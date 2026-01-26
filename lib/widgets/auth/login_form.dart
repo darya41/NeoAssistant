@@ -6,11 +6,11 @@ class LoginForm extends StatefulWidget {
   final VoidCallback onLoginPressed;
 
   const LoginForm({
-    Key? key,
+    super.key,
     required this.emailController,
     required this.passwordController,
     required this.onLoginPressed,
-  }) : super(key: key);
+  });
 
   @override
   State<LoginForm> createState() => _LoginFormState();
@@ -18,10 +18,36 @@ class LoginForm extends StatefulWidget {
 
 class _LoginFormState extends State<LoginForm> {
   bool _obscurePassword = true;
+  bool _isButtonEnabled = false;
+
+  final Color _primaryColor = const Color(0xFF44E4BF);
+  final Color _disabledColor = Colors.grey[400]!;
+
+  @override
+  void initState() {
+    super.initState();
+    widget.emailController.addListener(_validateFields);
+    widget.passwordController.addListener(_validateFields);
+  }
 
   @override
   void dispose() {
+    widget.emailController.removeListener(_validateFields);
+    widget.passwordController.removeListener(_validateFields);
     super.dispose();
+  }
+
+  void _validateFields() {
+    final email = widget.emailController.text.trim();
+    final password = widget.passwordController.text.trim();
+
+    final bool isValid = email.isNotEmpty && password.isNotEmpty;
+
+    if (_isButtonEnabled != isValid) {
+      setState(() {
+        _isButtonEnabled = isValid;
+      });
+    }
   }
 
   void _togglePasswordVisibility() {
@@ -74,7 +100,6 @@ class _LoginFormState extends State<LoginForm> {
                 child: TextField(
                   controller: widget.emailController,
                   keyboardType: TextInputType.emailAddress,
-                  textAlign: TextAlign.start,
                   textAlignVertical: TextAlignVertical.center,
                   decoration: const InputDecoration(
                     border: InputBorder.none,
@@ -85,11 +110,13 @@ class _LoginFormState extends State<LoginForm> {
                       fontSize: 16,
                       color: Colors.grey,
                     ),
-                    alignLabelWithHint: true,
                   ),
                   style: const TextStyle(
                     fontSize: 16,
                   ),
+                  onChanged: (value) {
+                    _validateFields();
+                  },
                 ),
               ),
 
@@ -129,6 +156,7 @@ class _LoginFormState extends State<LoginForm> {
                       child: TextField(
                         controller: widget.passwordController,
                         obscureText: _obscurePassword,
+                        textAlignVertical: TextAlignVertical.center,
                         decoration: const InputDecoration(
                           border: InputBorder.none,
                           contentPadding: EdgeInsets.zero,
@@ -142,6 +170,9 @@ class _LoginFormState extends State<LoginForm> {
                         style: const TextStyle(
                           fontSize: 16,
                         ),
+                        onChanged: (value) {
+                          _validateFields();
+                        },
                       ),
                     ),
 
@@ -165,20 +196,21 @@ class _LoginFormState extends State<LoginForm> {
         SizedBox(
           width: double.infinity,
           child: ElevatedButton(
-            onPressed: widget.onLoginPressed,
+            onPressed: _isButtonEnabled ? widget.onLoginPressed : null,
             style: ElevatedButton.styleFrom(
               padding: const EdgeInsets.symmetric(vertical: 16),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(12),
               ),
-              backgroundColor: const Color(0xFF44E4BF),
+              backgroundColor: _isButtonEnabled ? _primaryColor : _disabledColor,
+              animationDuration: const Duration(milliseconds: 200),
             ),
-            child: const Text(
+            child: Text(
               'Продолжить',
               style: TextStyle(
                 fontSize: 16,
                 fontWeight: FontWeight.w600,
-                color: Colors.white,
+                color: _isButtonEnabled ? Colors.white : Colors.grey[600],
               ),
             ),
           ),
