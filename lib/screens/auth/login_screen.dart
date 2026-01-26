@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../widgets/auth/login_ui.dart';
 import '../home_screen.dart';
+import 'registration_screen.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -45,7 +46,7 @@ class _LoginScreenState extends State<LoginScreen> {
     Navigator.pushReplacement(
       context,
       MaterialPageRoute(
-        builder: (context) => const HomeScreen(title: 'Зарегестрироваться'),
+        builder: (context) => const RegistrationScreen(),
       ),
     );
   }

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'password_rules.dart';
 
 class LoginForm extends StatefulWidget {
   final TextEditingController emailController;
@@ -56,30 +57,7 @@ class _LoginFormState extends State<LoginForm> {
     });
   }
 
-  void _showPasswordRules(BuildContext context) {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Требования к паролю'),
-        content: const Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text('• Не менее 8 символов'),
-            Text('• Содержит заглавные и строчные буквы'),
-            Text('• Содержит цифры'),
-            Text('• Содержит специальные символы'),
-          ],
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('OK'),
-          ),
-        ],
-      ),
-    );
-  }
+
 
   @override
   Widget build(BuildContext context) {
@@ -134,7 +112,7 @@ class _LoginFormState extends State<LoginForm> {
                 child: Row(
                   children: [
                     GestureDetector(
-                      onTap: () => _showPasswordRules(context),
+                      onTap: () => PasswordRulesDialog.show(context),
                       child: Container(
                         width: 24,
                         height: 24,
