@@ -41,4 +41,23 @@ class IconWidgets {
       ),
     );
   }
+
+  static Widget searchIcon({
+    required VoidCallback onTap,
+    double size = 20,
+    Color color = Colors.grey,
+    EdgeInsetsGeometry padding = EdgeInsets.zero,
+  }) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Padding(
+        padding: padding,
+        child: Icon(
+          Icons.search,
+          color: color,
+          size: size,
+        ),
+      ),
+    );
+  }
 }
