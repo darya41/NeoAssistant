@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'password_rules.dart';
+import '../../utils/icon_widgets.dart';
 
 class LoginForm extends StatefulWidget {
   final TextEditingController emailController;
@@ -111,21 +112,9 @@ class _LoginFormState extends State<LoginForm> {
                 ),
                 child: Row(
                   children: [
-                    GestureDetector(
+                    IconWidgets.infoIcon(
+                      context: context,
                       onTap: () => PasswordRulesDialog.show(context),
-                      child: Container(
-                        width: 24,
-                        height: 24,
-                        decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          color: Colors.grey[300],
-                        ),
-                        child: const Icon(
-                          Icons.info_outline,
-                          size: 16,
-                          color: Colors.grey,
-                        ),
-                      ),
                     ),
 
                     const SizedBox(width: 8),
@@ -154,13 +143,13 @@ class _LoginFormState extends State<LoginForm> {
                       ),
                     ),
 
-                    GestureDetector(
-                      onTap: _togglePasswordVisibility,
-                      child: Icon(
-                        _obscurePassword ? Icons.visibility_off : Icons.visibility,
-                        color: Colors.grey,
-                        size: 20,
-                      ),
+                    IconWidgets.visibilityIcon(
+                      isVisible: _obscurePassword,
+                      onTap: () {
+                        setState(() {
+                          _obscurePassword = !_obscurePassword;
+                        });
+                      },
                     ),
                   ],
                 ),
