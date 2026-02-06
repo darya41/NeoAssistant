@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../components/button/continue_button.dart';
 
 class RegistrationStep2 extends StatefulWidget {
   final TextEditingController lastNameController;
@@ -124,28 +125,9 @@ class _RegistrationStep2State extends State<RegistrationStep2> {
 
             const SizedBox(height: 40),
 
-            SizedBox(
-              width: double.infinity,
-              child: ElevatedButton(
-                onPressed: widget.isStepValid && _agreementChecked ? widget.onNextStep : null,
-                style: ElevatedButton.styleFrom(
-                  padding: const EdgeInsets.symmetric(vertical: 16),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  backgroundColor: (widget.isStepValid && _agreementChecked)
-                      ? const Color(0xFF44E4BF)
-                      : Colors.grey[400],
-                ),
-                child: Text(
-                  'Продолжить',
-                  style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w600,
-                    color: (widget.isStepValid && _agreementChecked) ? Colors.white : Colors.grey[600],
-                  ),
-                ),
-              ),
+            ContinueButton(
+              onPressed: widget.onNextStep,
+              isEnabled: widget.isStepValid && _agreementChecked,
             ),
 
             const SizedBox(height: 20),

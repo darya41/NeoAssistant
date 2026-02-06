@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import '../../components/button/continue_button.dart';
 
 class RegistrationStep3 extends StatefulWidget {
   final TextEditingController phoneController;
@@ -148,28 +149,9 @@ class _RegistrationStep3State extends State<RegistrationStep3> {
 
             const SizedBox(height: 40),
 
-            SizedBox(
-              width: double.infinity,
-              child: ElevatedButton(
-                onPressed: isPhoneValid ? widget.onComplete : null,
-                style: ElevatedButton.styleFrom(
-                  padding: const EdgeInsets.symmetric(vertical: 16),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  backgroundColor: isPhoneValid
-                      ? const Color(0xFF44E4BF)
-                      : Colors.grey[400],
-                ),
-                child: Text(
-                  'Продолжить',
-                  style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w600,
-                    color: isPhoneValid ? Colors.white : Colors.grey[600],
-                  ),
-                ),
-              ),
+            ContinueButton(
+              onPressed: widget.onComplete,
+              isEnabled: isPhoneValid,
             ),
           ],
         ),

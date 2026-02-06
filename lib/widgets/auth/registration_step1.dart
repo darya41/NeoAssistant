@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'password_rules.dart';
 import '../../utils/icon_widgets.dart';
+import '../../components/button/continue_button.dart';
 
 class RegistrationStep1 extends StatefulWidget {
   final TextEditingController emailController;
@@ -169,28 +170,9 @@ class _RegistrationStep1State extends State<RegistrationStep1> {
 
             const SizedBox(height: 40),
 
-            SizedBox(
-              width: double.infinity,
-              child: ElevatedButton(
-                onPressed: widget.isStepValid ? widget.onNextStep : null,
-                style: ElevatedButton.styleFrom(
-                  padding: const EdgeInsets.symmetric(vertical: 16),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  backgroundColor: widget.isStepValid
-                      ? const Color(0xFF44E4BF)
-                      : Colors.grey[400],
-                ),
-                child: Text(
-                  'Продолжить',
-                  style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w600,
-                    color: widget.isStepValid ? Colors.white : Colors.grey[600],
-                  ),
-                ),
-              ),
+            ContinueButton(
+              onPressed: widget.onNextStep,
+              isEnabled: widget.isStepValid,
             ),
           ],
         ),

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'password_rules.dart';
 import '../../utils/icon_widgets.dart';
+import '../../components/button/continue_button.dart';
 
 class LoginForm extends StatefulWidget {
   final TextEditingController emailController;
@@ -160,27 +161,9 @@ class _LoginFormState extends State<LoginForm> {
 
         const SizedBox(height: 40),
 
-        SizedBox(
-          width: double.infinity,
-          child: ElevatedButton(
-            onPressed: _isButtonEnabled ? widget.onLoginPressed : null,
-            style: ElevatedButton.styleFrom(
-              padding: const EdgeInsets.symmetric(vertical: 16),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12),
-              ),
-              backgroundColor: _isButtonEnabled ? _primaryColor : _disabledColor,
-              animationDuration: const Duration(milliseconds: 200),
-            ),
-            child: Text(
-              'Продолжить',
-              style: TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.w600,
-                color: _isButtonEnabled ? Colors.white : Colors.grey[600],
-              ),
-            ),
-          ),
+        ContinueButton(
+          onPressed: widget.onLoginPressed,
+          isEnabled: _isButtonEnabled,
         ),
       ],
     );

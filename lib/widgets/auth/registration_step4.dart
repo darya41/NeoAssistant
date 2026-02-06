@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../utils/icon_widgets.dart';
+import '../../components/button/continue_button.dart';
 
 class RegistrationStep4 extends StatefulWidget {
   final VoidCallback onComplete;
@@ -67,7 +68,7 @@ class _RegistrationStep4State extends State<RegistrationStep4> {
 
 
             const Text(
-              'Шаг 2/3',
+              'Шаг 3/3',
               style: TextStyle(
                 fontSize: 32,
                 fontWeight: FontWeight.bold,
@@ -149,28 +150,9 @@ class _RegistrationStep4State extends State<RegistrationStep4> {
 
             const Spacer(),
 
-            SizedBox(
-              width: double.infinity,
-              child: ElevatedButton(
-                onPressed: _selectedPosition != null ? widget.onComplete : null,
-                style: ElevatedButton.styleFrom(
-                  padding: const EdgeInsets.symmetric(vertical: 16),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  backgroundColor: _selectedPosition != null
-                      ? const Color(0xFF44E4BF)
-                      : Colors.grey[400],
-                ),
-                child: Text(
-                  'Продолжить',
-                  style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w600,
-                    color: _selectedPosition != null ? Colors.white : Colors.grey[600],
-                  ),
-                ),
-              ),
+            ContinueButton(
+              onPressed: widget.onComplete,
+              isEnabled: _selectedPosition != null,
             ),
 
             const SizedBox(height: 40),
