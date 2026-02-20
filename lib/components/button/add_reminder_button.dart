@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../screens/main/create_reminder_screen.dart';
 
 class AddReminderButton extends StatelessWidget {
   const AddReminderButton({super.key});
@@ -7,7 +8,10 @@ class AddReminderButton extends StatelessWidget {
   Widget build(BuildContext context) {
     return GestureDetector(
         onTap: () {
-
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => CreateReminderScreen()),
+          );
         },
       child: ConstrainedBox(
         constraints: const BoxConstraints(minWidth: 140, maxWidth: 160, minHeight: 70),
