@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-
 import '../../models/reminder.dart';
 
 class RemindersListUI extends StatelessWidget {
@@ -14,53 +13,78 @@ class RemindersListUI extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ListView.separated(
-      itemCount: reminders.length,
-      separatorBuilder: (context, index) => const Divider(),
-      itemBuilder: (context, index) {
-        final reminder = reminders[index];
-        return ListTile(
-          leading: Checkbox(
-            value: reminder.isCompleted,
-            onChanged: (value) {
-              onCheckboxChange(index, value ?? false);
-            },
-          ),
-          title: Text(
-            reminder.task,
-            style: TextStyle(
-              decoration: reminder.isCompleted
-                  ? TextDecoration.lineThrough
-                  : TextDecoration.none,
+    final Map<String, List<Reminder>> groupedReminders = {};
+    for (final reminder in reminders) {
+      groupedReminders.putIfAbsent(reminder.date, () => []).add(reminder);
+    }
+
+    return ListView(
+      children: groupedReminders.entries.map((entry) {
+        final date = entry.key;
+        final remindersForDate = entry.value;
+
+        return Column(
+          children: [
+            ListTile(
+              title: Text(
+                date,
+                style: const TextStyle(
+                  fontWeight: FontWeight.bold,
+                  color: Color(0xFF44E4BF),
+                ),
+              ),
             ),
-          ),
-          subtitle: Text(reminder.date),
+
+            ...remindersForDate.map((reminder) => ListTile(
+              leading: Container(
+                width: 24,
+                height: 24,
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.zero,
+                  border: reminder.isCompleted
+                      ? Border.all(
+                    color: Colors.grey,
+                    width: 1,
+                  )
+                      : null,
+                ),
+                child: Center(
+                  child: Checkbox(
+                    value: reminder.isCompleted,
+                    onChanged: (value) => onCheckboxChange(reminders.indexOf(reminder), value ?? false),
+                    checkColor: Color(0xFF77EBF5),
+                    fillColor: WidgetStateProperty.all(Colors.transparent),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.zero,
+                    ),
+                    materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                  ),
+                ),
+              ),
+              title: Text(
+                reminder.task,
+                style: TextStyle(
+                  color: reminder.isCompleted ? Colors.grey : Colors.black,
+                  decoration: reminder.isCompleted
+                      ? TextDecoration.lineThrough
+                      : TextDecoration.none,
+                ),
+              ),
+              subtitle: Text(
+                reminder.date,
+                style: const TextStyle(color: Colors.grey),
+              ),
+              trailing: !reminder.isCompleted
+                  ? IconButton(
+                icon: const Icon(Icons.close),
+                onPressed: () {},
+                color: Colors.red,
+              )
+                  : null,
+            )),
+          ],
         );
-      },
-    );
-  }
-}
-
-class AddReminderButtonUI extends StatelessWidget {
-  const AddReminderButtonUI({Key? key}) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      margin: const EdgeInsets.all(16),
-      width: double.infinity,
-      child: ElevatedButton(
-        onPressed: () {},
-        style: ElevatedButton.styleFrom(
-          backgroundColor: const Color(0xFF44E4BF),
-          foregroundColor: Colors.white,
-          padding: const EdgeInsets.symmetric(vertical: 12),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(8),
-          ),
-        ),
-        child: const Text('+ Добавить напоминание'),
-      ),
+      }).toList(),
     );
   }
 }
