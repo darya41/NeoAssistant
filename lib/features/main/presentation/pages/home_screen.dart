@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../../widgets/main/home_screen_ui.dart';
+import '../widgets/home_screen_ui.dart';
 
 class HomeScreen extends StatelessWidget {
   final String title;
