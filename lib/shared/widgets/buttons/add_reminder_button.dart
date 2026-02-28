@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../../screens/main/create_reminder_screen.dart';
+import '../../../features/main/presentation/pages/create_reminder_screen.dart';
 
 class AddReminderButton extends StatelessWidget {
   const AddReminderButton({super.key});
