@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../../models/protocol.dart';
+import '../../../../models/protocol.dart';
 
 class ProtocolsList extends StatelessWidget {
   const ProtocolsList({super.key});

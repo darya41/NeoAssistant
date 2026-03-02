@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import '../../widgets/main/bottom_navigation_bar.dart';
-import '../../widgets/main/doctor_profile_ui.dart';
+import '../widgets/custom_bottom_navigation_bar.dart';
+import '../widgets/doctor_profile_ui.dart';
 
 class DoctorProfileScreen extends StatelessWidget {
 
