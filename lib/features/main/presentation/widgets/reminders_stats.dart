@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'reminder_card.dart';
-import '../../components/button/add_reminder_button.dart';
+import '../../../../shared/widgets/buttons/add_reminder_button.dart';
 
 class RemindersStats extends StatelessWidget {
   const RemindersStats({super.key});

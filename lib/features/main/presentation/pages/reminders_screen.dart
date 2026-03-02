@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
-import '../../components/button/add_reminder_card_button.dart';
-import '../../models/reminder.dart';
-import '../../widgets/main/bottom_navigation_bar.dart';
-import '../../widgets/main/reminders_page_ui.dart';
+import '../../../../shared/widgets/buttons/create_button.dart';
+import '../../../../models/reminder.dart';
+import '../widgets/custom_bottom_navigation_bar.dart';
+import '../widgets/reminders_page_ui.dart';
+import 'create_reminder_screen.dart';
 
 class RemindersPageScreen extends StatefulWidget {
   const RemindersPageScreen({super.key});
@@ -13,6 +14,7 @@ class RemindersPageScreen extends StatefulWidget {
 
 class _RemindersPageScreenState extends State<RemindersPageScreen> {
   bool _sortNewFirst = true;
+  bool _isEditing = false;
 
   final List<Reminder> _reminders = [
     Reminder(date: '19 октября 2025', task: 'Провести анкетирование', isCompleted: false),
@@ -26,6 +28,12 @@ class _RemindersPageScreenState extends State<RemindersPageScreen> {
   void _toggleSort() {
     setState(() {
       _sortNewFirst = !_sortNewFirst;
+    });
+  }
+
+  void _toggleEditing(){
+    setState(() {
+      _isEditing = !_isEditing;
     });
   }
 
@@ -60,7 +68,13 @@ class _RemindersPageScreenState extends State<RemindersPageScreen> {
               onPressed: _toggleSort,
             ),
             const SizedBox(width: 10),
-            const Icon(Icons.edit),
+            IconButton(
+              icon: Icon(
+                _isEditing ? Icons.save : Icons.edit,
+                color: Colors.black,
+              ),
+              onPressed: _toggleEditing,
+            ),
           ],
         ),
         backgroundColor: const Color(0xFF44E4BF),
@@ -68,12 +82,25 @@ class _RemindersPageScreenState extends State<RemindersPageScreen> {
       body: RemindersListUI(
         reminders: _sortedReminders,
         onCheckboxChange: _handleCheckboxChange,
+        isEditing: _isEditing,
       ),
       bottomNavigationBar: const CustomBottomNavigationBar(
         currentIndex: 1,
       ),
-      floatingActionButton: AddReminderCardButton(),
-
+      floatingActionButton: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 30.0),
+        child: CreateButton(
+          onPressed: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => const CreateReminderScreen()),
+            );
+          },
+          backgroundColor: Color(0xFFACF3E3),
+          borderColor: Color(0xFF1DC9A1),
+          text: '+ Добавить напоминание',
+        ),
+      ),
     );
   }
 }

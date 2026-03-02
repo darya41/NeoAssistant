@@ -1,14 +1,17 @@
 import 'package:flutter/material.dart';
-import '../../models/reminder.dart';
+import '../../../../models/reminder.dart';
+import '../pages/reminder_detail_screen.dart';
 
 class RemindersListUI extends StatelessWidget {
   final List<Reminder> reminders;
   final Function(int, bool) onCheckboxChange;
+  final bool isEditing;
 
   const RemindersListUI({
     super.key,
     required this.reminders,
     required this.onCheckboxChange,
+    required this.isEditing,
   });
 
   @override
@@ -33,9 +36,28 @@ class RemindersListUI extends StatelessWidget {
                   color: Color(0xFF44E4BF),
                 ),
               ),
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => ReminderDetailScreen(title: 'фффф', description: 'фффф',),
+                  ),
+                );
+              },
             ),
 
             ...remindersForDate.map((reminder) => ListTile(
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => ReminderDetailScreen(
+                      title: reminder.task,
+                      description: 'Дополнительная информация о задаче...',
+                    ),
+                  ),
+                );
+              },
               leading: Container(
                 width: 24,
                 height: 24,
@@ -70,11 +92,8 @@ class RemindersListUI extends StatelessWidget {
                       : TextDecoration.none,
                 ),
               ),
-              subtitle: Text(
-                reminder.date,
-                style: const TextStyle(color: Colors.grey),
-              ),
-              trailing: !reminder.isCompleted
+
+              trailing: isEditing && !reminder.isCompleted
                   ? IconButton(
                 icon: const Icon(Icons.close),
                 onPressed: () {},
@@ -82,6 +101,7 @@ class RemindersListUI extends StatelessWidget {
               )
                   : null,
             )),
+
           ],
         );
       }).toList(),
