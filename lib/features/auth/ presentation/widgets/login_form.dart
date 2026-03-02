@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'password_rules.dart';
-import '../../utils/icon_widgets.dart';
-import '../../components/button/continue_button.dart';
+import '../../../../core/utils/icon_widgets.dart';
+import '../../../../shared/widgets/buttons/continue_button.dart';
 
 class LoginForm extends StatefulWidget {
   final TextEditingController emailController;

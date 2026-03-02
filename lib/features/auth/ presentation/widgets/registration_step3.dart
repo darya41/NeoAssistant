@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import '../../components/button/continue_button.dart';
+import '../../../../shared/widgets/buttons/continue_button.dart';
 
 class RegistrationStep3 extends StatefulWidget {
   final TextEditingController phoneController;

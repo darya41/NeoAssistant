@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
-import '../main/home_screen.dart';
-import '../../widgets/auth/registration_step1.dart';
-import '../../widgets/auth/registration_step2.dart';
-import '../../widgets/auth/registration_step3.dart';
-import '../../widgets/auth/registration_step4.dart';
+import '../../../main/presentation/pages/home_screen.dart';
+import '../widgets/registration_step1.dart';
+import '../widgets/registration_step2.dart';
+import '../widgets/registration_step3.dart';
+import '../widgets/registration_step4.dart';
 
 class RegistrationScreen extends StatefulWidget {
   const RegistrationScreen({super.key});
