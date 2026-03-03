@@ -14,7 +14,7 @@ class CustomTextField extends StatelessWidget {
   final VoidCallback? onVisibilityPressed;
 
   const CustomTextField({
-    Key? key,
+    super.key,
     required this.labelText,
     this.obscureText = false,
     this.controller,
@@ -26,7 +26,7 @@ class CustomTextField extends StatelessWidget {
     this.isFirstField = false,
     this.onInfoPressed,
     this.onVisibilityPressed,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

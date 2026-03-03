@@ -8,12 +8,12 @@ class LoginUI extends StatelessWidget {
   final VoidCallback onCreateAccountPressed;
 
   const LoginUI({
-    Key? key,
+    super.key,
     required this.emailController,
     required this.passwordController,
     required this.onLoginPressed,
     required this.onCreateAccountPressed,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

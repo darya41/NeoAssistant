@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'password_rules.dart';
+import '../../../../core/utils/icon_widgets.dart';
+import '../../../../shared/widgets/buttons/continue_button.dart';
 
 class LoginForm extends StatefulWidget {
   final TextEditingController emailController;
@@ -6,11 +9,11 @@ class LoginForm extends StatefulWidget {
   final VoidCallback onLoginPressed;
 
   const LoginForm({
-    Key? key,
+    super.key,
     required this.emailController,
     required this.passwordController,
     required this.onLoginPressed,
-  }) : super(key: key);
+  });
 
   @override
   State<LoginForm> createState() => _LoginFormState();
@@ -18,10 +21,36 @@ class LoginForm extends StatefulWidget {
 
 class _LoginFormState extends State<LoginForm> {
   bool _obscurePassword = true;
+  bool _isButtonEnabled = false;
+
+  final Color _primaryColor = const Color(0xFF44E4BF);
+  final Color _disabledColor = Colors.grey[400]!;
+
+  @override
+  void initState() {
+    super.initState();
+    widget.emailController.addListener(_validateFields);
+    widget.passwordController.addListener(_validateFields);
+  }
 
   @override
   void dispose() {
+    widget.emailController.removeListener(_validateFields);
+    widget.passwordController.removeListener(_validateFields);
     super.dispose();
+  }
+
+  void _validateFields() {
+    final email = widget.emailController.text.trim();
+    final password = widget.passwordController.text.trim();
+
+    final bool isValid = email.isNotEmpty && password.isNotEmpty;
+
+    if (_isButtonEnabled != isValid) {
+      setState(() {
+        _isButtonEnabled = isValid;
+      });
+    }
   }
 
   void _togglePasswordVisibility() {
@@ -30,30 +59,7 @@ class _LoginFormState extends State<LoginForm> {
     });
   }
 
-  void _showPasswordRules(BuildContext context) {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Требования к паролю'),
-        content: const Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text('• Не менее 8 символов'),
-            Text('• Содержит заглавные и строчные буквы'),
-            Text('• Содержит цифры'),
-            Text('• Содержит специальные символы'),
-          ],
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('OK'),
-          ),
-        ],
-      ),
-    );
-  }
+
 
   @override
   Widget build(BuildContext context) {
@@ -74,7 +80,6 @@ class _LoginFormState extends State<LoginForm> {
                 child: TextField(
                   controller: widget.emailController,
                   keyboardType: TextInputType.emailAddress,
-                  textAlign: TextAlign.start,
                   textAlignVertical: TextAlignVertical.center,
                   decoration: const InputDecoration(
                     border: InputBorder.none,
@@ -85,11 +90,13 @@ class _LoginFormState extends State<LoginForm> {
                       fontSize: 16,
                       color: Colors.grey,
                     ),
-                    alignLabelWithHint: true,
                   ),
                   style: const TextStyle(
                     fontSize: 16,
                   ),
+                  onChanged: (value) {
+                    _validateFields();
+                  },
                 ),
               ),
 
@@ -106,21 +113,9 @@ class _LoginFormState extends State<LoginForm> {
                 ),
                 child: Row(
                   children: [
-                    GestureDetector(
-                      onTap: () => _showPasswordRules(context),
-                      child: Container(
-                        width: 24,
-                        height: 24,
-                        decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          color: Colors.grey[300],
-                        ),
-                        child: const Icon(
-                          Icons.info_outline,
-                          size: 16,
-                          color: Colors.grey,
-                        ),
-                      ),
+                    IconWidgets.infoIcon(
+                      context: context,
+                      onTap: () => PasswordRulesDialog.show(context),
                     ),
 
                     const SizedBox(width: 8),
@@ -129,6 +124,7 @@ class _LoginFormState extends State<LoginForm> {
                       child: TextField(
                         controller: widget.passwordController,
                         obscureText: _obscurePassword,
+                        textAlignVertical: TextAlignVertical.center,
                         decoration: const InputDecoration(
                           border: InputBorder.none,
                           contentPadding: EdgeInsets.zero,
@@ -142,16 +138,19 @@ class _LoginFormState extends State<LoginForm> {
                         style: const TextStyle(
                           fontSize: 16,
                         ),
+                        onChanged: (value) {
+                          _validateFields();
+                        },
                       ),
                     ),
 
-                    GestureDetector(
-                      onTap: _togglePasswordVisibility,
-                      child: Icon(
-                        _obscurePassword ? Icons.visibility_off : Icons.visibility,
-                        color: Colors.grey,
-                        size: 20,
-                      ),
+                    IconWidgets.visibilityIcon(
+                      isVisible: _obscurePassword,
+                      onTap: () {
+                        setState(() {
+                          _obscurePassword = !_obscurePassword;
+                        });
+                      },
                     ),
                   ],
                 ),
@@ -162,26 +161,9 @@ class _LoginFormState extends State<LoginForm> {
 
         const SizedBox(height: 40),
 
-        SizedBox(
-          width: double.infinity,
-          child: ElevatedButton(
-            onPressed: widget.onLoginPressed,
-            style: ElevatedButton.styleFrom(
-              padding: const EdgeInsets.symmetric(vertical: 16),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12),
-              ),
-              backgroundColor: const Color(0xFF44E4BF),
-            ),
-            child: const Text(
-              'Продолжить',
-              style: TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.w600,
-                color: Colors.white,
-              ),
-            ),
-          ),
+        ContinueButton(
+          onPressed: widget.onLoginPressed,
+          isEnabled: _isButtonEnabled,
         ),
       ],
     );
