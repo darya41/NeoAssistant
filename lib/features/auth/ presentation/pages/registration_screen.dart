@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../../core/validators/auth_validator.dart';
 import '../../../main/presentation/pages/home_screen.dart';
 import '../widgets/registration_step1.dart';
 import '../widgets/registration_step2.dart';
@@ -67,11 +68,11 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
     final password = _passwordController.text;
     final confirmPassword = _confirmPasswordController.text;
 
-    if (email.isEmpty || password.isEmpty || confirmPassword.isEmpty) {
-      return false;
-    }
+    if (!AuthValidator.isEmailValid(email)) return false;
+    if (!AuthValidator.isPasswordValid(password)) return false;
+    if (!AuthValidator.doPasswordsMatch(password, confirmPassword)) return false;
 
-    return password == confirmPassword;
+    return true;
   }
 
   bool get _isStep2Valid {
