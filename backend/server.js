@@ -5,6 +5,7 @@ const express = require('express');
 const mysql = require('mysql2');
 const cors = require('cors');
 require('dotenv').config();
+const bcrypt = require('bcrypt');
 
 const app = express();
 
@@ -42,4 +43,19 @@ app.listen(PORT, () => {
     console.log(`\nСервер запущен на порту ${PORT}`);
     console.log(`База данных: ${process.env.DB_NAME}`);
     console.log(`http://localhost:${PORT}/api/health - проверить подключение\n`);
+});
+
+app.get('/api/specializations', async (req, res) => {
+    try {
+        const [rows] = await db.query(
+            'SELECT specialization_id, name, description FROM specializations ORDER BY name'
+        );
+        res.json(rows);
+    } catch (error) {
+        console.error('❌ Error fetching specializations:', error);
+        res.status(500).json({
+            success: false,
+            error: 'Ошибка загрузки специализаций'
+        });
+    }
 });
