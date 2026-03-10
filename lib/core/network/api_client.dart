@@ -20,4 +20,24 @@ class ApiClient {
       throw Exception('Ошибка соединения: $e');
     }
   }
+
+  static Future<Map<String, dynamic>> post(String endpoint, Map<String, dynamic> data) async {
+    try {
+      final response = await http.post(
+        Uri.parse('$baseUrl/$endpoint'),
+        headers: {'Content-Type': 'application/json'},
+        body: json.encode(data),
+      );
+
+      final responseData = json.decode(response.body);
+
+      if (response.statusCode >= 200 && response.statusCode < 300) {
+        return responseData;
+      } else {
+        throw Exception(responseData['error'] ?? 'Ошибка запроса');
+      }
+    } catch (e) {
+      throw Exception('Ошибка соединения: $e');
+    }
+  }
 }

@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
-import '../../../../core/validators/auth_validator.dart';
 import '../../../main/presentation/pages/home_screen.dart';
 import '../widgets/registration_step1.dart';
 import '../widgets/registration_step2.dart';
 import '../widgets/registration_step3.dart';
 import '../widgets/registration_step4.dart';
+import '../../data/repositories/auth_repository.dart';
+import '../../../../core/validators/auth_validator.dart';
 
 class RegistrationScreen extends StatefulWidget {
   const RegistrationScreen({super.key});
@@ -15,6 +16,7 @@ class RegistrationScreen extends StatefulWidget {
 
 class _RegistrationScreenState extends State<RegistrationScreen> {
   int _currentStep = 0;
+  bool _isLoading = false;
 
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
@@ -23,7 +25,9 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
   final TextEditingController _firstNameController = TextEditingController();
   final TextEditingController _middleNameController = TextEditingController();
   final TextEditingController _phoneController = TextEditingController();
-  String? _selectedPosition;
+ int? _selectedPositionId;
+
+  final AuthRepository _authRepository = AuthRepository();
 
   @override
   void initState() {
@@ -98,7 +102,7 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
       setState(() {
         _currentStep = 3;
       });
-    } else if (_currentStep == 3 && _selectedPosition != null) {
+    } else if (_currentStep == 3 && _selectedPositionId != null) {
       _completeRegistration();
     }
   }
@@ -113,31 +117,55 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
     }
   }
 
-  void _completeRegistration() {
+  Future<void> _completeRegistration() async {
     String phoneDigits = _phoneController.text
         .replaceAll(RegExp(r'[^\d]'), '')
         .substring(3);
 
-    final userData = {
-      'email': _emailController.text.trim(),
-      'lastName': _lastNameController.text.trim(),
-      'firstName': _firstNameController.text.trim(),
-      'middleName': _middleNameController.text.trim(),
-      'phone': '+375$phoneDigits',
-      'position': _selectedPosition,
-    };
+    setState(() => _isLoading = true);
 
-    Navigator.pushReplacement(
-      context,
-      MaterialPageRoute(
-        builder: (context) => const HomeScreen(title: 'Neo Friend - Главная'),
-      ),
-    );
+    try {
+      final result = await _authRepository.register(
+        email: _emailController.text.trim(),
+        password: _passwordController.text,
+        lastName: _lastNameController.text.trim(),
+        firstName: _firstNameController.text.trim(),
+        middleName: _middleNameController.text.trim().isEmpty
+            ? null
+            : _middleNameController.text.trim(),
+        phone: '+375$phoneDigits',
+        positionId: _selectedPositionId!,
+      );
+
+      if (mounted) {
+        setState(() => _isLoading = false);
+
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Регистрация успешна! Теперь вы можете войти'),
+            backgroundColor: Color(0xFF44E4BF),
+            duration: Duration(seconds: 2),
+          ),
+        );
+
+        Navigator.pushReplacementNamed(context, '/login');
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() => _isLoading = false);
+
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(e.toString().replaceFirst('Exception: ', '')),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    }
   }
-
-  void _onPositionSelected(String position) {
+  void _onPositionSelected(int position) {
     setState(() {
-      _selectedPosition = position;
+      _selectedPositionId = position;
     });
   }
 
@@ -152,7 +180,9 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
           onPressed: _previousStep,
         ),
       ),
-      body: _buildCurrentScreen(),
+      body: _isLoading
+          ? const Center(child: CircularProgressIndicator())
+          : _buildCurrentScreen(),
     );
   }
 

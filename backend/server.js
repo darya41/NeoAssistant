@@ -52,10 +52,59 @@ app.get('/api/specializations', async (req, res) => {
         );
         res.json(rows);
     } catch (error) {
-        console.error('❌ Error fetching specializations:', error);
         res.status(500).json({
             success: false,
             error: 'Ошибка загрузки специализаций'
+        });
+    }
+});
+
+app.post('/api/auth/register', async (req, res) => {
+    try {
+        const {
+            email, password,
+            last_name, first_name, middle_name,
+            personal_phone, specialization_id
+        } = req.body;
+
+        const [existing] = await db.query(
+            'SELECT * FROM doctors WHERE work_email = ?',
+            [email]
+        );
+
+        if (existing.length > 0) {
+            return res.status(400).json({
+                success: false,
+                error: 'Пользователь с таким email уже существует'
+            });
+        }
+
+        const hashedPassword = await bcrypt.hash(password, 10);
+
+        const [result] = await db.query(
+            `INSERT INTO doctors
+            (work_email, password,  last_name, first_name, patronymic, work_phone,  specialization_id)
+            VALUES (?, ?, ?, ?, ?, ?, ?)`,
+            [
+                email,
+                hashedPassword,
+                last_name,
+                first_name,
+                middle_name || null,
+                personal_phone,
+                specialization_id
+            ]
+        );
+
+        res.status(201).json({
+            success: true,
+            message: 'Регистрация успешна'
+        });
+
+    } catch (error) {
+        res.status(500).json({
+            success: false,
+            error: 'Ошибка при регистрации'
         });
     }
 });
