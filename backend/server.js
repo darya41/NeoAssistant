@@ -6,6 +6,7 @@ const mysql = require('mysql2');
 const cors = require('cors');
 require('dotenv').config();
 const bcrypt = require('bcrypt');
+const jwt = require('jsonwebtoken');
 
 const app = express();
 
@@ -105,6 +106,81 @@ app.post('/api/auth/register', async (req, res) => {
         res.status(500).json({
             success: false,
             error: 'Ошибка при регистрации'
+        });
+    }
+});
+
+app.post('/api/auth/login', async (req, res) => {
+    try {
+        const { email, password } = req.body;
+
+        console.log('📥 Попытка входа:', { email });
+
+
+        const [doctors] = await db.query(
+            `SELECT d.*, s.name as specialization_name
+             FROM doctors d
+             LEFT JOIN specializations s ON d.specialization_id = s.specialization_id
+             WHERE d.work_email = ?`,
+            [email]
+        );
+
+        const doctor = doctors[0];
+
+        if (!doctor) {
+            return res.status(401).json({
+                success: false,
+                error: 'Неверный email или пароль'
+            });
+        }
+
+        const validPassword = await bcrypt.compare(password, doctor.password);
+
+        if (!validPassword) {
+            return res.status(401).json({
+                success: false,
+                error: 'Неверный email или пароль'
+            });
+        }
+
+        const accessToken = jwt.sign(
+            {
+                id: doctor.doctor_id,
+                email: doctor.email,
+                name: doctor.full_name
+            },
+            process.env.ACCESS_SECRET,
+            { expiresIn: '15m' }
+        );
+
+        const refreshToken = jwt.sign(
+            { id: doctor.doctor_id },
+            process.env.REFRESH_SECRET,
+            { expiresIn: '7d' }
+        );
+
+        await db.query(
+            'UPDATE doctors SET refresh_token = ? WHERE doctor_id = ?',
+            [refreshToken, doctor.doctor_id]
+        );
+
+        res.json({
+            success: true,
+            accessToken,
+            refreshToken,
+            doctor: {
+                id: doctor.doctor_id,
+                email: doctor.email,
+                fullName: doctor.full_name,
+                specialization: doctor.specialization_name,
+                phone: doctor.personal_phone
+            }
+        });
+
+    } catch (error) {
+        res.status(500).json({
+            success: false,
+            error: 'Ошибка при входе'
         });
     }
 });

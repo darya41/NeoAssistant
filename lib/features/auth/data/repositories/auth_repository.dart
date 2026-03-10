@@ -25,4 +25,14 @@ class AuthRepository {
       'specialization_id': positionId,
     });
   }
+
+  Future<Map<String, dynamic>> login({
+    required String email,
+    required String password,
+  }) async {
+    return await ApiClient.post('auth/login', {
+      'email': email,
+      'password': password,
+    });
+  }
 }
