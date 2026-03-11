@@ -3,7 +3,7 @@ import 'password_rules.dart';
 import '../../../../core/utils/icon_widgets.dart';
 import '../../../../shared/widgets/buttons/continue_button.dart';
 
-class LoginForm extends StatelessWidget {
+class LoginForm extends StatefulWidget {
   final TextEditingController emailController;
   final TextEditingController passwordController;
   final VoidCallback onLoginPressed;
@@ -20,6 +20,13 @@ class LoginForm extends StatelessWidget {
   });
 
   @override
+  State<LoginForm> createState() => _LoginFormState();
+}
+
+class _LoginFormState extends State<LoginForm> {
+  bool _obscurePassword = true;
+
+  @override
   Widget build(BuildContext context) {
     return Column(
       children: [
@@ -32,19 +39,19 @@ class LoginForm extends StatelessWidget {
             children: [
               _buildEmailField(),
               _buildDivider(),
-              _buildPasswordField(context),
+              _buildPasswordField(),
             ],
           ),
         ),
 
         const SizedBox(height: 40),
 
-        if (isLoading)
+        if (widget.isLoading)
           const Center(child: CircularProgressIndicator())
         else
           ContinueButton(
-            onPressed: isFormValid ? onLoginPressed : null,
-            isEnabled: isFormValid,
+            onPressed: widget.isFormValid ? widget.onLoginPressed : null,
+            isEnabled: widget.isFormValid,
           ),
       ],
     );
@@ -54,7 +61,7 @@ class LoginForm extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       child: TextField(
-        controller: emailController,
+        controller: widget.emailController,
         keyboardType: TextInputType.emailAddress,
         textAlignVertical: TextAlignVertical.center,
         decoration: const InputDecoration(
@@ -65,51 +72,53 @@ class LoginForm extends StatelessWidget {
           hintStyle: TextStyle(fontSize: 16, color: Colors.grey),
         ),
         style: const TextStyle(fontSize: 16),
+        onChanged: (_) {
+          widget.emailController.addListener(() {});
+          widget.emailController.notifyListeners();
+        },
       ),
     );
   }
 
-  Widget _buildPasswordField(BuildContext context) {
-    return StatefulBuilder(
-      builder: (context, setState) {
-        bool obscurePassword = true;
-
-        return Container(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-          child: Row(
-            children: [
-              IconWidgets.infoIcon(
-                context: context,
-                onTap: () => PasswordRulesDialog.show(context),
-              ),
-              const SizedBox(width: 8),
-              Expanded(
-                child: TextField(
-                  controller: passwordController,
-                  obscureText: obscurePassword,
-                  textAlignVertical: TextAlignVertical.center,
-                  decoration: const InputDecoration(
-                    border: InputBorder.none,
-                    contentPadding: EdgeInsets.zero,
-                    isDense: true,
-                    hintText: 'Пароль',
-                    hintStyle: TextStyle(fontSize: 16, color: Colors.grey),
-                  ),
-                  style: const TextStyle(fontSize: 16),
-                ),
-              ),
-              IconWidgets.visibilityIcon(
-                isVisible: obscurePassword,
-                onTap: () {
-                  setState(() {
-                    obscurePassword = !obscurePassword;
-                  });
-                },
-              ),
-            ],
+  Widget _buildPasswordField() {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      child: Row(
+        children: [
+          IconWidgets.infoIcon(
+            context: context,
+            onTap: () => PasswordRulesDialog.show(context),
           ),
-        );
-      },
+          const SizedBox(width: 8),
+          Expanded(
+            child: TextField(
+              controller: widget.passwordController,
+              obscureText: _obscurePassword,
+              textAlignVertical: TextAlignVertical.center,
+              decoration: const InputDecoration(
+                border: InputBorder.none,
+                contentPadding: EdgeInsets.zero,
+                isDense: true,
+                hintText: 'Пароль',
+                hintStyle: TextStyle(fontSize: 16, color: Colors.grey),
+              ),
+              style: const TextStyle(fontSize: 16),
+              onChanged: (_) {
+                widget.passwordController.addListener(() {});
+                widget.passwordController.notifyListeners();
+              },
+            ),
+          ),
+          IconWidgets.visibilityIcon(
+            isVisible: _obscurePassword,
+            onTap: () {
+              setState(() {
+                _obscurePassword = !_obscurePassword;
+              });
+            },
+          ),
+        ],
+      ),
     );
   }
 

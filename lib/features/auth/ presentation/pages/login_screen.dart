@@ -21,8 +21,19 @@ class _LoginScreenState extends State<LoginScreen> {
 
   final AuthRepository _authRepository = AuthRepository();
 
+  @override
+  void initState() {
+    super.initState();
+    _emailController.addListener(_updateState);
+    _passwordController.addListener(_updateState);
+  }
+
+  void _updateState() {
+    setState(() {});
+  }
+
   bool get _isFormValid {
-    return _emailController.text.isNotEmpty &&
+    return _emailController.text.trim().isNotEmpty &&
         _passwordController.text.isNotEmpty;
   }
 
@@ -30,8 +41,14 @@ class _LoginScreenState extends State<LoginScreen> {
     final email = _emailController.text.trim();
     final password = _passwordController.text;
 
-    final validationError = AuthValidator.getLoginError(email, password);
+    if (!_isFormValid) {
+      setState(() {
+        _errorMessage = 'Заполните оба поля';
+      });
+      return;
+    }
 
+    final validationError = AuthValidator.getLoginError(email, password);
     if (validationError != null) {
       setState(() {
         _errorMessage = validationError;
@@ -71,6 +88,8 @@ class _LoginScreenState extends State<LoginScreen> {
 
   @override
   void dispose() {
+    _emailController.removeListener(_updateState);
+    _passwordController.removeListener(_updateState);
     _emailController.dispose();
     _passwordController.dispose();
     super.dispose();

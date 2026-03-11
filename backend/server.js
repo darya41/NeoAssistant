@@ -170,10 +170,12 @@ app.post('/api/auth/login', async (req, res) => {
             refreshToken,
             doctor: {
                 id: doctor.doctor_id,
-                email: doctor.email,
-                fullName: doctor.full_name,
-                specialization: doctor.specialization_name,
-                phone: doctor.personal_phone
+                email: doctor.work_email,
+                firstName: doctor.first_name,
+                lastName: doctor.last_name,
+                : doctor.patronymic,
+                phone: doctor.work_phone,
+                specialization: doctor.specialization_name
             }
         });
 
