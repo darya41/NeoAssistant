@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../../core/validators/auth_validator.dart';
 import 'password_rules.dart';
 import '../../../../core/utils/icon_widgets.dart';
 import '../../../../shared/widgets/buttons/continue_button.dart';
@@ -27,6 +28,34 @@ class _RegistrationStep1State extends State<RegistrationStep1> {
   bool _obscurePassword = true;
   final bool _obscureConfirmPassword = true;
 
+  String? get _emailError {
+    final email = widget.emailController.text;
+    if (email.isEmpty) return null;
+    return AuthValidator.getEmailError(email);
+  }
+
+  String? get _passwordError {
+    final password = widget.passwordController.text;
+    if (password.isEmpty) return null;
+    return AuthValidator.getPasswordError(password);
+  }
+
+  String? get _confirmError {
+    final confirm = widget.confirmPasswordController.text;
+    if (confirm.isEmpty) return null;
+    return AuthValidator.getConfirmPasswordError(
+      widget.passwordController.text,
+      confirm,
+    );
+  }
+
+  String? get _firstError {
+    if (_emailError != null) return _emailError;
+    if (_passwordError != null) return _passwordError;
+    if (_confirmError != null) return _confirmError;
+    return null;
+  }
+
   @override
   Widget build(BuildContext context) {
     return SafeArea(
@@ -45,7 +74,39 @@ class _RegistrationStep1State extends State<RegistrationStep1> {
               ),
             ),
 
-            const SizedBox(height: 40),
+            const SizedBox(height: 20),
+
+            if (_firstError != null)
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                margin: const EdgeInsets.only(bottom: 20),
+                decoration: BoxDecoration(
+                  color: Colors.red[50],
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: Colors.red.shade200),
+                ),
+                child: Row(
+                  children: [
+                    const Icon(
+                      Icons.error_outline,
+                      color: Colors.red,
+                      size: 20,
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Text(
+                        _firstError!,
+                        style: const TextStyle(
+                          color: Colors.red,
+                          fontSize: 14,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
 
             Container(
               decoration: BoxDecoration(

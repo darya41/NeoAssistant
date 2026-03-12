@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 import '../../../../core/utils/icon_widgets.dart';
 import '../../../../shared/widgets/buttons/continue_button.dart';
+import '../../data/repositories/specialization_repository.dart';
+import '../../domain/entities/specialization.dart';
 
 class RegistrationStep4 extends StatefulWidget {
   final VoidCallback onComplete;
-  final Function(String) onPositionSelected;
+  final Function(int) onPositionSelected;
 
   const RegistrationStep4({
     super.key,
@@ -17,9 +19,17 @@ class RegistrationStep4 extends StatefulWidget {
 }
 
 class _RegistrationStep4State extends State<RegistrationStep4> {
-  String? _selectedPosition;
+  int? _selectedPositionId;
+  String? _selectedPositionName;
+
   final TextEditingController _positionController = TextEditingController();
   final FocusNode _positionFocusNode = FocusNode();
+
+  List<Specialization> _specializations = [];
+  bool _isLoading = true;
+  String? _errorMessage;
+
+  final SpecializationRepository _repository = SpecializationRepository();
 
   @override
   void initState() {
@@ -29,6 +39,27 @@ class _RegistrationStep4State extends State<RegistrationStep4> {
         _selectCustomPosition();
       }
     });
+    _loadSpecializations();
+  }
+
+  Future<void> _loadSpecializations() async {
+    setState(() {
+      _isLoading = true;
+      _errorMessage = null;
+    });
+
+    try {
+      final specializations = await _repository.getSpecializations();
+      setState(() {
+        _specializations = specializations;
+        _isLoading = false;
+      });
+    } catch (e) {
+      setState(() {
+        _errorMessage = 'Не удалось загрузить список должностей';
+        _isLoading = false;
+      });
+    }
   }
 
   @override
@@ -42,18 +73,20 @@ class _RegistrationStep4State extends State<RegistrationStep4> {
     final text = _positionController.text.trim();
     if (text.isNotEmpty) {
       setState(() {
-        _selectedPosition = text;
+        _selectedPositionId = 0;
+        _selectedPositionName = text;
       });
-      widget.onPositionSelected(text);
+      widget.onPositionSelected(0);
     }
   }
 
-  void _selectPredefinedPosition(String position) {
+  void _selectPredefinedPosition(Specialization specialization) {
     setState(() {
-      _selectedPosition = position;
-      _positionController.text = position;
+      _selectedPositionId = specialization.id;
+      _selectedPositionName = specialization.name;
+      _positionController.text = specialization.name;
     });
-    widget.onPositionSelected(position);
+    widget.onPositionSelected(specialization.id);
   }
 
   @override
@@ -65,7 +98,6 @@ class _RegistrationStep4State extends State<RegistrationStep4> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             const SizedBox(height: 40),
-
 
             const Text(
               'Шаг 3/3',
@@ -111,12 +143,14 @@ class _RegistrationStep4State extends State<RegistrationStep4> {
                         onChanged: (value) {
                           if (value.isNotEmpty) {
                             setState(() {
-                              _selectedPosition = value;
+                              _selectedPositionId = 0;
+                              _selectedPositionName = value;
                             });
-                            widget.onPositionSelected(value);
+                            widget.onPositionSelected(0);
                           } else {
                             setState(() {
-                              _selectedPosition = null;
+                              _selectedPositionId = null;
+                              _selectedPositionName = null;
                             });
                           }
                         },
@@ -132,27 +166,50 @@ class _RegistrationStep4State extends State<RegistrationStep4> {
 
             const SizedBox(height: 32),
 
-
-            GridView.count(
-              shrinkWrap: true,
-              physics: const NeverScrollableScrollPhysics(),
-              crossAxisCount: 2,
-              crossAxisSpacing: 16,
-              mainAxisSpacing: 16,
-              childAspectRatio: 3.2,
-              children: [
-                _buildGridPositionButton('Врач-неонатолог'),
-                _buildGridPositionButton('Реаниматолог'),
-                _buildGridPositionButton('Неонатальный хирург'),
-                _buildGridPositionButton('Главврач'),
-              ],
-            ),
+            if (_isLoading)
+              const Center(child: CircularProgressIndicator())
+            else if (_errorMessage != null)
+              Center(
+                child: Column(
+                  children: [
+                    Text(
+                      _errorMessage!,
+                      style: const TextStyle(color: Colors.red),
+                    ),
+                    const SizedBox(height: 8),
+                    TextButton(
+                      onPressed: _loadSpecializations,
+                      child: const Text('Повторить'),
+                    ),
+                  ],
+                ),
+              )
+            else if (_specializations.isEmpty)
+                const Center(
+                  child: Text('Нет доступных должностей'),
+                )
+              else
+                GridView.builder(
+                  shrinkWrap: true,
+                  physics: const NeverScrollableScrollPhysics(),
+                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: 2,
+                    crossAxisSpacing: 16,
+                    mainAxisSpacing: 16,
+                    childAspectRatio: 3.2,
+                  ),
+                  itemCount: _specializations.length,
+                  itemBuilder: (context, index) {
+                    final spec = _specializations[index];
+                    return _buildGridPositionButton(spec);
+                  },
+                ),
 
             const Spacer(),
 
             ContinueButton(
-              onPressed: widget.onComplete,
-              isEnabled: _selectedPosition != null,
+              onPressed: _selectedPositionId != null ? widget.onComplete : () {},
+              isEnabled: _selectedPositionId != null,
             ),
 
             const SizedBox(height: 40),
@@ -162,11 +219,11 @@ class _RegistrationStep4State extends State<RegistrationStep4> {
     );
   }
 
-  Widget _buildGridPositionButton(String position) {
-    final isSelected = _selectedPosition == position;
+  Widget _buildGridPositionButton(Specialization specialization) {
+    final isSelected = _selectedPositionId == specialization.id;
 
     return GestureDetector(
-      onTap: () => _selectPredefinedPosition(position),
+      onTap: () => _selectPredefinedPosition(specialization),
       child: Container(
         decoration: BoxDecoration(
           color: isSelected ? const Color(0xFF44E4BF) : Colors.grey[200],
@@ -174,7 +231,7 @@ class _RegistrationStep4State extends State<RegistrationStep4> {
         ),
         child: Center(
           child: Text(
-            position,
+            specialization.name,
             style: TextStyle(
               fontSize: 14,
               fontWeight: FontWeight.w500,
