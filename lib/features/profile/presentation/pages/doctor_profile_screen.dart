@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../../../core/network/api_client.dart';
 import '../../../../core/storage/token_storage.dart';
-import '../widgets/custom_bottom_navigation_bar.dart';
+import '../../../main/presentation/widgets/custom_bottom_navigation_bar.dart';
 import '../widgets/doctor_profile_ui.dart';
 
 class DoctorProfileScreen extends StatefulWidget {

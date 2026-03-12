@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../pages/doctor_profile_screen.dart';
+import '../../../profile/presentation/pages/doctor_profile_screen.dart';
 import '../pages/home_screen.dart';
 import '../pages/reminders_screen.dart';
 import '../pages/templates_screen.dart';
