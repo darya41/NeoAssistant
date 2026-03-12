@@ -173,7 +173,7 @@ app.post('/api/auth/login', async (req, res) => {
                 email: doctor.work_email,
                 firstName: doctor.first_name,
                 lastName: doctor.last_name,
-                : doctor.patronymic,
+                patronymic: doctor.patronymic,
                 phone: doctor.work_phone,
                 specialization: doctor.specialization_name
             }
