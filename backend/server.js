@@ -114,7 +114,7 @@ app.post('/api/auth/login', async (req, res) => {
     try {
         const { email, password } = req.body;
 
-        console.log('📥 Попытка входа:', { email });
+        console.log('Попытка входа:', { email });
 
 
         const [doctors] = await db.query(
@@ -183,6 +183,70 @@ app.post('/api/auth/login', async (req, res) => {
         res.status(500).json({
             success: false,
             error: 'Ошибка при входе'
+        });
+    }
+});
+
+app.post('/api/auth/refresh', async (req, res) => {
+    try {
+        const { refreshToken } = req.body;
+
+        if (!refreshToken) {
+            return res.status(401).json({
+                success: false,
+                error: 'Refresh token не предоставлен'
+            });
+        }
+
+        const decoded = jwt.verify(refreshToken, process.env.REFRESH_SECRET);
+
+        const [doctors] = await db.query(
+            'SELECT * FROM doctors WHERE doctor_id = ? AND refresh_token = ?',
+            [decoded.id, refreshToken]
+        );
+
+        if (doctors.length === 0) {
+            return res.status(401).json({
+                success: false,
+                error: 'Недействительный refresh token'
+            });
+        }
+
+        const doctor = doctors[0];
+
+        const newAccessToken = jwt.sign(
+            {
+                id: doctor.doctor_id,
+                email: doctor.work_email,
+                firstName: doctor.first_name,
+                lastName: doctor.last_name,
+                patronymic: doctor.patronymic
+            },
+            process.env.ACCESS_SECRET,
+            { expiresIn: '15m' }
+        );
+
+        const newRefreshToken = jwt.sign(
+            { id: doctor.doctor_id },
+            process.env.REFRESH_SECRET,
+            { expiresIn: '7d' }
+        );
+
+        await db.query(
+            'UPDATE doctors SET refresh_token = ? WHERE doctor_id = ?',
+            [newRefreshToken, doctor.doctor_id]
+        );
+
+        res.json({
+            success: true,
+            accessToken: newAccessToken,
+            refreshToken: newRefreshToken
+        });
+
+    } catch (error) {
+        res.status(401).json({
+            success: false,
+            error: 'Недействительный refresh token'
         });
     }
 });
