@@ -385,3 +385,35 @@ app.put('/api/doctors/profile', authenticateToken, async (req, res) => {
         });
     }
 });
+
+app.get('/api/reminders/stats', authenticateToken, async (req, res) => {
+    try {
+        const doctorId = req.user.id;
+        const today = new Date().toISOString().split('T')[0];
+
+        const tomorrow = new Date();
+        tomorrow.setDate(tomorrow.getDate() + 1);
+        const tomorrowStr = tomorrow.toISOString().split('T')[0];
+
+        const [todayRows] = await db.query(
+            'SELECT COUNT(*) as count FROM reminders WHERE doctor_id = ? AND reminder_date = ? AND is_completed = FALSE',
+            [doctorId, today]
+        );
+
+        const [tomorrowRows] = await db.query(
+            'SELECT COUNT(*) as count FROM reminders WHERE doctor_id = ? AND reminder_date = ? AND is_completed = FALSE',
+            [doctorId, tomorrowStr]
+        );
+
+        res.json({
+            todayCount: todayRows[0].count,
+            tomorrowCount: tomorrowRows[0].count,
+            tomorrowDate: tomorrowStr
+        });
+
+    } catch (error) {
+        res.status(500).json({
+            error: 'Ошибка при получении статистики'
+        });
+    }
+});
