@@ -3,6 +3,7 @@ import '../../../../core/network/api_client.dart';
 import '../../../../core/storage/token_storage.dart';
 import '../../../main/presentation/widgets/custom_bottom_navigation_bar.dart';
 import '../widgets/doctor_profile_ui.dart';
+import 'doctor_edit_profile_screen.dart';
 
 class DoctorProfileScreen extends StatefulWidget {
   const DoctorProfileScreen({super.key});
@@ -92,7 +93,22 @@ class _DoctorProfileScreenState extends State<DoctorProfileScreen> {
           ),
           IconButton(
             icon: const Icon(Icons.edit, color: Colors.white),
-            onPressed: () {},
+            onPressed: () {
+              Navigator.push<Map<String, dynamic>>(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => DoctorEditProfileScreen(
+                    doctorData: _doctorData!,
+                  ),
+                ),
+              ).then((updatedData) {
+                if (updatedData != null) {
+                  setState(() {
+                    _doctorData!.addAll(updatedData);
+                  });
+                }
+              });
+            },
           ),
         ],
       ),

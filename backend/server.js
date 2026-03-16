@@ -250,3 +250,138 @@ app.post('/api/auth/refresh', async (req, res) => {
         });
     }
 });
+
+const authenticateToken = (req, res, next) => {
+    const authHeader = req.headers['authorization'];
+    const token = authHeader && authHeader.split(' ')[1];
+
+    if (!token) {
+        return res.status(401).json({
+            success: false,
+            error: 'Токен не предоставлен'
+        });
+    }
+
+    jwt.verify(token, process.env.ACCESS_SECRET, (err, user) => {
+        if (err) {
+            return res.status(403).json({
+                success: false,
+                error: 'Недействительный токен'
+            });
+        }
+        req.user = user;
+        next();
+    });
+};
+
+app.put('/api/doctors/profile', authenticateToken, async (req, res) => {
+    try {
+        const doctorId = req.user.id;
+        const {
+            lastName, firstName, patronymic,
+            email, phone, specializationId,
+            password
+        } = req.body;
+
+        console.log(' Обновление профиля:', { doctorId, email });
+
+        if (email) {
+            const [existing] = await db.query(
+                'SELECT doctor_id FROM doctors WHERE work_email = ? AND doctor_id != ?',
+                [email, doctorId]
+            );
+            if (existing.length > 0) {
+                return res.status(400).json({
+                    success: false,
+                    error: 'Этот email уже используется другим доктором'
+                });
+            }
+        }
+
+        let query = 'UPDATE doctors SET ';
+        const params = [];
+        const updates = [];
+
+        if (lastName) {
+            updates.push('last_name = ?');
+            params.push(lastName);
+        }
+        if (firstName) {
+            updates.push('first_name = ?');
+            params.push(firstName);
+        }
+        if (patronymic !== undefined) {
+            updates.push('patronymic = ?');
+            params.push(patronymic || null);
+        }
+        if (email) {
+            updates.push('work_email = ?');
+            params.push(email);
+        }
+        if (phone) {
+            updates.push('work_phone = ?');
+            params.push(phone);
+        }
+        if (specializationId) {
+            updates.push('specialization_id = ?');
+            params.push(specializationId);
+        }
+        if (password) {
+            const hashedPassword = await bcrypt.hash(password, 10);
+            updates.push('password = ?');
+            params.push(hashedPassword);
+        }
+
+        if (updates.length === 0) {
+            return res.status(400).json({
+                success: false,
+                error: 'Нет данных для обновления'
+            });
+        }
+
+        query += updates.join(', ');
+        query += ' WHERE doctor_id = ?';
+        params.push(doctorId);
+
+        const [result] = await db.query(query, params);
+
+        if (result.affectedRows === 0) {
+            return res.status(404).json({
+                success: false,
+                error: 'Доктор не найден'
+            });
+        }
+
+        const [updatedDoctor] = await db.query(
+            `SELECT d.doctor_id, d.work_email as email,
+                    d.first_name, d.last_name, d.patronymic,
+                    d.work_phone as phone, s.name as specialization
+             FROM doctors d
+             LEFT JOIN specializations s ON d.specialization_id = s.specialization_id
+             WHERE d.doctor_id = ?`,
+            [doctorId]
+        );
+
+        const doctor = updatedDoctor[0];
+
+        res.json({
+            success: true,
+            message: 'Профиль успешно обновлён',
+            doctor: {
+                id: doctor.doctor_id,
+                email: doctor.email,
+                firstName: doctor.first_name,
+                lastName: doctor.last_name,
+                patronymic: doctor.patronymic,
+                phone: doctor.phone,
+                specialization: doctor.specialization
+            }
+        });
+
+    } catch (error) {
+        res.status(500).json({
+            success: false,
+            error: 'Ошибка при обновлении профиля'
+        });
+    }
+});
