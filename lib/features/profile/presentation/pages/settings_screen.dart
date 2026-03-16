@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../../core/storage/token_storage.dart';
 
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({super.key});
@@ -8,6 +9,55 @@ class SettingsScreen extends StatefulWidget {
 }
 
 class _SettingsScreenState extends State<SettingsScreen> {
+
+  Future<void> _handleLogout() async {
+    final shouldLogout = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Выход из аккаунта'),
+        content: const Text('Вы уверены, что хотите выйти из аккаунта?'),
+        actions: [
+          TextButton(
+            onPressed: () {
+              Navigator.pop(context, false);
+            },
+            child: const Text('Отмена'),
+          ),
+          TextButton(
+            onPressed: () {
+              Navigator.pop(context, true);
+            },
+            child: const Text(
+              'Выйти',
+              style: TextStyle(color: Colors.red),
+            ),
+          ),
+        ],
+      ),
+    );
+
+    if (shouldLogout ?? false) {
+      try {
+        await TokenStorage.clearAll();
+
+        Navigator.pushNamedAndRemoveUntil(
+          context,
+          '/login',
+              (route) => false,
+        );
+      } catch (e) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Ошибка при выходе: $e'),
+            backgroundColor: Colors.red,
+            duration: Duration(seconds: 3),
+          ),
+        );
+      }
+    } else {
+    }
+  }
+
 
   @override
   Widget build(BuildContext context) {
@@ -37,7 +87,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
   Widget _settingItem(String title) {
     return Container(
       padding: const EdgeInsets.all(16),
-
+      decoration: BoxDecoration(
+        border: Border.all(color: Colors.grey[300]!),
+        borderRadius: BorderRadius.circular(8),
+      ),
       child: ListTile(
         title: Text(
           title,
@@ -51,7 +104,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
   Widget _logoutButton() {
     return ElevatedButton(
-      onPressed: () {},
+      onPressed: _handleLogout,
       style: ElevatedButton.styleFrom(
         backgroundColor: Colors.white,
         foregroundColor: Colors.black,
