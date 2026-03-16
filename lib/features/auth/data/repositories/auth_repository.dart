@@ -30,7 +30,7 @@ class AuthRepository {
     required String email,
     required String password,
   }) async {
-    return await ApiClient.postAuth('auth/login', {
+    return await ApiClient.login('auth/login', {
       'email': email,
       'password': password,
     });
