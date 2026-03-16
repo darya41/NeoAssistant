@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:neo_friend/features/profile/presentation/pages/about_screen.dart';
 import '../../../../core/storage/token_storage.dart';
 
 class SettingsScreen extends StatefulWidget {
@@ -97,7 +98,12 @@ class _SettingsScreenState extends State<SettingsScreen> {
           style: TextStyle(fontSize: 18),
         ),
         trailing: const Icon(Icons.arrow_forward_ios),
-        onTap: () {},
+        onTap: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => AboutScreen()),
+          );
+        },
       ),
     );
   }
