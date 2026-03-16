@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:neo_friend/features/profile/presentation/pages/settings_screen.dart';
 import '../../../../core/network/api_client.dart';
 import '../../../../core/storage/token_storage.dart';
 import '../../../main/presentation/widgets/custom_bottom_navigation_bar.dart';
@@ -89,7 +90,12 @@ class _DoctorProfileScreenState extends State<DoctorProfileScreen> {
         actions: [
           IconButton(
             icon: const Icon(Icons.settings, color: Colors.white),
-            onPressed: () {},
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => SettingsScreen()),
+              );
+            },
           ),
           IconButton(
             icon: const Icon(Icons.edit, color: Colors.white),
