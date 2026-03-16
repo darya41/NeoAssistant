@@ -46,4 +46,10 @@ class TokenStorage {
   static Future<void> clearAll() async {
     await _storage.deleteAll();
   }
+
+  static Future<void> saveDoctorData(Map<String, dynamic> doctorData) async {
+    final currentData = await getDoctorData() ?? {};
+    final updatedData = {...currentData, ...doctorData};
+    await _storage.write(key: _doctorDataKey, value: json.encode(updatedData));
+  }
 }

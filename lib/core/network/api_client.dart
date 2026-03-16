@@ -148,4 +148,37 @@ class ApiClient {
       throw Exception('Ошибка соединения: $e');
     }
   }
+
+  static Future<Map<String, dynamic>> getAuth(String endpoint) async {
+    return _sendRequestWithAuth(
+          () async {
+        final token = await TokenStorage.getAccessToken();
+        final response = await http.get(
+          Uri.parse('$baseUrl/$endpoint'),
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': 'Bearer $token',
+          },
+        );
+        return response;
+      },
+    );
+  }
+
+  static Future<Map<String, dynamic>> putAuth(String endpoint, Map<String, dynamic> data) async {
+    return _sendRequestWithAuth(
+          () async {
+        final token = await TokenStorage.getAccessToken();
+        final response = await http.put(
+          Uri.parse('$baseUrl/$endpoint'),
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': 'Bearer $token',
+          },
+          body: json.encode(data),
+        );
+        return response;
+      },
+    );
+  }
 }
