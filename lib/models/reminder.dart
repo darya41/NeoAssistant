@@ -3,7 +3,7 @@ class Reminder {
   final String title;
   final String? description;
   final DateTime date;
-  final bool isCompleted;
+  bool isCompleted;
   final DateTime createdAt;
 
   Reminder({
