@@ -385,3 +385,192 @@ app.put('/api/doctors/profile', authenticateToken, async (req, res) => {
         });
     }
 });
+
+app.get('/api/reminders/stats', authenticateToken, async (req, res) => {
+    try {
+        const doctorId = req.user.id;
+        const today = new Date().toISOString().split('T')[0];
+
+        const tomorrow = new Date();
+        tomorrow.setDate(tomorrow.getDate() + 1);
+        const tomorrowStr = tomorrow.toISOString().split('T')[0];
+
+        const [todayRows] = await db.query(
+            'SELECT COUNT(*) as count FROM reminders WHERE doctor_id = ? AND reminder_date = ? AND is_completed = FALSE',
+            [doctorId, today]
+        );
+
+        const [tomorrowRows] = await db.query(
+            'SELECT COUNT(*) as count FROM reminders WHERE doctor_id = ? AND reminder_date = ? AND is_completed = FALSE',
+            [doctorId, tomorrowStr]
+        );
+
+        res.json({
+            todayCount: todayRows[0].count,
+            tomorrowCount: tomorrowRows[0].count,
+            tomorrowDate: tomorrowStr
+        });
+
+    } catch (error) {
+        res.status(500).json({
+            error: 'Ошибка при получении статистики'
+        });
+    }
+});
+
+app.get('/api/reminders', authenticateToken, async (req, res) => {
+    try {
+        const doctorId = req.user.id;
+
+        const [rows] = await db.query(
+            `SELECT reminder_id, title, description, reminder_date, is_completed, created_at
+             FROM reminders
+             WHERE doctor_id = ?
+             ORDER BY reminder_date DESC, created_at DESC`,
+            [doctorId]
+        );
+
+        res.json({
+            success: true,
+            data: rows
+        });
+
+    } catch (error) {
+        res.status(500).json({
+            success: false,
+            error: 'Ошибка при получении напоминаний'
+        });
+    }
+});
+
+app.get('/api/reminders/:id', authenticateToken, async (req, res) => {
+    try {
+        const reminderId = req.params.id;
+        const doctorId = req.user.id;
+
+        const [rows] = await db.query(
+            `SELECT reminder_id, title, description, reminder_date, is_completed, created_at
+             FROM reminders
+             WHERE reminder_id = ? AND doctor_id = ?`,
+            [reminderId, doctorId]
+        );
+
+        if (rows.length === 0) {
+            return res.status(404).json({
+                success: false,
+                error: 'Напоминание не найдено'
+            });
+        }
+
+        res.json({
+            success: true,
+            data: rows[0]
+        });
+
+    } catch (error) {
+        res.status(500).json({
+            success: false,
+            error: 'Ошибка при получении напоминания'
+        });
+    }
+});
+
+app.put('/api/reminders/:id', authenticateToken, async (req, res) => {
+    try {
+        const reminderId = req.params.id;
+        const doctorId = req.user.id;
+        const { is_completed } = req.body;
+
+        const [result] = await db.query(
+            `UPDATE reminders
+             SET is_completed = ?
+             WHERE reminder_id = ? AND doctor_id = ?`,
+            [is_completed, reminderId, doctorId]
+        );
+
+        if (result.affectedRows === 0) {
+            return res.status(404).json({
+                success: false,
+                error: 'Напоминание не найдено'
+            });
+        }
+
+        res.json({
+            success: true,
+            message: 'Напоминание обновлено'
+        });
+
+    } catch (error) {
+        res.status(500).json({
+            success: false,
+            error: 'Ошибка при обновлении напоминания'
+        });
+    }
+});
+
+app.delete('/api/reminders/:id', authenticateToken, async (req, res) => {
+    try {
+        const reminderId = req.params.id;
+        const doctorId = req.user.id;
+
+        const [result] = await db.query(
+            'DELETE FROM reminders WHERE reminder_id = ? AND doctor_id = ?',
+            [reminderId, doctorId]
+        );
+
+        if (result.affectedRows === 0) {
+            return res.status(404).json({
+                success: false,
+                error: 'Напоминание не найдено'
+            });
+        }
+
+        res.json({
+            success: true,
+            message: 'Напоминание удалено'
+        });
+
+    } catch (error) {
+        res.status(500).json({
+            success: false,
+            error: 'Ошибка при удалении напоминания'
+        });
+    }
+});
+
+app.post('/api/reminders', authenticateToken, async (req, res) => {
+    try {
+        const doctorId = req.user.id;
+        const { title, description, reminder_date } = req.body;
+
+        if (!title || !reminder_date) {
+            return res.status(400).json({
+                success: false,
+                error: 'Название и дата обязательны'
+            });
+        }
+
+        const [result] = await db.query(
+            `INSERT INTO reminders (doctor_id, title, description, reminder_date)
+             VALUES (?, ?, ?, ?)`,
+            [doctorId, title, description || null, reminder_date]
+        );
+
+        const [newReminder] = await db.query(
+            `SELECT reminder_id, title, description, reminder_date, is_completed, created_at
+             FROM reminders WHERE reminder_id = ?`,
+            [result.insertId]
+        );
+
+        res.status(201).json({
+            success: true,
+            data: newReminder[0]
+        });
+
+    } catch (error) {
+        res.status(500).json({
+            success: false,
+            error: 'Ошибка при создании напоминания'
+        });
+    }
+});

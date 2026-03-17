@@ -45,11 +45,12 @@ class ApiClient {
     }
   }
 
-  static Future<Map<String, dynamic>> postAuth(String endpoint, Map<String, dynamic> data) async {
+  static Future<Map<String, dynamic>> login(String endpoint, Map<String, dynamic> data) async {
     try {
       final response = await http.post(
         Uri.parse('$baseUrl/$endpoint'),
         headers: {'Content-Type': 'application/json'},
+
         body: json.encode(data),
       );
 
@@ -170,6 +171,39 @@ class ApiClient {
           () async {
         final token = await TokenStorage.getAccessToken();
         final response = await http.put(
+          Uri.parse('$baseUrl/$endpoint'),
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': 'Bearer $token',
+          },
+          body: json.encode(data),
+        );
+        return response;
+      },
+    );
+  }
+
+  static Future<Map<String, dynamic>> deleteAuth(String endpoint) async {
+    return _sendRequestWithAuth(
+          () async {
+        final token = await TokenStorage.getAccessToken();
+        final response = await http.delete(
+          Uri.parse('$baseUrl/$endpoint'),
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': 'Bearer $token',
+          },
+        );
+        return response;
+      },
+    );
+  }
+
+  static Future<Map<String, dynamic>> postAuth(String endpoint, Map<String, dynamic> data) async {
+    return _sendRequestWithAuth(
+          () async {
+        final token = await TokenStorage.getAccessToken();
+        final response = await http.post(
           Uri.parse('$baseUrl/$endpoint'),
           headers: {
             'Content-Type': 'application/json',
