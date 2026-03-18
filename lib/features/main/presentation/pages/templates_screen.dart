@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:neo_friend/features/main/presentation/pages/create_reminder_screen.dart';
+import 'package:neo_friend/features/reminders/presentation/pages/create_reminder_screen.dart';
 import '../../../../shared/widgets/buttons/create_button.dart';
 import '../widgets/custom_bottom_navigation_bar.dart';
 import '../widgets/templates_list_ui.dart';

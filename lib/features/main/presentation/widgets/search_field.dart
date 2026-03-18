@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:neo_friend/features/patient_card/presentation/pages/add_patient_screen.dart';
 import '../../../../core/utils/icon_widgets.dart';
 
 class SearchField extends StatelessWidget {
@@ -92,7 +93,10 @@ class SearchField extends StatelessWidget {
             ),
             child: IconWidgets.addIcon(
               onTap: () {
-                // Обработка нажатия кнопки добавления
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => AddPatientScreen()),
+                );
               },
             ),
           ),
