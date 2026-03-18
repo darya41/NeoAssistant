@@ -47,30 +47,25 @@ class Address {
   String get fullAddress {
     final parts = <String>[];
 
-    // Населенный пункт
     if (settlementType != null && city != null) {
       parts.add('$settlementType $city');
     } else if (city != null) {
       parts.add(city!);
     }
 
-    // Улица
     if (street != null && street!.isNotEmpty) {
       final streetPart = addressType != null ? '$addressType $street' : 'ул. $street';
       parts.add(streetPart);
     }
 
-    // Дом
     if (houseNumber != null && houseNumber!.isNotEmpty) {
       parts.add('д. $houseNumber');
     }
 
-    // Корпус
     if (building != null && building!.isNotEmpty) {
       parts.add('корп. $building');
     }
 
-    // Квартира
     if (apartment != null && apartment!.isNotEmpty) {
       parts.add('кв. $apartment');
     }
