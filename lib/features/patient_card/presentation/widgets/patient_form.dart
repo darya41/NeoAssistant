@@ -1,199 +1,138 @@
 import 'package:flutter/material.dart';
+import 'form_fields/date_field_widget.dart';
+import 'form_fields/gender_selector.dart';
+import 'form_fields/mother_search_field.dart';
+import 'form_fields/text_input_field.dart';
+import 'form_fields/time_field.dart';
 
-class PatientForm {
-  static Container searchField(
-      TextEditingController motherFioController,
-      VoidCallback onTextChange,
-      Color defaultBackgroundColor,
-      Color borderColor,
-      ) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-      decoration: BoxDecoration(
-        color: defaultBackgroundColor,
-        border: Border.all(color: borderColor),
-        borderRadius: BorderRadius.circular(8),
-      ),
-      child: Row(
-        children: [
-          Expanded(
-            child: TextField(
-              controller: motherFioController,
-              onChanged: (text) => onTextChange(),
-              decoration: const InputDecoration(
-                prefixIcon: Icon(Icons.search),
-                hintText: 'ФИО матери',
-                border: InputBorder.none,
-                isDense: true,
-              ),
-            ),
-          ),
-          IconButton(
-            icon: const Icon(Icons.add),
-            onPressed: () => print('Добавить новую мать'),
-          ),
-        ],
-      ),
+class PatientFormWidget extends StatelessWidget {
+
+  final TextEditingController motherFioController;
+  final TextEditingController historyNumberController;
+  final TextEditingController heightController;
+  final TextEditingController weightController;
+
+
+  final DateTime? selectedDate;
+  final TimeOfDay? selectedTime;
+  final String selectedGender;
+
+  final VoidCallback onMotherSearchChanged;
+  final Function(DateTime) onDateSelected;
+  final Function(TimeOfDay) onTimeSelected;
+  final Function(String) onGenderSelected;
+
+  final bool showValidationErrors;
+  final String? motherFioError;
+  final String? historyNumberError;
+  final String? heightError;
+  final String? weightError;
+  final String? dateError;
+  final String? timeError;
+  final String? genderError;
+
+  const PatientFormWidget({
+    super.key,
+    required this.motherFioController,
+    required this.historyNumberController,
+    required this.heightController,
+    required this.weightController,
+    required this.selectedDate,
+    required this.selectedTime,
+    required this.selectedGender,
+    required this.onMotherSearchChanged,
+    required this.onDateSelected,
+    required this.onTimeSelected,
+    required this.onGenderSelected,
+    this.showValidationErrors = false,
+    this.motherFioError,
+    this.historyNumberError,
+    this.heightError,
+    this.weightError,
+    this.dateError,
+    this.timeError,
+    this.genderError,
+  });
+
+  Future<void> _selectDate(BuildContext context) async {
+    final picked = await showDatePicker(
+      context: context,
+      initialDate: selectedDate ?? DateTime.now(),
+      firstDate: DateTime(1900),
+      lastDate: DateTime.now(),
     );
+    if (picked != null) {
+      onDateSelected(picked);
+    }
   }
 
-  static GestureDetector dateField(
-      String dateDisplay,
-      VoidCallback onTap,
-      Color defaultBackgroundColor,
-      Color borderColor,
-      ) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-        decoration: BoxDecoration(
-          color: defaultBackgroundColor,
-          border: Border.all(color: borderColor),
-          borderRadius: BorderRadius.circular(8),
-        ),
-        child: Row(
-          children: [
-            const Icon(Icons.calendar_today),
-            const SizedBox(width: 8),
-            Text(dateDisplay),
-          ],
-        ),
-      ),
+  Future<void> _selectTime(BuildContext context) async {
+    final picked = await showTimePicker(
+      context: context,
+      initialTime: selectedTime ?? TimeOfDay.now(),
     );
+    if (picked != null) {
+      onTimeSelected(picked);
+    }
   }
 
-  static GestureDetector timeField(
-      String timeDisplay,
-      VoidCallback onTap,
-      Color defaultBackgroundColor,
-      Color borderColor,
-      ) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-        decoration: BoxDecoration(
-          color: defaultBackgroundColor,
-          border: Border.all(color: borderColor),
-          borderRadius: BorderRadius.circular(8),
-        ),
-        child: Row(
-          children: [
-            const Icon(Icons.access_time),
-            const SizedBox(width: 8),
-            Text(timeDisplay),
-          ],
-        ),
-      ),
-    );
-  }
-
-  // 🔥 ИСПРАВЛЕНО: теперь в сером квадрате
-  static Container historyField(
-      TextEditingController historyNumberController,
-      Color defaultBackgroundColor,
-      Color borderColor,
-      ) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-      decoration: BoxDecoration(
-        color: defaultBackgroundColor,
-        border: Border.all(color: borderColor),
-        borderRadius: BorderRadius.circular(8),
-      ),
-      child: TextField(
-        controller: historyNumberController,
-        keyboardType: TextInputType.number,
-        decoration: const InputDecoration(
-          hintText: 'Номер истории',
-          border: InputBorder.none,
-          isDense: true,
-        ),
-      ),
-    );
-  }
-
-  // 🔥 ИСПРАВЛЕНО: теперь в сером квадрате
-  static Container heightField(
-      TextEditingController childHeightController,
-      Color defaultBackgroundColor,
-      Color borderColor,
-      ) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-      decoration: BoxDecoration(
-        color: defaultBackgroundColor,
-        border: Border.all(color: borderColor),
-        borderRadius: BorderRadius.circular(8),
-      ),
-      child: TextField(
-        controller: childHeightController,
-        keyboardType: TextInputType.number,
-        decoration: const InputDecoration(
-          hintText: 'Рост ребёнка (сантиметров)',
-          border: InputBorder.none,
-          isDense: true,
-        ),
-      ),
-    );
-  }
-
-  // 🔥 ИСПРАВЛЕНО: теперь в сером квадрате
-  static Container weightField(
-      TextEditingController childWeightController,
-      Color defaultBackgroundColor,
-      Color borderColor,
-      ) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-      decoration: BoxDecoration(
-        color: defaultBackgroundColor,
-        border: Border.all(color: borderColor),
-        borderRadius: BorderRadius.circular(8),
-      ),
-      child: TextField(
-        controller: childWeightController,
-        keyboardType: TextInputType.number,
-        decoration: const InputDecoration(
-          hintText: 'Вес ребёнка (грамм)',
-          border: InputBorder.none,
-          isDense: true,
-        ),
-      ),
-    );
-  }
-
-  static Column genderField({
-    required String selectedGender,
-    required VoidCallback onMaleSelected,
-    required VoidCallback onFemaleSelected,
-  }) {
+  @override
+  Widget build(BuildContext context) {
     return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text('Пол ребёнка:'),
-        const SizedBox(height: 8),
-        Row(
-          children: [
-            Radio<String>(
-              value: 'мужской',
-              groupValue: selectedGender,
-              onChanged: (value) {
-                if (value == 'мужской') onMaleSelected();
-              },
-            ),
-            const Text('Мужской'),
-            const SizedBox(width: 16),
-            Radio<String>(
-              value: 'женский',
-              groupValue: selectedGender,
-              onChanged: (value) {
-                if (value == 'женский') onFemaleSelected();
-              },
-            ),
-            const Text('Женский'),
-          ],
+        MotherSearchField(
+          controller: motherFioController,
+          onTextChange: onMotherSearchChanged,
+        ),
+        const SizedBox(height: 12),
+
+        TextInputField(
+          controller: historyNumberController,
+          hintText: 'Номер истории',
+          keyboardType: TextInputType.number,
+          errorText: historyNumberError,
+          showError: showValidationErrors && historyNumberError != null,
+        ),
+        const SizedBox(height: 12),
+
+        DateFieldWidget(
+          selectedDate: selectedDate,
+          onTap: () => _selectDate(context),
+          errorText: dateError,
+          showError: showValidationErrors && dateError != null,
+        ),
+        const SizedBox(height: 12),
+
+        TimeField(
+          timeDisplay: selectedTime != null
+              ? selectedTime!.format(context)
+              : '',
+          onTap: () => _selectTime(context),
+          hintText: 'Выберите время',
+        ),
+        const SizedBox(height: 12),
+
+        TextInputField(
+          controller: heightController,
+          hintText: 'Рост ребёнка (сантиметров)',
+          keyboardType: TextInputType.number,
+          errorText: heightError,
+          showError: showValidationErrors && heightError != null,
+        ),
+        const SizedBox(height: 12),
+
+        TextInputField(
+          controller: weightController,
+          hintText: 'Вес ребёнка (грамм)',
+          keyboardType: TextInputType.number,
+          errorText: weightError,
+          showError: showValidationErrors && weightError != null,
+        ),
+        const SizedBox(height: 12),
+
+        GenderSelector(
+          selectedGender: selectedGender,
+          onGenderSelected: onGenderSelected,
         ),
       ],
     );

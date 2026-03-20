@@ -598,10 +598,23 @@ app.get('/api/parameters', authenticateToken, async (req, res) => {
       });
     }
 
-    const [paramsResult] = await db.query(
-      'SELECT medical_parameter_id, name, value_type, unit, description FROM MedicalParameters WHERE medical_parameter_id IN (?)',
-      [paramIds]
-    );
+    const [paramsResult] = await db.query(`
+      SELECT
+        mp.medical_parameter_id,
+        mp.name,
+        mp.value_type,
+        mp.unit,
+        mp.description
+      FROM MedicalParameters mp
+      WHERE mp.medical_parameter_id IN (?)
+        AND NOT (
+          mp.value_type = 'enum'
+          AND NOT EXISTS (
+            SELECT 1 FROM parametervalues pv
+            WHERE pv.medical_parameter_id = mp.medical_parameter_id
+          )
+        )
+    `, [paramIds]);
 
     let parameters = paramsResult;
 
@@ -615,7 +628,6 @@ app.get('/api/parameters', authenticateToken, async (req, res) => {
 
       param.options = optionsResult.map(row => row.param_value);
       param.optionDescriptions = optionsResult.map(row => row.description);
-
     }
 
     res.json({

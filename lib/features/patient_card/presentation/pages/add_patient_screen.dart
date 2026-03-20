@@ -5,10 +5,7 @@ import '../../data/repositories/parameter_repository.dart';
 import '../widgets/patient_form.dart';
 
 class AddPatientScreen extends StatefulWidget {
-
-  const AddPatientScreen({
-    super.key
-  });
+  const AddPatientScreen({super.key});
 
   @override
   State<AddPatientScreen> createState() => _AddPatientScreenState();
@@ -23,9 +20,7 @@ class _AddPatientScreenState extends State<AddPatientScreen> {
   final TextEditingController _childWeightController = TextEditingController();
 
   int examId = 1;
-  String _dateDisplay = 'Дата: 00/00/0000';
   DateTime? _selectedDate;
-  String _timeDisplay = 'Час рождения: 00:00';
   TimeOfDay? _selectedTime;
   String _selectedGender = '';
   bool _isSaving = false;
@@ -35,14 +30,11 @@ class _AddPatientScreenState extends State<AddPatientScreen> {
   List<MedicalParameter> _parameters = [];
   final Map<int, dynamic> _parameterValues = {};
 
+  bool _triedToSubmit = false;
+
   static const _defaultBackgroundColor = Color(0xFFF3F3F3);
   static const _borderColor = Color(0xFFC6C6C6);
   static const _activeColor = Color(0xFF44E4BF);
-
-  bool _motherFioIsEmpty = true;
-  bool _historyNumberIsEmpty = true;
-  bool _childHeightIsEmpty = true;
-  bool _childWeightIsEmpty = true;
 
   @override
   void initState() {
@@ -71,10 +63,10 @@ class _AddPatientScreenState extends State<AddPatientScreen> {
   }
 
   bool get _isFormValid {
-    if (_motherFioIsEmpty ||
-        _historyNumberIsEmpty ||
-        _childHeightIsEmpty ||
-        _childWeightIsEmpty ||
+    if (_motherFioController.text.trim().isEmpty ||
+        _historyNumberController.text.trim().isEmpty ||
+        _childHeightController.text.trim().isEmpty ||
+        _childWeightController.text.trim().isEmpty ||
         _selectedDate == null ||
         _selectedTime == null ||
         _selectedGender.isEmpty) {
@@ -85,44 +77,13 @@ class _AddPatientScreenState extends State<AddPatientScreen> {
       if (!_parameterValues.containsKey(param.id)) {
         return false;
       }
-      if (param.valueType == 'enum' && _parameterValues[param.id] == null) {
-        return false;
-      }
-      if (param.valueType == 'number' && _parameterValues[param.id] == null) {
+      final value = _parameterValues[param.id];
+      if (value == null || value.toString().trim().isEmpty) {
         return false;
       }
     }
 
     return true;
-  }
-
-  Future<void> _selectDate() async {
-    final DateTime? picked = await showDatePicker(
-      context: context,
-      initialDate: DateTime.now(),
-      firstDate: DateTime(1900),
-      lastDate: DateTime(2100),
-    );
-    if (picked != null) {
-      final dateString = '${picked.day}/${picked.month}/${picked.year}';
-      setState(() {
-        _dateDisplay = 'Дата: $dateString';
-        _selectedDate = picked;
-      });
-    }
-  }
-
-  Future<void> _selectTime() async {
-    final TimeOfDay? picked = await showTimePicker(
-      context: context,
-      initialTime: TimeOfDay.now(),
-    );
-    if (picked != null) {
-      setState(() {
-        _timeDisplay = 'Час рождения: ${picked.format(context)}';
-        _selectedTime = picked;
-      });
-    }
   }
 
   DateTime _getCombinedDateTime() {
@@ -138,11 +99,11 @@ class _AddPatientScreenState extends State<AddPatientScreen> {
   }
 
   Future<void> _handleSave() async {
+    setState(() => _triedToSubmit = true);
+
     if (!_isFormValid) return;
 
-    setState(() {
-      _isSaving = true;
-    });
+    setState(() => _isSaving = true);
 
     try {
 
@@ -166,9 +127,7 @@ class _AddPatientScreenState extends State<AddPatientScreen> {
       }
     } finally {
       if (mounted) {
-        setState(() {
-          _isSaving = false;
-        });
+        setState(() => _isSaving = false);
       }
     }
   }
@@ -203,55 +162,46 @@ class _AddPatientScreenState extends State<AddPatientScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    PatientForm.searchField(
-                      _motherFioController,
-                          () => setState(() => _motherFioIsEmpty = _motherFioController.text.isEmpty),
-                      _defaultBackgroundColor,
-                      _borderColor,
-                    ),
-                    const SizedBox(height: 16),
-
-                    PatientForm.dateField(
-                      _dateDisplay,
-                      _selectDate,
-                      _defaultBackgroundColor,
-                      _borderColor,
-                    ),
-                    const SizedBox(height: 16),
-
-                    PatientForm.timeField(
-                      _timeDisplay,
-                      _selectTime,
-                      _defaultBackgroundColor,
-                      _borderColor,
-                    ),
-                    const SizedBox(height: 16),
-
-                    PatientForm.historyField(
-                      _historyNumberController,
-                      _defaultBackgroundColor,
-                      _borderColor,
-                    ),
-                    const SizedBox(height: 16),
-
-                    PatientForm.heightField(
-                      _childHeightController,
-                      _defaultBackgroundColor,
-                      _borderColor,
-                    ),
-                    const SizedBox(height: 16),
-
-                    PatientForm.weightField(
-                      _childWeightController,
-                      _defaultBackgroundColor,
-                      _borderColor,
-                    ),
-                    const SizedBox(height: 16),
-
-                    PatientForm.genderField(
+                    PatientFormWidget(
+                      motherFioController: _motherFioController,
+                      historyNumberController: _historyNumberController,
+                      heightController: _childHeightController,
+                      weightController: _childWeightController,
+                      selectedDate: _selectedDate,
+                      selectedTime: _selectedTime,
                       selectedGender: _selectedGender,
-                      onMaleSelected: () => setState(() => _selectedGender = 'мужской'),
-                      onFemaleSelected: () => setState(() => _selectedGender = 'женский'),
+                      onMotherSearchChanged: _onMotherSearchChanged,
+                      onDateSelected: (date) {
+                        setState(() => _selectedDate = date);
+                      },
+                      onTimeSelected: (time) {
+                        setState(() => _selectedTime = time);
+                      },
+                      onGenderSelected: (gender) {
+                        setState(() => _selectedGender = gender);
+                      },
+                      showValidationErrors: _triedToSubmit,
+                      motherFioError: _triedToSubmit && _motherFioController.text.trim().isEmpty
+                          ? 'Обязательное поле'
+                          : null,
+                      historyNumberError: _triedToSubmit && _historyNumberController.text.trim().isEmpty
+                          ? 'Обязательное поле'
+                          : null,
+                      heightError: _triedToSubmit && _childHeightController.text.trim().isEmpty
+                          ? 'Обязательное поле'
+                          : null,
+                      weightError: _triedToSubmit && _childWeightController.text.trim().isEmpty
+                          ? 'Обязательное поле'
+                          : null,
+                      dateError: _triedToSubmit && _selectedDate == null
+                          ? 'Обязательное поле'
+                          : null,
+                      timeError: _triedToSubmit && _selectedTime == null
+                          ? 'Обязательное поле'
+                          : null,
+                      genderError: _triedToSubmit && _selectedGender.isEmpty
+                          ? 'Обязательное поле'
+                          : null,
                     ),
 
                     const SizedBox(height: 24),
@@ -309,6 +259,10 @@ class _AddPatientScreenState extends State<AddPatientScreen> {
         ),
       ),
     );
+  }
+
+  void _onMotherSearchChanged() {
+    setState(() {});
   }
 
   Widget _buildParameterField(MedicalParameter param) {
