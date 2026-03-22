@@ -1,17 +1,29 @@
 require('dotenv').config();
 console.log('DB_USER:', process.env.DB_USER);
 console.log('DB_PASSWORD:', process.env.DB_PASSWORD ? 'есть' : 'нет');
+
 const express = require('express');
 const mysql = require('mysql2');
 const cors = require('cors');
-require('dotenv').config();
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 
+const { authenticateToken } = require('./src/middleware/auth');
+
+const addressRoutes = require('./src/routes/addressRoutes');
+const motherRoutes = require('./src/routes/motherRoutes');
+const parametersRoutes = require('./src/routes/parametersRoutes');
+
 const app = express();
+
+
 
 app.use(cors());
 app.use(express.json());
+
+app.use('/api/addresses', addressRoutes);
+app.use('/api/mothers', motherRoutes);
+
 
 const db = mysql.createPool({
     host: process.env.DB_HOST,
@@ -250,29 +262,6 @@ app.post('/api/auth/refresh', async (req, res) => {
         });
     }
 });
-
-const authenticateToken = (req, res, next) => {
-    const authHeader = req.headers['authorization'];
-    const token = authHeader && authHeader.split(' ')[1];
-
-    if (!token) {
-        return res.status(401).json({
-            success: false,
-            error: 'Токен не предоставлен'
-        });
-    }
-
-    jwt.verify(token, process.env.ACCESS_SECRET, (err, user) => {
-        if (err) {
-            return res.status(403).json({
-                success: false,
-                error: 'Недействительный токен'
-            });
-        }
-        req.user = user;
-        next();
-    });
-};
 
 app.put('/api/doctors/profile', authenticateToken, async (req, res) => {
     try {
