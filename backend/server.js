@@ -13,6 +13,7 @@ const { authenticateToken } = require('./src/middleware/auth');
 const addressRoutes = require('./src/routes/addressRoutes');
 const motherRoutes = require('./src/routes/motherRoutes');
 const parametersRoutes = require('./src/routes/parametersRoutes');
+const patientRoutes = require('./src/routes/patientRoutes');
 
 const app = express();
 
@@ -23,7 +24,8 @@ app.use(express.json());
 
 app.use('/api/addresses', addressRoutes);
 app.use('/api/mothers', motherRoutes);
-
+app.use('/api/auth', authRoutes);
+app.use('/api/patients', patientRoutes);
 
 const db = mysql.createPool({
     host: process.env.DB_HOST,

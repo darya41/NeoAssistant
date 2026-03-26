@@ -1,49 +1,94 @@
 import 'package:flutter/material.dart';
 import '../../../../models/patient.dart';
+import '../../data/repository/patient_service.dart';
 
-class PatientCards extends StatelessWidget {
+class PatientCards extends StatefulWidget {
   const PatientCards({super.key});
 
-  static const List<Map<String, dynamic>> _patientsData = [
-    {
-      'cardNumber': '035231412432355532',
-      'status': 'Архив',
-      'patientName': 'Елизавета Константиновна Константинопольская',
-      'birthDate': '03/05/2025 14:30',
-      'gender': 'Мужской',
-      'bloodType': 'A (II), Rh–',
-      'hasConcern': false,
-    },
-    {
-      'cardNumber': '035231412432355532',
-      'status': 'Архив',
-      'patientName': 'Сидорова Татьяна Викторовна',
-      'birthDate': '03/05/2025 14:30',
-      'gender': 'Мужской',
-      'bloodType': 'A (II), Rh–',
-      'hasConcern': false,
-    },
-    {
-      'cardNumber': '035231441243235535',
-      'status': 'Архив',
-      'patientName': 'Смирнова Анна Валентиновна',
-      'birthDate': '03/05/2025 14:30',
-      'gender': 'Женский',
-      'bloodType': 'B (III), Rh+',
-      'hasConcern': true,
-    },
-  ];
+  @override
+  State<PatientCards> createState() => _PatientCardsState();
+}
+
+class _PatientCardsState extends State<PatientCards> {
+  List<Patient> _patients = [];
+  bool _isLoading = true;
+  String? _error;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadPatients();
+  }
+
+  Future<void> _loadPatients() async {
+    setState(() {
+      _isLoading = true;
+      _error = null;
+    });
+
+    try {
+      final patients = await PatientService.getPatients();
+      setState(() {
+        _patients = patients;
+        _isLoading = false;
+      });
+    } catch (e) {
+      setState(() {
+        _error = e.toString();
+        _isLoading = false;
+      });
+    }
+  }
+
+  Future<void> _refreshPatients() async {
+    await _loadPatients();
+  }
 
   @override
   Widget build(BuildContext context) {
-    return ListView.separated(
-      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
-      itemCount: _patientsData.length,
-      separatorBuilder: (context, index) => const SizedBox(height: 16),
-      itemBuilder: (context, index) {
-        final patient = Patient.fromMap(_patientsData[index]);
-        return _buildPatientCard(patient);
-      },
+    if (_isLoading) {
+      return const Center(
+        child: CircularProgressIndicator(),
+      );
+    }
+
+    if (_error != null) {
+      return Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Text(
+              _error!,
+              style: const TextStyle(color: Colors.red),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 16),
+            ElevatedButton(
+              onPressed: _refreshPatients,
+              child: const Text('Повторить'),
+            ),
+          ],
+        ),
+      );
+    }
+
+    if (_patients.isEmpty) {
+      return const Center(
+        child: Text('Нет пациентов'),
+      );
+    }
+
+    return RefreshIndicator(
+      onRefresh: _refreshPatients,
+      child: ListView.separated(
+        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+        itemCount: _patients.length,
+        separatorBuilder: (context, index) => const SizedBox(height: 16),
+        itemBuilder: (context, index) {
+          final patient = _patients[index];
+          return _buildPatientCard(patient);
+        },
+      ),
     );
   }
 
@@ -59,12 +104,12 @@ class PatientCards extends StatelessWidget {
           children: [
             _buildCardHeader(patient),
             const SizedBox(height: 16),
-            _buildPatientName(patient.patientName),
+            _buildPatientName(patient.motherName),
             const SizedBox(height: 16),
             _buildPatientDataRow(
-                patient.birthDate,
-                patient.gender,
-                patient.bloodType
+              _formatDate(patient.dateOfBirth),
+              _formatGender(patient.gender),
+              'Не указано',
             ),
             const Divider(
               color: Colors.grey,
@@ -82,7 +127,7 @@ class PatientCards extends StatelessWidget {
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
         Text(
-          patient.cardNumber,
+          patient.numberHistory,
           style: const TextStyle(
             fontSize: 12,
             color: Colors.grey,
@@ -141,5 +186,23 @@ class PatientCards extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  String _formatDate(String dateTime) {
+    try {
+      final date = DateTime.parse(dateTime);
+      return '${date.day.toString().padLeft(2, '0')}/${date.month.toString().padLeft(2, '0')}/${date.year} ${date.hour.toString().padLeft(2, '0')}:${date.minute.toString().padLeft(2, '0')}';
+    } catch (e) {
+      return dateTime;
+    }
+  }
+
+  String _formatGender(String gender) {
+    if (gender == 'MALE' || gender == 'M') {
+      return 'Мужской';
+    } else if (gender == 'FEMALE' || gender == 'F') {
+      return 'Женский';
+    }
+    return gender;
   }
 }
