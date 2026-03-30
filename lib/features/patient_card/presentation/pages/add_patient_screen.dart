@@ -23,6 +23,8 @@ class _AddPatientScreenState extends State<AddPatientScreen> {
   DateTime? _selectedDate;
   TimeOfDay? _selectedTime;
   String _selectedGender = '';
+  String? _selectedBloodGroup;
+  String? _selectedRhFactor;
   bool _isSaving = false;
   bool _isLoadingParameters = true;
   String? _parametersError;
@@ -69,7 +71,9 @@ class _AddPatientScreenState extends State<AddPatientScreen> {
         _childWeightController.text.trim().isEmpty ||
         _selectedDate == null ||
         _selectedTime == null ||
-        _selectedGender.isEmpty) {
+        _selectedGender.isEmpty ||
+        _selectedBloodGroup == null ||
+        _selectedRhFactor == null) {
       return false;
     }
 
@@ -170,6 +174,8 @@ class _AddPatientScreenState extends State<AddPatientScreen> {
                       selectedDate: _selectedDate,
                       selectedTime: _selectedTime,
                       selectedGender: _selectedGender,
+                      selectedBloodGroup: _selectedBloodGroup,
+                      selectedRhFactor: _selectedRhFactor,
                       onMotherSearchChanged: _onMotherSearchChanged,
                       onDateSelected: (date) {
                         setState(() => _selectedDate = date);
@@ -179,6 +185,12 @@ class _AddPatientScreenState extends State<AddPatientScreen> {
                       },
                       onGenderSelected: (gender) {
                         setState(() => _selectedGender = gender);
+                      },
+                      onBloodGroupChanged: (group) {
+                        setState(() => _selectedBloodGroup = group);
+                      },
+                      onRhFactorChanged: (rh) {
+                        setState(() => _selectedRhFactor = rh);
                       },
                       showValidationErrors: _triedToSubmit,
                       motherFioError: _triedToSubmit && _motherFioController.text.trim().isEmpty
@@ -200,6 +212,12 @@ class _AddPatientScreenState extends State<AddPatientScreen> {
                           ? 'Обязательное поле'
                           : null,
                       genderError: _triedToSubmit && _selectedGender.isEmpty
+                          ? 'Обязательное поле'
+                          : null,
+                      bloodGroupError: _triedToSubmit && _selectedBloodGroup == null
+                          ? 'Обязательное поле'
+                          : null,
+                      rhFactorError: _triedToSubmit && _selectedRhFactor == null
                           ? 'Обязательное поле'
                           : null,
                     ),

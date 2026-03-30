@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
+import '../../../../models/address.dart';
 import '../../../../models/mother.dart';
 import '../../../../shared/widgets/buttons/save_button.dart';
+import '../../data/repositories/address_repository.dart';
+import '../../data/repositories/mother_repository.dart';
 import '../widgets/mother_form.dart';
 
 class AddMotherScreen extends StatefulWidget {
@@ -11,8 +14,11 @@ class AddMotherScreen extends StatefulWidget {
 }
 
 class _AddMotherPageState extends State<AddMotherScreen> {
+  final MotherRepository _motherRepository = MotherRepository();
+  final AddressRepository _addressRepository = AddressRepository();
 
   Mother? _currentMother;
+  Address? _currentAddress;
   bool _isSaving = false;
   bool _triedToSubmit = false;
 
@@ -26,14 +32,35 @@ class _AddMotherPageState extends State<AddMotherScreen> {
   Future<void> _handleSave() async {
     setState(() => _triedToSubmit = true);
 
-    if (!_isFormValid || _currentMother == null) return;
+    if (!_isFormValid || _currentMother == null) {
+      return;
+    }
 
     setState(() => _isSaving = true);
 
     try {
-      // создание матери
-      // переход обратно с сохранненой матерью  Navigator.pop(context, created);
+      int? savedAddressId;
+      if (_currentAddress != null && _isAddressValid(_currentAddress!)) {
 
+        final createdAddress = await _addressRepository.createAddress(_currentAddress!);
+        savedAddressId = createdAddress.id;
+      }
+
+      final motherWithAddress = _currentMother!.copyWith(
+        addressId: savedAddressId,
+      );
+
+      final createdMother = await _motherRepository.createMother(motherWithAddress);
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Мать успешно добавлена!'),
+            backgroundColor: Color(0xFF44E4BF),
+          ),
+        );
+        Navigator.pop(context, createdMother);
+      }
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -46,6 +73,12 @@ class _AddMotherPageState extends State<AddMotherScreen> {
     } finally {
       if (mounted) setState(() => _isSaving = false);
     }
+  }
+
+  bool _isAddressValid(Address address) {
+    return (address.city != null && address.city!.isNotEmpty) &&
+        (address.street != null && address.street!.isNotEmpty) &&
+        (address.houseNumber != null && address.houseNumber!.isNotEmpty);
   }
 
   @override
@@ -72,6 +105,11 @@ class _AddMotherPageState extends State<AddMotherScreen> {
                       _currentMother = mother;
                     });
                   },
+                  onAddressChanged: (address) {
+                    setState(() {
+                      _currentAddress = address;
+                    });
+                    },
                   showValidationErrors: _triedToSubmit,
                   lastNameError: _triedToSubmit && _currentMother?.lastName.isEmpty == true
                       ? 'Фамилия обязательна'
