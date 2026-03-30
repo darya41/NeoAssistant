@@ -9,6 +9,7 @@ import 'form_fields/text_input_field.dart';
 
 class MotherFormWidget extends StatefulWidget {
   final Function(Mother) onMotherChanged;
+  final Function(Address?) onAddressChanged;
   final Mother? initialMother;
   final bool showValidationErrors;
   final String? lastNameError;
@@ -23,6 +24,7 @@ class MotherFormWidget extends StatefulWidget {
     this.lastNameError,
     this.firstNameError,
     this.dateError,
+    required this.onAddressChanged,
   });
 
   @override
@@ -237,6 +239,7 @@ class _MotherFormWidgetState extends State<MotherFormWidget> {
         AddressForm(
           onAddressChanged: (address) {
             setState(() => _selectedAddress = address);
+            widget.onAddressChanged(address);
             _updateMother();
           },
         ),

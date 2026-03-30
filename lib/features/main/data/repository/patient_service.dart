@@ -28,4 +28,26 @@ class PatientService {
       throw Exception('Ошибка соединения: $e');
     }
   }
+
+  static Future<Patient> getPatientById(int patientId) async {
+    try {
+      final token = await TokenStorage.getAccessToken();
+
+      final response = await http.get(
+        Uri.parse('$baseUrl/patients/$patientId'),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $token',
+        },
+      );
+
+      if (response.statusCode == 200) {
+        return Patient.fromJson(json.decode(response.body));
+      } else {
+        throw Exception('Ошибка загрузки пациента: ${response.statusCode}');
+      }
+    } catch (e) {
+      throw Exception('Ошибка соединения: $e');
+    }
+  }
 }

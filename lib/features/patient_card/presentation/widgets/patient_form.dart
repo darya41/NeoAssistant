@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'form_fields/blood_type_selector.dart';
 import 'form_fields/date_field_widget.dart';
 import 'form_fields/gender_selector.dart';
 import 'form_fields/mother_search_field.dart';
@@ -12,15 +13,18 @@ class PatientFormWidget extends StatelessWidget {
   final TextEditingController heightController;
   final TextEditingController weightController;
 
-
   final DateTime? selectedDate;
   final TimeOfDay? selectedTime;
   final String selectedGender;
+  final String? selectedBloodGroup;
+  final String? selectedRhFactor;
 
   final VoidCallback onMotherSearchChanged;
   final Function(DateTime) onDateSelected;
   final Function(TimeOfDay) onTimeSelected;
   final Function(String) onGenderSelected;
+  final Function(String?) onBloodGroupChanged;
+  final Function(String?) onRhFactorChanged;
 
   final bool showValidationErrors;
   final String? motherFioError;
@@ -30,6 +34,8 @@ class PatientFormWidget extends StatelessWidget {
   final String? dateError;
   final String? timeError;
   final String? genderError;
+  final String? bloodGroupError;
+  final String? rhFactorError;
 
   const PatientFormWidget({
     super.key,
@@ -40,10 +46,14 @@ class PatientFormWidget extends StatelessWidget {
     required this.selectedDate,
     required this.selectedTime,
     required this.selectedGender,
+    this.selectedBloodGroup,
+    this.selectedRhFactor,
     required this.onMotherSearchChanged,
     required this.onDateSelected,
     required this.onTimeSelected,
     required this.onGenderSelected,
+    required this.onBloodGroupChanged,
+    required this.onRhFactorChanged,
     this.showValidationErrors = false,
     this.motherFioError,
     this.historyNumberError,
@@ -52,6 +62,8 @@ class PatientFormWidget extends StatelessWidget {
     this.dateError,
     this.timeError,
     this.genderError,
+    this.bloodGroupError,
+    this.rhFactorError,
   });
 
   Future<void> _selectDate(BuildContext context) async {
@@ -133,6 +145,16 @@ class PatientFormWidget extends StatelessWidget {
         GenderSelector(
           selectedGender: selectedGender,
           onGenderSelected: onGenderSelected,
+        ),
+
+        BloodTypeSelector(
+          selectedBloodGroup: selectedBloodGroup,
+          selectedRhFactor: selectedRhFactor,
+          onBloodGroupChanged: onBloodGroupChanged,
+          onRhFactorChanged: onRhFactorChanged,
+          showValidationErrors: showValidationErrors,
+          bloodGroupError: bloodGroupError,
+          rhFactorError: rhFactorError,
         ),
       ],
     );

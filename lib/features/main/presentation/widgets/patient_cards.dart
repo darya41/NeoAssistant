@@ -104,12 +104,12 @@ class _PatientCardsState extends State<PatientCards> {
           children: [
             _buildCardHeader(patient),
             const SizedBox(height: 16),
-            _buildPatientName(patient.motherName),
+            _buildPatientName(patient.motherName ?? 'Пациент #${patient.patientId}'),
             const SizedBox(height: 16),
             _buildPatientDataRow(
               _formatDate(patient.dateOfBirth),
               _formatGender(patient.gender),
-              'Не указано',
+              patient.formattedBloodType,
             ),
             const Divider(
               color: Colors.grey,
