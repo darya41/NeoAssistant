@@ -46,9 +46,8 @@ const createPatient = async (req, res) => {
             number_history,
             blood_group,
             rh_factor,
-            weight_at_birth,
-            height_at_birth,
-            head_circumference_at_birth
+            weight,
+            height
         } = req.body;
 
         // Проверка обязательных полей
@@ -77,9 +76,8 @@ const createPatient = async (req, res) => {
             number_history,
             blood_group,
             rh_factor,
-            weight_at_birth,
-            height_at_birth,
-            head_circumference_at_birth
+            weight,
+            height
         });
 
         const newPatient = await PatientModel.findById(patientId);

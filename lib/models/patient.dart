@@ -7,6 +7,8 @@ class Patient {
   final String? motherName;
   final String? bloodGroup;
   final String? rhFactor;
+  final int? weight;
+  final int? height;
 
   Patient({
     required this.patientId,
@@ -17,6 +19,8 @@ class Patient {
     this.motherName,
     this.bloodGroup,
     this.rhFactor,
+    this.weight,
+    this.height,
   });
 
   factory Patient.fromJson(Map<String, dynamic> json) {
@@ -29,6 +33,8 @@ class Patient {
       motherName: json['mother_name']?.trim(),
       bloodGroup: json['blood_group'],
       rhFactor: json['rh_factor'],
+      weight: json['weight']?.toInt(),
+      height: json['height']?.toInt(),
     );
   }
 
@@ -42,6 +48,8 @@ class Patient {
       'mother_name': motherName,
       'blood_group': bloodGroup,
       'rh_factor': rhFactor,
+      'weight': weight,
+      'height': height,
     };
   }
 
@@ -49,6 +57,16 @@ class Patient {
     if (bloodGroup == null || rhFactor == null) {
       return 'Не указано';
     }
-    return '$bloodGroup (${rhFactor == '+' ? 'Rh+' : 'Rh−'})';
+    return '$bloodGroup, ${rhFactor == '+' ? 'Rh+' : 'Rh−'}';
+  }
+
+  String get formattedWeight {
+    if (weight == null) return 'Не указан';
+    return '${weight!.toStringAsFixed(0)} грамм';
+  }
+
+  String get formattedHeight {
+    if (height == null) return 'Не указан';
+    return '${height!.toStringAsFixed(0)} сантиметров';
   }
 }

@@ -36,7 +36,7 @@ class PatientExamModel {
    static async saveParameters(patientsExamsId, parameters) {
         for (const param of parameters) {
             await db.query(`
-                INSERT INTO medParamInPatientExams (patients_exams_id, medical_parameter_id, value)
+                INSERT INTO medParamInPatientExams (patients_exams_id, med_param_exam_id, value)
                 VALUES (?, ?, ?)
             `, [patientsExamsId, param.medical_parameter_id, param.value]);
         }

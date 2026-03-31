@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../../core/storage/token_storage.dart';
 import '../../../../models/medical_parameter.dart';
 import '../../../../models/mother.dart';
 import '../../../../shared/widgets/buttons/save_button.dart';
@@ -113,6 +114,15 @@ class _AddPatientScreenState extends State<AddPatientScreen> {
     setState(() => _isSaving = true);
 
     try {
+      final doctorData = await TokenStorage.getDoctorData();
+      print('👨‍⚕️ Данные врача: $doctorData');
+
+      final doctorId = doctorData?['doctor_id'] ?? doctorData?['id'];
+      print('👨‍⚕️ ID врача: $doctorId');
+
+      if (doctorId == null) {
+        throw Exception('Не удалось получить ID врача. Пожалуйста, войдите заново.');
+      }
 
       final patientData = {
         'mother_id': _selectedMotherId > 0 ? _selectedMotherId : null,
@@ -121,22 +131,27 @@ class _AddPatientScreenState extends State<AddPatientScreen> {
         'number_history': _historyNumberController.text.trim(),
         'blood_group': _selectedBloodGroup,
         'rh_factor': _selectedRhFactor,
-        'weight_at_birth': double.parse(_childWeightController.text.trim()),
-        'height_at_birth': double.parse(_childHeightController.text.trim()),
+        'weight': double.parse(_childWeightController.text.trim()),
+        'height': double.parse(_childHeightController.text.trim()),
       };
 
-      final patientId = await PatientExamRepository.createPatient(patientData);
+      print('📤 Отправка пациента: $patientData');
 
+      final patientId = await PatientExamRepository.createPatient(patientData);
+      print('✅ Пациент создан с ID: $patientId');
+
+      print("aaaa");
       final examData = {
         'patient_id': patientId,
         'exam_id': examId,
-        'doctor_id': null,
+        'doctor_id': doctorId,
         'date_time': _getCombinedDateTime().toIso8601String(),
       };
 
       final patientsExamsId =
       await PatientExamRepository.createPatientExam(examData);
 
+      print("save");
       await PatientExamRepository.saveExamParameters(
         patientsExamsId,
         _parameterValues,
