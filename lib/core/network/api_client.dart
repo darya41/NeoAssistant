@@ -118,14 +118,15 @@ class ApiClient {
     }
   }
 
-  static Future<Map<String, dynamic>> _sendRequestWithAuth(
+  static Future<dynamic> _sendRequestWithAuth(
       Future<http.Response> Function() request,
       ) async {
     try {
       var response = await request();
 
       if (response.statusCode == 200 || response.statusCode == 201) {
-        return json.decode(response.body);
+        final decoded = json.decode(response.body);
+       return decoded;
       }
 
       if (response.statusCode == 401) {
@@ -134,7 +135,8 @@ class ApiClient {
         if (success) {
           response = await request();
           if (response.statusCode == 200 || response.statusCode == 201) {
-            return json.decode(response.body);
+            final decoded = json.decode(response.body);
+            return decoded;
           }
         }
 
@@ -150,7 +152,7 @@ class ApiClient {
     }
   }
 
-  static Future<Map<String, dynamic>> getAuth(String endpoint) async {
+  static Future<dynamic> getAuth(String endpoint) async {
     return _sendRequestWithAuth(
           () async {
         final token = await TokenStorage.getAccessToken();
@@ -166,7 +168,7 @@ class ApiClient {
     );
   }
 
-  static Future<Map<String, dynamic>> putAuth(String endpoint, Map<String, dynamic> data) async {
+  static Future<dynamic> putAuth(String endpoint, Map<String, dynamic> data) async {
     return _sendRequestWithAuth(
           () async {
         final token = await TokenStorage.getAccessToken();
@@ -183,7 +185,7 @@ class ApiClient {
     );
   }
 
-  static Future<Map<String, dynamic>> deleteAuth(String endpoint) async {
+  static Future<dynamic> deleteAuth(String endpoint) async {
     return _sendRequestWithAuth(
           () async {
         final token = await TokenStorage.getAccessToken();
@@ -199,7 +201,7 @@ class ApiClient {
     );
   }
 
-  static Future<Map<String, dynamic>> postAuth(String endpoint, Map<String, dynamic> data) async {
+  static Future<dynamic> postAuth(String endpoint, Map<String, dynamic> data) async {
     return _sendRequestWithAuth(
           () async {
         final token = await TokenStorage.getAccessToken();

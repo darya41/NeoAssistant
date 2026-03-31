@@ -4,7 +4,9 @@ class Patient {
   final String dateOfBirth;
   final String gender;
   final String numberHistory;
-  final String motherName;
+  final String? motherName;
+  final String? bloodGroup;
+  final String? rhFactor;
 
   Patient({
     required this.patientId,
@@ -12,7 +14,9 @@ class Patient {
     required this.dateOfBirth,
     required this.gender,
     required this.numberHistory,
-    required this.motherName,
+    this.motherName,
+    this.bloodGroup,
+    this.rhFactor,
   });
 
   factory Patient.fromJson(Map<String, dynamic> json) {
@@ -22,7 +26,9 @@ class Patient {
       dateOfBirth: json['date_of_birth'],
       gender: json['gender'],
       numberHistory: json['number_history'] ?? 'Не указан',
-      motherName: json['mother_name']?.trim() ?? 'Мать не указана',
+      motherName: json['mother_name']?.trim(),
+      bloodGroup: json['blood_group'],
+      rhFactor: json['rh_factor'],
     );
   }
 
@@ -34,6 +40,15 @@ class Patient {
       'gender': gender,
       'number_history': numberHistory,
       'mother_name': motherName,
+      'blood_group': bloodGroup,
+      'rh_factor': rhFactor,
     };
+  }
+
+  String get formattedBloodType {
+    if (bloodGroup == null || rhFactor == null) {
+      return 'Не указано';
+    }
+    return '$bloodGroup (${rhFactor == '+' ? 'Rh+' : 'Rh−'})';
   }
 }

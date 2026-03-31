@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import '../../../../models/medical_parameter.dart';
+import '../../../../models/mother.dart';
 import '../../../../shared/widgets/buttons/save_button.dart';
 import '../../data/repositories/parameter_repository.dart';
+import '../../data/repositories/patient_exam_repository.dart';
 import '../widgets/patient_form.dart';
 
 class AddPatientScreen extends StatefulWidget {
@@ -19,6 +21,7 @@ class _AddPatientScreenState extends State<AddPatientScreen> {
   final TextEditingController _childHeightController = TextEditingController();
   final TextEditingController _childWeightController = TextEditingController();
 
+  int _selectedMotherId = 0;
   int examId = 1;
   DateTime? _selectedDate;
   TimeOfDay? _selectedTime;
@@ -111,10 +114,38 @@ class _AddPatientScreenState extends State<AddPatientScreen> {
 
     try {
 
+      final patientData = {
+        'mother_id': _selectedMotherId > 0 ? _selectedMotherId : null,
+        'date_of_birth': _getCombinedDateTime().toIso8601String(),
+        'gender': _selectedGender == 'Мужской' ? 'MALE' : 'FEMALE',
+        'number_history': _historyNumberController.text.trim(),
+        'blood_group': _selectedBloodGroup,
+        'rh_factor': _selectedRhFactor,
+        'weight_at_birth': double.parse(_childWeightController.text.trim()),
+        'height_at_birth': double.parse(_childHeightController.text.trim()),
+      };
+
+      final patientId = await PatientExamRepository.createPatient(patientData);
+
+      final examData = {
+        'patient_id': patientId,
+        'exam_id': examId,
+        'doctor_id': null,
+        'date_time': _getCombinedDateTime().toIso8601String(),
+      };
+
+      final patientsExamsId =
+      await PatientExamRepository.createPatientExam(examData);
+
+      await PatientExamRepository.saveExamParameters(
+        patientsExamsId,
+        _parameterValues,
+      );
+
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
-            content: Text('Пациент успешно добавлен!'),
+            content: Text('Пациент и осмотр успешно добавлены!'),
             backgroundColor: Color(0xFF44E4BF),
           ),
         );
@@ -124,7 +155,7 @@ class _AddPatientScreenState extends State<AddPatientScreen> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Ошибка: $e'),
+            content: Text('Ошибка: ${e.toString().replaceFirst('Exception: ', '')}'),
             backgroundColor: Colors.red,
           ),
         );
@@ -176,7 +207,13 @@ class _AddPatientScreenState extends State<AddPatientScreen> {
                       selectedGender: _selectedGender,
                       selectedBloodGroup: _selectedBloodGroup,
                       selectedRhFactor: _selectedRhFactor,
-                      onMotherSearchChanged: _onMotherSearchChanged,
+                      onMotherSearchChanged: () {},
+                      onMotherSelected: (Mother mother) {
+                        setState(() {
+                          _selectedMotherId = mother.id;
+                          _motherFioController.text = mother.fullName;
+                        });
+                      },
                       onDateSelected: (date) {
                         setState(() => _selectedDate = date);
                       },
@@ -193,8 +230,8 @@ class _AddPatientScreenState extends State<AddPatientScreen> {
                         setState(() => _selectedRhFactor = rh);
                       },
                       showValidationErrors: _triedToSubmit,
-                      motherFioError: _triedToSubmit && _motherFioController.text.trim().isEmpty
-                          ? 'Обязательное поле'
+                      motherFioError: _triedToSubmit && _selectedMotherId == 0
+                          ? 'Выберите или добавьте мать'
                           : null,
                       historyNumberError: _triedToSubmit && _historyNumberController.text.trim().isEmpty
                           ? 'Обязательное поле'
@@ -220,16 +257,6 @@ class _AddPatientScreenState extends State<AddPatientScreen> {
                       rhFactorError: _triedToSubmit && _selectedRhFactor == null
                           ? 'Обязательное поле'
                           : null,
-                    ),
-
-                    const SizedBox(height: 24),
-
-                    const Text(
-                      'Параметры обследования:',
-                      style: TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                      ),
                     ),
                     const SizedBox(height: 16),
 
@@ -257,7 +284,7 @@ class _AddPatientScreenState extends State<AddPatientScreen> {
                           child: Text('Нет параметров для этого обследования'),
                         )
                       else
-                        ..._parameters.map((param) => _buildParameterField(param)).toList(),
+                        ..._parameters.map((param) => _buildParameterField(param)),
                   ],
                 ),
               ),
@@ -277,10 +304,6 @@ class _AddPatientScreenState extends State<AddPatientScreen> {
         ),
       ),
     );
-  }
-
-  void _onMotherSearchChanged() {
-    setState(() {});
   }
 
   Widget _buildParameterField(MedicalParameter param) {

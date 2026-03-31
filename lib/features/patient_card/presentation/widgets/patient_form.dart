@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../../models/mother.dart';
 import 'form_fields/blood_type_selector.dart';
 import 'form_fields/date_field_widget.dart';
 import 'form_fields/gender_selector.dart';
@@ -20,6 +21,7 @@ class PatientFormWidget extends StatelessWidget {
   final String? selectedRhFactor;
 
   final VoidCallback onMotherSearchChanged;
+  final Function(Mother) onMotherSelected;
   final Function(DateTime) onDateSelected;
   final Function(TimeOfDay) onTimeSelected;
   final Function(String) onGenderSelected;
@@ -49,6 +51,7 @@ class PatientFormWidget extends StatelessWidget {
     this.selectedBloodGroup,
     this.selectedRhFactor,
     required this.onMotherSearchChanged,
+    required this.onMotherSelected,
     required this.onDateSelected,
     required this.onTimeSelected,
     required this.onGenderSelected,
@@ -94,9 +97,10 @@ class PatientFormWidget extends StatelessWidget {
       children: [
         MotherSearchField(
           controller: motherFioController,
-          onTextChange: onMotherSearchChanged,
+          onMotherSelected: onMotherSelected,
+          errorText: motherFioError,
         ),
-        const SizedBox(height: 12),
+        const SizedBox(height: 16),
 
         TextInputField(
           controller: historyNumberController,

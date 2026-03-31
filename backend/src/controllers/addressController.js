@@ -1,4 +1,5 @@
 const db = require('../config/database');
+const AddressModel = require('../models/address');
 
 const createAddress = async (req, res) => {
     console.log('POST /api/addresses');
@@ -12,17 +13,11 @@ const createAddress = async (req, res) => {
             });
         }
 
-        const [result] = await db.query(
-            `INSERT INTO addresses (settlement_type, city, address_type, street, house_number, building, apartment)
-             VALUES (?, ?, ?, ?, ?, ?, ?)`,
-            [settlement_type || null, city, address_type || null, street, house_number, building || null, apartment || null]
-        );
+        const addressId = await AddressModel.create({
+                    settlement_type, city, address_type, street, house_number, building, apartment
+                });
 
-        const [newAddress] = await db.query(
-            `SELECT address_id, settlement_type, city, address_type, street, house_number, building, apartment
-             FROM addresses WHERE address_id = ?`,
-            [result.insertId]
-        );
+        const newAddress = await AddressModel.findById(addressId);
 
         res.status(201).json({ success: true, data: newAddress[0] });
     } catch (error) {
@@ -31,66 +26,6 @@ const createAddress = async (req, res) => {
     }
 };
 
-const getAddressById = async (req, res) => {
-    try {
-        const [addresses] = await db.query(
-            `SELECT address_id, settlement_type, city, address_type, street, house_number, building, apartment
-             FROM addresses WHERE address_id = ?`,
-            [req.params.id]
-        );
 
-        if (addresses.length === 0) {
-            return res.status(404).json({ success: false, error: 'Address not found' });
-        }
 
-        res.json({ success: true, data: addresses[0] });
-    } catch (error) {
-        console.error('Error getting address:', error);
-        res.status(500).json({ success: false, error: 'Error getting address' });
-    }
-};
-
-const updateAddress = async (req, res) => {
-    try {
-        const { settlement_type, city, address_type, street, house_number, building, apartment } = req.body;
-
-        const [result] = await db.query(
-            `UPDATE addresses SET
-                settlement_type = COALESCE(?, settlement_type),
-                city = COALESCE(?, city),
-                address_type = COALESCE(?, address_type),
-                street = COALESCE(?, street),
-                house_number = COALESCE(?, house_number),
-                building = COALESCE(?, building),
-                apartment = COALESCE(?, apartment)
-             WHERE address_id = ?`,
-            [settlement_type, city, address_type, street, house_number, building, apartment, req.params.id]
-        );
-
-        if (result.affectedRows === 0) {
-            return res.status(404).json({ success: false, error: 'Address not found' });
-        }
-
-        res.json({ success: true, message: 'Address updated' });
-    } catch (error) {
-        console.error('Error updating address:', error);
-        res.status(500).json({ success: false, error: 'Error updating address' });
-    }
-};
-
-const deleteAddress = async (req, res) => {
-    try {
-        const [result] = await db.query('DELETE FROM addresses WHERE address_id = ?', [req.params.id]);
-
-        if (result.affectedRows === 0) {
-            return res.status(404).json({ success: false, error: 'Address not found' });
-        }
-
-        res.json({ success: true, message: 'Address deleted' });
-    } catch (error) {
-        console.error('Error deleting address:', error);
-        res.status(500).json({ success: false, error: 'Error deleting address' });
-    }
-};
-
-module.exports = { createAddress, getAddressById, updateAddress, deleteAddress };
+module.exports = { createAddress };

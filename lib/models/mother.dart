@@ -67,4 +67,36 @@ class Mother {
       'address_id': addressId,
     };
   }
+
+  Mother copyWith({
+    int? id,
+    String? lastName,
+    String? firstName,
+    String? patronymic,
+    DateTime? dateOfBirth,
+    int? numberOfPregnancies,
+    int? numberOfDeliveries,
+    String? medicalHistory,
+    String? medicationsDuringPregnancy,
+    bool? gestationalDiabetes,
+    bool? preeclampsia,
+    String? groupBStreptococcusStatus,
+    int? addressId,
+  }) {
+    return Mother(
+      id: id ?? this.id,
+      lastName: lastName ?? this.lastName,
+      firstName: firstName ?? this.firstName,
+      patronymic: patronymic ?? this.patronymic,
+      dateOfBirth: dateOfBirth ?? this.dateOfBirth,
+      numberOfPregnancies: numberOfPregnancies ?? this.numberOfPregnancies,
+      numberOfDeliveries: numberOfDeliveries ?? this.numberOfDeliveries,
+      medicalHistory: medicalHistory ?? this.medicalHistory,
+      medicationsDuringPregnancy: medicationsDuringPregnancy ?? this.medicationsDuringPregnancy,
+      gestationalDiabetes: gestationalDiabetes ?? this.gestationalDiabetes,
+      preeclampsia: preeclampsia ?? this.preeclampsia,
+      groupBStreptococcusStatus: groupBStreptococcusStatus ?? this.groupBStreptococcusStatus,
+      addressId: addressId ?? this.addressId,
+    );
+  }
 }

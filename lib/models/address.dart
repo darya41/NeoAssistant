@@ -1,5 +1,5 @@
 class Address {
-  final int id;
+  final int? id;
   final String? settlementType;
   final String? city;
   final String? addressType;
@@ -9,7 +9,7 @@ class Address {
   final String? building;
 
   const Address({
-    required this.id,
+    this.id,
     this.settlementType,
     this.city,
     this.addressType,
@@ -21,7 +21,7 @@ class Address {
 
   factory Address.fromJson(Map<String, dynamic> json) {
     return Address(
-      id: json['address_id'] ?? 0,
+      id: json['id'] ?? json['address_id'] ?? 0,
       settlementType: json['settlement_type'],
       city: json['city'],
       addressType: json['address_type'],
@@ -33,7 +33,7 @@ class Address {
   }
 
   Map<String, dynamic> toJson() {
-    return {
+    final map = {
       'settlement_type': settlementType,
       'city': city,
       'address_type': addressType,
@@ -42,6 +42,10 @@ class Address {
       'apartment': apartment,
       'building': building,
     };
+
+    map.removeWhere((key, value) => value == null);
+
+    return map;
   }
 
   String get fullAddress {
