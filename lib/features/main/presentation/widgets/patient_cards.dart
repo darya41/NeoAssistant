@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../../../models/patient.dart';
+import '../../../patient_card/presentation/pages/patient_details_screen.dart';
 import '../../data/repository/patient_service.dart';
 
 class PatientCards extends StatefulWidget {
@@ -91,12 +92,20 @@ class _PatientCardsState extends State<PatientCards> {
       ),
     );
   }
+  void _navigateToPatientDetails(Patient patient) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => PatientDetailsScreen(
+          patient: patient,
+        ),
+      ),
+    );
+  }
 
   Widget _buildPatientCard(Patient patient) {
     return InkWell(
-      onTap: () {
-        // Обработчик нажатия на карточку пациента
-      },
+      onTap: () => _navigateToPatientDetails(patient),
       child: Padding(
         padding: const EdgeInsets.only(bottom: 8),
         child: Column(
