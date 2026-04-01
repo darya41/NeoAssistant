@@ -28,7 +28,7 @@ class PatientDetailsState {
     );
   }
 
-  String get formattedBloodGroup {
+  String get formattedMotherBloodGroup {
     if (motherError != null) return 'Ошибка: $motherError';
     if (isLoadingMother) return 'Загрузка...';
     if (mother == null) return 'Не указано';
@@ -36,6 +36,17 @@ class PatientDetailsState {
     return BloodTypeFormatter.format(
       mother!.bloodGroup,
       mother!.rhFactor,
+    );
+  }
+
+  String get formattedChildBloodGroup {
+    if (motherError != null) return 'Ошибка: $motherError';
+    if (isLoadingMother) return 'Загрузка...';
+    if (mother == null) return 'Не указано';
+
+    return BloodTypeFormatter.format(
+      patient.bloodGroup,
+      patient.rhFactor,
     );
   }
 

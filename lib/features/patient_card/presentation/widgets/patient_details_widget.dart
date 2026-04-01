@@ -3,7 +3,7 @@ import '../../../../models/patient.dart';
 import '../../../../shared/widgets/buttons/action_button.dart';
 import '../../data/repositories/mother_repository.dart';
 import '../../domain/models/patient_details_state.dart';
-import 'form_fields/info_column_widget.dart';
+import 'form_fields/info_column.dart';
 import 'form_fields/patient_header.dart';
 
 class PatientDetailsWidget extends StatefulWidget {
@@ -87,7 +87,7 @@ class _PatientDetailsWidgetState extends State<PatientDetailsWidget> {
             const SizedBox(width: 16),
             InfoColumnWidget(
               label: 'Г.К. Матери',
-              value: _state.formattedBloodGroup,
+              value: _state.formattedMotherBloodGroup,
             ),
           ],
         ),
@@ -102,7 +102,7 @@ class _PatientDetailsWidgetState extends State<PatientDetailsWidget> {
             const SizedBox(width: 16),
             InfoColumnWidget(
               label: 'Г.К. Ребёнка',
-              value: _state.formattedBloodGroup,
+              value: _state.formattedChildBloodGroup,
             ),
           ],
         ),

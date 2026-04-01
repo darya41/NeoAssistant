@@ -205,6 +205,7 @@ class ApiClient {
     return _sendRequestWithAuth(
           () async {
         final token = await TokenStorage.getAccessToken();
+
         final response = await http.post(
           Uri.parse('$baseUrl/$endpoint'),
           headers: {

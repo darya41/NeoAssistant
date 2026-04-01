@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:neo_friend/features/patient_card/presentation/pages/primary_exam_view_screen.dart';
 import '../../../../models/patient.dart';
 import '../widgets/patient_details_widget.dart';
 
@@ -68,7 +69,14 @@ class _PatientDetailsScreenState extends State<PatientDetailsScreen> {
   }
 
   void _togglePrimaryExam() {
-    // ПЕРВИЧНЫЙ ОСМОТР
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => PrimaryExamViewScreen(
+            patientId: widget.patient.getId(), examTypeId: 1,
+        ),
+      ),
+    );
   }
 
   void _generateEpicrisis() {

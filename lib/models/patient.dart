@@ -69,4 +69,8 @@ class Patient {
     if (height == null) return 'Не указан';
     return '${height!.toStringAsFixed(0)} сантиметров';
   }
+
+  int getId() {
+    return patientId;
+  }
 }
