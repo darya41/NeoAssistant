@@ -4,8 +4,9 @@ import '../../../../models/mother.dart';
 class MotherRepository {
   Future<Mother> createMother(Mother mother) async {
     try {
+      final motherData = mother.toJson();
 
-      final response = await ApiClient.postAuth('mothers', mother.toJson());
+      final response = await ApiClient.postAuth('mothers', motherData);
 
       if (response is! Map<String, dynamic>) {
         throw Exception('Неверный формат ответа');
@@ -15,21 +16,22 @@ class MotherRepository {
         throw Exception(response['error'] ?? 'Ошибка создания матери');
       }
 
-      final motherData = response['data'];
-      if (motherData == null) {
+      final motherDataResponse = response['data'];
+
+      if (motherDataResponse == null) {
         throw Exception('Сервер не вернул данные матери');
       }
 
       final Map<String, dynamic> motherJson;
-      if (motherData is List) {
-        if (motherData.isEmpty) {
+      if (motherDataResponse is List) {
+        if (motherDataResponse.isEmpty) {
           throw Exception('Сервер вернул пустой список');
         }
-        motherJson = motherData[0];
-      } else if (motherData is Map<String, dynamic>) {
-        motherJson = motherData;
+        motherJson = motherDataResponse[0];
+      } else if (motherDataResponse is Map<String, dynamic>) {
+        motherJson = motherDataResponse;
       } else {
-        throw Exception('Неверный тип данных: ${motherData.runtimeType}');
+        throw Exception('Неверный тип данных: ${motherDataResponse.runtimeType}');
       }
 
       if (!motherJson.containsKey('mother_id') && !motherJson.containsKey('id')) {
@@ -68,19 +70,16 @@ class MotherRepository {
       if (mothersData is List) {
         for (var item in mothersData) {
           if (item is Map<String, dynamic>) {
-              final mother = Mother.fromJson(item);
-              mothers.add(mother);
+            final mother = Mother.fromJson(item);
+            mothers.add(mother);
           }
         }
-      }
-
-      else if (mothersData is Map<String, dynamic>) {
+      } else if (mothersData is Map<String, dynamic>) {
         final mother = Mother.fromJson(mothersData);
         mothers.add(mother);
       }
 
       return mothers;
-
     } catch (e) {
       return [];
     }

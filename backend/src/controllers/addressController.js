@@ -3,6 +3,8 @@ const AddressModel = require('../models/address');
 
 const createAddress = async (req, res) => {
     console.log('POST /api/addresses');
+    console.log('Request body:', req.body);
+
     try {
         const { settlement_type, city, address_type, street, house_number, building, apartment } = req.body;
 
@@ -14,18 +16,36 @@ const createAddress = async (req, res) => {
         }
 
         const addressId = await AddressModel.create({
-                    settlement_type, city, address_type, street, house_number, building, apartment
-                });
+            settlement_type,
+            city,
+            address_type,
+            street,
+            house_number,
+            building,
+            apartment
+        });
 
         const newAddress = await AddressModel.findById(addressId);
 
-        res.status(201).json({ success: true, data: newAddress[0] });
+       if (!newAddress) {
+            return res.status(500).json({
+                success: false,
+                error: 'Address created but not found'
+            });
+        }
+
+        const addressData = Array.isArray(newAddress) ? newAddress[0] : newAddress;
+
+        res.status(201).json({
+            success: true,
+            data: addressData
+        });
     } catch (error) {
-        console.error('Error creating address:', error);
-        res.status(500).json({ success: false, error: 'Error creating address' });
+        res.status(500).json({
+            success: false,
+            error: 'Error creating address: ' + error.message
+        });
     }
 };
-
-
 
 module.exports = { createAddress };

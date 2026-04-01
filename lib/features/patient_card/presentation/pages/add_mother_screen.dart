@@ -26,13 +26,29 @@ class _AddMotherPageState extends State<AddMotherScreen> {
     if (_currentMother == null) return false;
     return _currentMother!.lastName.isNotEmpty &&
         _currentMother!.firstName.isNotEmpty &&
-        _currentMother!.dateOfBirth != null;
+        _currentMother!.bloodGroup != null &&
+        _currentMother!.rhFactor != null;
+  }
+
+  bool _isAddressFilled(Address address) {
+    return (address.city != null && address.city!.isNotEmpty) ||
+        (address.street != null && address.street!.isNotEmpty) ||
+        (address.houseNumber != null && address.houseNumber!.isNotEmpty) ||
+        (address.building != null && address.building!.isNotEmpty) ||
+        (address.apartment != null && address.apartment!.isNotEmpty);
+  }
+
+  bool _isAddressValid(Address address) {
+    return (address.city != null && address.city!.isNotEmpty) &&
+        (address.street != null && address.street!.isNotEmpty) &&
+        (address.houseNumber != null && address.houseNumber!.isNotEmpty);
   }
 
   Future<void> _handleSave() async {
     setState(() => _triedToSubmit = true);
 
     if (!_isFormValid || _currentMother == null) {
+      print('❌ Форма невалидна');
       return;
     }
 
@@ -40,10 +56,26 @@ class _AddMotherPageState extends State<AddMotherScreen> {
 
     try {
       int? savedAddressId;
-      if (_currentAddress != null && _isAddressValid(_currentAddress!)) {
 
-        final createdAddress = await _addressRepository.createAddress(_currentAddress!);
-        savedAddressId = createdAddress.id;
+      if (_currentAddress != null) {
+        if (_isAddressFilled(_currentAddress!)) {
+          if (_isAddressValid(_currentAddress!)) {
+            final createdAddress = await _addressRepository.createAddress(_currentAddress!);
+            savedAddressId = createdAddress.id;
+          } else {
+            if (mounted) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(
+                  content: Text('Пожалуйста, заполните все поля адреса (город, улица, дом) или оставьте адрес пустым'),
+                  backgroundColor: Colors.orange,
+                  duration: Duration(seconds: 3),
+                ),
+              );
+            }
+            setState(() => _isSaving = false);
+            return;
+          }
+        }
       }
 
       final motherWithAddress = _currentMother!.copyWith(
@@ -73,12 +105,6 @@ class _AddMotherPageState extends State<AddMotherScreen> {
     } finally {
       if (mounted) setState(() => _isSaving = false);
     }
-  }
-
-  bool _isAddressValid(Address address) {
-    return (address.city != null && address.city!.isNotEmpty) &&
-        (address.street != null && address.street!.isNotEmpty) &&
-        (address.houseNumber != null && address.houseNumber!.isNotEmpty);
   }
 
   @override
@@ -119,6 +145,12 @@ class _AddMotherPageState extends State<AddMotherScreen> {
                       : null,
                   dateError: _triedToSubmit && _currentMother?.dateOfBirth == null
                       ? 'Дата рождения обязательна'
+                      : null,
+                  bloodGroupError: _triedToSubmit && _currentMother?.bloodGroup == null
+                      ? 'Группа крови обязательна'
+                      : null,
+                  rhFactorError: _triedToSubmit && _currentMother?.rhFactor == null
+                      ? 'Резус-фактор обязателен'
                       : null,
                 ),
               ),

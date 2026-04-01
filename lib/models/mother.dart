@@ -12,6 +12,8 @@ class Mother {
   final bool? preeclampsia;
   final String? groupBStreptococcusStatus;
   final int? addressId;
+  final String? bloodGroup;
+  final String? rhFactor;
 
   String get fullName => [lastName, firstName, patronymic]
       .where((name) => name != null && name.isNotEmpty)
@@ -31,6 +33,8 @@ class Mother {
     this.preeclampsia,
     this.groupBStreptococcusStatus,
     this.addressId,
+    this.bloodGroup,
+    this.rhFactor,
   });
 
   factory Mother.fromJson(Map<String, dynamic> json) {
@@ -48,6 +52,8 @@ class Mother {
       preeclampsia: json['preeclampsia'] == 1,
       groupBStreptococcusStatus: json['groupb_streptococcus_status'],
       addressId: json['address_id'],
+      bloodGroup: json['blood_group'],
+      rhFactor: json['rh_factor'],
     );
   }
 
@@ -65,6 +71,8 @@ class Mother {
       'preeclampsia': preeclampsia == true ? 1 : 0,
       'groupb_streptococcus_status': groupBStreptococcusStatus,
       'address_id': addressId,
+      'blood_group': bloodGroup,
+      'rh_factor': rhFactor,
     };
   }
 
@@ -82,6 +90,8 @@ class Mother {
     bool? preeclampsia,
     String? groupBStreptococcusStatus,
     int? addressId,
+    String? bloodGroup,
+    String? rhFactor,
   }) {
     return Mother(
       id: id ?? this.id,
@@ -97,6 +107,8 @@ class Mother {
       preeclampsia: preeclampsia ?? this.preeclampsia,
       groupBStreptococcusStatus: groupBStreptococcusStatus ?? this.groupBStreptococcusStatus,
       addressId: addressId ?? this.addressId,
+      bloodGroup: bloodGroup ?? this.bloodGroup,
+      rhFactor: rhFactor ?? this.rhFactor,
     );
   }
 }

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../../../../models/address.dart';
 import '../../../../models/mother.dart';
 import 'address_form.dart';
+import 'form_fields/blood_type_selector.dart';
 import 'form_fields/date_field_widget.dart';
 import 'form_fields/checkbox_group_widget.dart';
 import 'form_fields/streptococcus_selector.dart';
@@ -15,6 +16,8 @@ class MotherFormWidget extends StatefulWidget {
   final String? lastNameError;
   final String? firstNameError;
   final String? dateError;
+  final String? bloodGroupError;
+  final String? rhFactorError;
 
   const MotherFormWidget({
     super.key,
@@ -24,6 +27,8 @@ class MotherFormWidget extends StatefulWidget {
     this.lastNameError,
     this.firstNameError,
     this.dateError,
+    this.bloodGroupError,
+    this.rhFactorError,
     required this.onAddressChanged,
   });
 
@@ -46,6 +51,8 @@ class _MotherFormWidgetState extends State<MotherFormWidget> {
   bool _preeclampsia = false;
   String? _groupBStreptococcus;
   Address? _selectedAddress;
+  String? _selectedBloodGroup;
+  String? _selectedRhFactor;
 
   @override
   void initState() {
@@ -88,6 +95,8 @@ class _MotherFormWidgetState extends State<MotherFormWidget> {
     _gestationalDiabetes = mother.gestationalDiabetes ?? false;
     _preeclampsia = mother.preeclampsia ?? false;
     _groupBStreptococcus = mother.groupBStreptococcusStatus;
+    _selectedBloodGroup = mother.bloodGroup;
+    _selectedRhFactor = mother.rhFactor;
   }
 
   Mother get _currentMother {
@@ -114,12 +123,16 @@ class _MotherFormWidgetState extends State<MotherFormWidget> {
       gestationalDiabetes: _gestationalDiabetes,
       preeclampsia: _preeclampsia,
       groupBStreptococcusStatus: _groupBStreptococcus,
+      bloodGroup: _selectedBloodGroup,
+      rhFactor: _selectedRhFactor,
     );
   }
 
   void _updateMother() {
     if (_selectedDate != null) {
-      widget.onMotherChanged(_currentMother);
+      final mother = _currentMother;
+      print('🔄 Обновление матери: ${mother.lastName} ${mother.firstName}');
+      widget.onMotherChanged(mother);
     }
   }
 
@@ -162,7 +175,6 @@ class _MotherFormWidgetState extends State<MotherFormWidget> {
           keyboardType: TextInputType.number,
           errorText: widget.lastNameError,
           showError: widget.showValidationErrors && widget.lastNameError != null,
-
         ),
         const SizedBox(height: 12),
         TextInputField(
@@ -186,6 +198,26 @@ class _MotherFormWidgetState extends State<MotherFormWidget> {
           showError: widget.showValidationErrors && widget.dateError != null,
         ),
         const SizedBox(height: 12),
+        BloodTypeSelector(
+          selectedBloodGroup: _selectedBloodGroup,
+          selectedRhFactor: _selectedRhFactor,
+          onBloodGroupChanged: (value) {
+            setState(() {
+              _selectedBloodGroup = value;
+            });
+            _updateMother();
+          },
+          onRhFactorChanged: (value) {
+            setState(() {
+              _selectedRhFactor = value;
+            });
+            _updateMother();
+          },
+          showValidationErrors: widget.showValidationErrors,
+          bloodGroupError: widget.bloodGroupError,
+          rhFactorError: widget.rhFactorError,
+        ),
+        const SizedBox(height: 12),
         TextInputField(
           hintText:'Количество беременностей',
           controller: _pregnanciesController,
@@ -193,6 +225,7 @@ class _MotherFormWidgetState extends State<MotherFormWidget> {
           onChanged: (_) {},
         ),
         const SizedBox(height: 12),
+
         TextInputField(
           hintText: 'Количество родов',
           controller: _deliveriesController,
@@ -238,6 +271,7 @@ class _MotherFormWidgetState extends State<MotherFormWidget> {
         const SizedBox(height: 16),
         AddressForm(
           onAddressChanged: (address) {
+            print('📝 Адрес изменен: ${address?.toJson()}');
             setState(() => _selectedAddress = address);
             widget.onAddressChanged(address);
             _updateMother();
