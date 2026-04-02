@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../../../../../models/medical_parameter_value.dart';
+import '../../../domain/entities/medical_parameter_value.dart';
 import 'parameter_row.dart';
 
 class ParametersList extends StatelessWidget {
