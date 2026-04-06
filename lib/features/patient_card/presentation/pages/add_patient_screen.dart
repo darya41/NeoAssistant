@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../../../core/storage/token_storage.dart';
-import '../../../../models/medical_parameter.dart';
+import '../../domain/entities/medical_parameter.dart';
 import '../../../../models/mother.dart';
 import '../../../../shared/widgets/buttons/save_button.dart';
 import '../../data/repositories/parameter_repository.dart';
@@ -115,10 +115,8 @@ class _AddPatientScreenState extends State<AddPatientScreen> {
 
     try {
       final doctorData = await TokenStorage.getDoctorData();
-      print('👨‍⚕️ Данные врача: $doctorData');
 
       final doctorId = doctorData?['doctor_id'] ?? doctorData?['id'];
-      print('👨‍⚕️ ID врача: $doctorId');
 
       if (doctorId == null) {
         throw Exception('Не удалось получить ID врача. Пожалуйста, войдите заново.');

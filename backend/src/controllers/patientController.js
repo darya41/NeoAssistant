@@ -94,9 +94,59 @@ const createPatient = async (req, res) => {
         });
     }
 };
+// controllers/patientController.js
+// controllers/patientController.js
+const searchPatients = async (req, res) => {
+    console.log('🔍 ========== ПОИСК ПАЦИЕНТОВ ==========');
+    console.log('📥 Параметр query:', req.query.query);
+
+    try {
+        const { query } = req.query;
+
+        if (!query || query.trim().length === 0) {
+            console.log('❌ Query пустой');
+            return res.status(400).json({
+                success: false,
+                error: 'Query parameter is required'
+            });
+        }
+
+        if (query.length < 2) {
+            console.log('⚠️ Query слишком короткий (< 2)');
+            return res.json({
+                success: true,
+                data: [],
+                meta: { query, count: 0 }
+            });
+        }
+
+        const patients = await PatientModel.search(query);
+
+        console.log(`✅ Найдено пациентов: ${patients.length}`);
+        console.log('🔍 ========== КОНЕЦ ПОИСКА ==========');
+
+        res.json({
+            success: true,
+            data: patients,
+            meta: {
+                query: query,
+                count: patients.length
+            }
+        });
+
+    } catch (error) {
+        console.error('❌ Ошибка поиска:', error);
+        res.status(500).json({
+            success: false,
+            error: 'Ошибка поиска пациентов'
+        });
+    }
+};
+
 
 module.exports = {
     getAllPatients,
     getPatientById,
-    createPatient
+    createPatient,
+    searchPatients
 };

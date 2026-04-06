@@ -34,10 +34,6 @@ class _PatientDetailsScreenState extends State<PatientDetailsScreen> {
             icon: const Icon(Icons.star),
             onPressed: _toggleFavorite,
           ),
-          IconButton(
-            icon: const Icon(Icons.edit),
-            onPressed: _editPatient,
-          ),
         ],
         elevation: 4,
       ),

@@ -50,4 +50,28 @@ class PatientService {
       throw Exception('Ошибка соединения: $e');
     }
   }
+
+  static Future<List<Patient>> searchPatients(String query) async {
+    try {
+      final token = await TokenStorage.getAccessToken();
+
+      final response = await http.get(
+        Uri.parse('$baseUrl/patients/search?query=$query'),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $token',
+        },
+      );
+
+      if (response.statusCode == 200) {
+        final Map<String, dynamic> result = json.decode(response.body);
+        final List<dynamic> data = result['data'] ?? [];
+        return data.map((json) => Patient.fromJson(json)).toList();
+      } else {
+        throw Exception('Ошибка поиска: ${response.statusCode}');
+      }
+    } catch (e) {
+      throw Exception('Ошибка соединения: $e');
+    }
+  }
 }

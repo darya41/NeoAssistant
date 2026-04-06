@@ -1,71 +1,44 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import '../../../../models/patient.dart';
 import '../../../patient_card/presentation/pages/patient_details_screen.dart';
-import '../../data/repository/patient_service.dart';
+import '../view_models/patient_search_viewmodel.dart';
 
-class PatientCards extends StatefulWidget {
+class PatientCards extends StatelessWidget {
   const PatientCards({super.key});
 
   @override
-  State<PatientCards> createState() => _PatientCardsState();
-}
-
-class _PatientCardsState extends State<PatientCards> {
-  List<Patient> _patients = [];
-  bool _isLoading = true;
-  String? _error;
-
-  @override
-  void initState() {
-    super.initState();
-    _loadPatients();
-  }
-
-  Future<void> _loadPatients() async {
-    setState(() {
-      _isLoading = true;
-      _error = null;
-    });
-
-    try {
-      final patients = await PatientService.getPatients();
-      setState(() {
-        _patients = patients;
-        _isLoading = false;
-      });
-    } catch (e) {
-      setState(() {
-        _error = e.toString();
-        _isLoading = false;
-      });
-    }
-  }
-
-  Future<void> _refreshPatients() async {
-    await _loadPatients();
-  }
-
-  @override
   Widget build(BuildContext context) {
-    if (_isLoading) {
+    final viewModel = context.watch<PatientSearchViewModel>();
+
+    return RefreshIndicator(
+      onRefresh: () async {
+        viewModel.refresh();
+      },
+      child: _buildContent(viewModel, context),
+    );
+  }
+
+  Widget _buildContent(PatientSearchViewModel viewModel, BuildContext context) {
+    if (viewModel.isLoading) {
       return const Center(
         child: CircularProgressIndicator(),
       );
     }
 
-    if (_error != null) {
+    if (viewModel.error != null && !viewModel.hasResults) {
       return Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Text(
-              _error!,
+              viewModel.error!,
               style: const TextStyle(color: Colors.red),
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 16),
             ElevatedButton(
-              onPressed: _refreshPatients,
+              onPressed: () => viewModel.refresh(),
               child: const Text('Повторить'),
             ),
           ],
@@ -73,26 +46,45 @@ class _PatientCardsState extends State<PatientCards> {
       );
     }
 
-    if (_patients.isEmpty) {
-      return const Center(
-        child: Text('Нет пациентов'),
+    if (viewModel.isSearching) {
+      return const Center(child: CircularProgressIndicator());
+    }
+
+    if (!viewModel.hasResults) {
+      return Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const Icon(Icons.medical_information, size: 64, color: Colors.grey),
+            const SizedBox(height: 16),
+            const Text(
+              'Пациенты не найдены',
+              style: TextStyle(fontSize: 16, color: Colors.grey),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              viewModel.searchQuery.isNotEmpty
+                  ? 'Попробуйте изменить поисковый запрос'
+                  : 'Добавьте первого пациента',
+              style: const TextStyle(fontSize: 14, color: Colors.grey),
+            ),
+          ],
+        ),
       );
     }
 
-    return RefreshIndicator(
-      onRefresh: _refreshPatients,
-      child: ListView.separated(
-        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
-        itemCount: _patients.length,
-        separatorBuilder: (context, index) => const SizedBox(height: 16),
-        itemBuilder: (context, index) {
-          final patient = _patients[index];
-          return _buildPatientCard(patient);
-        },
-      ),
+    return ListView.separated(
+      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+      itemCount: viewModel.patients.length,
+      separatorBuilder: (context, index) => const SizedBox(height: 16),
+      itemBuilder: (context, index) {
+        final patient = viewModel.patients[index];
+        return _buildPatientCard(context, patient);
+      },
     );
   }
-  void _navigateToPatientDetails(Patient patient) {
+
+  void _navigateToPatientDetails(BuildContext context, Patient patient) {
     Navigator.push(
       context,
       MaterialPageRoute(
@@ -103,9 +95,9 @@ class _PatientCardsState extends State<PatientCards> {
     );
   }
 
-  Widget _buildPatientCard(Patient patient) {
+  Widget _buildPatientCard(BuildContext context, Patient patient) {
     return InkWell(
-      onTap: () => _navigateToPatientDetails(patient),
+      onTap: () => _navigateToPatientDetails(context, patient),
       child: Padding(
         padding: const EdgeInsets.only(bottom: 8),
         child: Column(
@@ -197,21 +189,22 @@ class _PatientCardsState extends State<PatientCards> {
     );
   }
 
-  String _formatDate(String dateTime) {
+  String _formatDate(String? dateTime) {
+    if (dateTime == null) return 'Не указана';
     try {
       final date = DateTime.parse(dateTime);
-      return '${date.day.toString().padLeft(2, '0')}/${date.month.toString().padLeft(2, '0')}/${date.year} ${date.hour.toString().padLeft(2, '0')}:${date.minute.toString().padLeft(2, '0')}';
+      return '${date.day.toString().padLeft(2, '0')}/${date.month.toString().padLeft(2, '0')}/${date.year}';
     } catch (e) {
       return dateTime;
     }
   }
 
-  String _formatGender(String gender) {
+  String _formatGender(String? gender) {
     if (gender == 'MALE' || gender == 'M') {
       return 'Мужской';
     } else if (gender == 'FEMALE' || gender == 'F') {
       return 'Женский';
     }
-    return gender;
+    return gender ?? 'Не указан';
   }
 }

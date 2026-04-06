@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../../../models/mother.dart';
 import 'form_fields/blood_type_selector.dart';
-import 'form_fields/date_field_widget.dart';
+import 'form_fields/date_field.dart';
 import 'form_fields/gender_selector.dart';
 import 'form_fields/mother_search_field.dart';
 import 'form_fields/text_input_field.dart';
@@ -111,7 +111,7 @@ class PatientFormWidget extends StatelessWidget {
         ),
         const SizedBox(height: 12),
 
-        DateFieldWidget(
+        DateField(
           selectedDate: selectedDate,
           onTap: () => _selectDate(context),
           errorText: dateError,
