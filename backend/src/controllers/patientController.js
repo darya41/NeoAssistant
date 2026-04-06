@@ -50,7 +50,6 @@ const createPatient = async (req, res) => {
             height
         } = req.body;
 
-        // Проверка обязательных полей
         if (!date_of_birth || !gender) {
             return res.status(400).json({
                 success: false,
@@ -58,7 +57,6 @@ const createPatient = async (req, res) => {
             });
         }
 
-        // Проверка существования матери (если указана)
         if (mother_id) {
             const motherExists = await PatientModel.motherExists(mother_id);
             if (!motherExists) {
@@ -94,25 +92,14 @@ const createPatient = async (req, res) => {
         });
     }
 };
-// controllers/patientController.js
-// controllers/patientController.js
+
 const searchPatients = async (req, res) => {
-    console.log('🔍 ========== ПОИСК ПАЦИЕНТОВ ==========');
-    console.log('📥 Параметр query:', req.query.query);
 
     try {
-        const { query } = req.query;
+        const { query, gender, bloodGroup, rhFactor, dateFrom, dateTo } = req.query;
 
-        if (!query || query.trim().length === 0) {
-            console.log('❌ Query пустой');
-            return res.status(400).json({
-                success: false,
-                error: 'Query parameter is required'
-            });
-        }
-
-        if (query.length < 2) {
-            console.log('⚠️ Query слишком короткий (< 2)');
+        if ((!query || query.length < 2) &&
+            !gender && !bloodGroup && !rhFactor && !dateFrom && !dateTo) {
             return res.json({
                 success: true,
                 data: [],
@@ -120,22 +107,27 @@ const searchPatients = async (req, res) => {
             });
         }
 
-        const patients = await PatientModel.search(query);
+        const filters = {
+            gender: gender,
+            bloodGroup: bloodGroup,
+            rhFactor: rhFactor,
+            dateFrom: dateFrom,
+            dateTo: dateTo
+        };
 
-        console.log(`✅ Найдено пациентов: ${patients.length}`);
-        console.log('🔍 ========== КОНЕЦ ПОИСКА ==========');
+        const patients = await PatientModel.search(query, filters);
 
         res.json({
             success: true,
             data: patients,
             meta: {
                 query: query,
+                filters: filters,
                 count: patients.length
             }
         });
 
     } catch (error) {
-        console.error('❌ Ошибка поиска:', error);
         res.status(500).json({
             success: false,
             error: 'Ошибка поиска пациентов'

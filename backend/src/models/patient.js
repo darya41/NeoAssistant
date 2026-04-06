@@ -103,32 +103,9 @@ class PatientModel {
         return rows.length > 0;
     }
 
-    // models/patient.js
-    // models/patient.js
-    static async search(query) {
-        console.log('🔍 Модель: поиск:', query);
+    static async search(query, filters = {}) {
 
-        const searchTerm = `%${query}%`;
-
-        // ✅ Временно: проверяем, есть ли вообще такие пациенты
-        const [checkResult] = await db.query(`
-            SELECT COUNT(*) as total
-            FROM patients p
-            LEFT JOIN mothers m ON p.mother_id = m.mother_id
-            WHERE
-                p.number_history LIKE ?
-                OR CONCAT(m.last_name, ' ', m.first_name, ' ', COALESCE(m.patronymic, '')) LIKE ?
-        `, [searchTerm, searchTerm]);
-
-        console.log('🔍 Должно быть найдено:', checkResult[0].total);
-
-        // Если нет совпадений - возвращаем пустой массив
-        if (checkResult[0].total === 0) {
-            console.log('🔍 Нет совпадений, возвращаем []');
-            return [];
-        }
-
-        const [rows] = await db.query(`
+        let sql = `
             SELECT
                 p.patient_id,
                 p.mother_id,
@@ -142,20 +119,43 @@ class PatientModel {
                 CONCAT(m.last_name, ' ', m.first_name, ' ', COALESCE(m.patronymic, '')) as mother_name
             FROM patients p
             LEFT JOIN mothers m ON p.mother_id = m.mother_id
-            WHERE
+            WHERE 1=1
+        `;
+
+        const params = [];
+
+        if (query && query.length >= 2) {
+            sql += ` AND (
                 p.number_history LIKE ?
                 OR CONCAT(m.last_name, ' ', m.first_name, ' ', COALESCE(m.patronymic, '')) LIKE ?
-            ORDER BY
-                CASE
-                    WHEN p.number_history = ? THEN 1
-                    WHEN p.number_history LIKE ? THEN 2
-                    ELSE 3
-                END,
-                p.patient_id DESC
-            LIMIT 50
-        `, [searchTerm, searchTerm, query, `${query}%`]);
+            )`;
+            const searchTerm = `%${query}%`;
+            params.push(searchTerm, searchTerm);
+        }
 
-        console.log('🔍 Реально найдено:', rows.length);
+        if (filters.gender) {
+            sql += ` AND p.gender = ?`;
+            params.push(filters.gender === 'Мужской' ? 'MALE' : 'FEMALE');
+        }
+
+        if (filters.bloodGroup) {
+            sql += ` AND p.blood_group = ?`;
+            params.push(filters.bloodGroup);
+        }
+
+        if (filters.rhFactor) {
+            sql += ` AND p.rh_factor = ?`;
+            params.push(filters.rhFactor);
+        }
+
+        if (filters.dateFrom && filters.dateTo) {
+            sql += ` AND p.date_of_birth BETWEEN ? AND ?`;
+            params.push(filters.dateFrom, filters.dateTo);
+        }
+
+        sql += ` ORDER BY p.patient_id DESC LIMIT 100`;
+
+        const [rows] = await db.query(sql, params);
         return rows;
     }
 }

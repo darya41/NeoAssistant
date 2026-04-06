@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:neo_friend/features/patient_card/presentation/pages/add_patient_screen.dart';
+import '../../../../core/constants/app_colors.dart';
 import '../../../../core/utils/icon_widgets.dart';
 import '../view_models/patient_search_viewmodel.dart';
+import 'filter_dialog.dart';
 
 class SearchField extends StatelessWidget {
   final TextEditingController _controller = TextEditingController();
@@ -14,7 +16,7 @@ class SearchField extends StatelessWidget {
     final viewModel = context.watch<PatientSearchViewModel>();
 
     return Container(
-      color: const Color(0xFF44E4BF),
+      color: AppColors.primary,
       padding: const EdgeInsets.fromLTRB(24, 0, 24, 16),
       child: Row(
         children: [
@@ -60,10 +62,33 @@ class SearchField extends StatelessWidget {
                   ),
                   Padding(
                     padding: const EdgeInsets.only(right: 8.0),
-                    child: IconWidgets.filterIcon(
-                      onTap: () {
-                        // Обработка нажатия фильтра
-                      },
+                    child: Stack(
+                      children: [
+                        IconWidgets.filterIcon(
+                          onTap: () {
+                            final viewModel = context.read<PatientSearchViewModel>();
+                            showDialog(
+                              context: context,
+                              builder: (context) => FilterDialog(
+                                viewModel: viewModel,
+                              ),
+                            );
+                          },
+                        ),
+                        if (viewModel.hasActiveFilters)
+                          Positioned(
+                            right: 0,
+                            top: 0,
+                            child: Container(
+                              width: 10,
+                              height: 10,
+                              decoration: const BoxDecoration(
+                                color: AppColors.error,
+                                shape: BoxShape.circle,
+                              ),
+                            ),
+                          ),
+                      ],
                     ),
                   ),
                 ],
@@ -76,7 +101,7 @@ class SearchField extends StatelessWidget {
             width: 38,
             height: 40,
             decoration: BoxDecoration(
-              color: Colors.white,
+              color: AppColors.white,
               borderRadius: BorderRadius.circular(10),
             ),
             child: IconWidgets.addIcon(

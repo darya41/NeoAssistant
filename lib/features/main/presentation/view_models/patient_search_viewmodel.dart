@@ -11,11 +11,112 @@ class PatientSearchViewModel extends ChangeNotifier {
   String? _error;
   String _searchQuery = '';
 
-  List<Patient> get patients {
-    if (_searchQuery.isNotEmpty && _searchQuery.length >= 2) {
-      return _searchResults;
-    }
-    return _allPatients;
+  String? _selectedGender;
+  String? _selectedBloodGroup;
+  String? _selectedRhFactor;
+  DateTimeRange? _selectedDateRange;
+
+  List<Patient> get displayedPatients {
+    final isSearchMode = _searchQuery.isNotEmpty && _searchQuery.length >= 2;
+    List<Patient> sourcePatients = isSearchMode ? _searchResults : _allPatients;
+
+    return _applyFilters(sourcePatients);
+  }
+
+  List<Patient> _applyFilters(List<Patient> patients) {
+    return patients.where((patient) {
+      if (_selectedGender != null) {
+        String patientGender = '';
+        if (patient.gender == 'MALE') {
+          patientGender = 'Мужской';
+        } else if (patient.gender == 'FEMALE') {
+          patientGender = 'Женский';
+        } else {
+          patientGender = patient.gender;
+        }
+
+        if (patientGender != _selectedGender) {
+          return false;
+        }
+      }
+
+      if (_selectedBloodGroup != null &&
+          _selectedBloodGroup!.isNotEmpty &&
+          patient.bloodGroup != _selectedBloodGroup) {
+        return false;
+      }
+
+      if (_selectedRhFactor != null &&
+          _selectedRhFactor!.isNotEmpty &&
+          patient.rhFactor != _selectedRhFactor) {
+        return false;
+      }
+
+      if (_selectedDateRange != null) {
+        if (patient.dateOfBirth.isEmpty) {
+          return false;
+        }
+
+        final birthDate = DateTime.tryParse(patient.dateOfBirth);
+        if (birthDate == null) return false;
+
+        if (birthDate.isBefore(_selectedDateRange!.start) ||
+            birthDate.isAfter(_selectedDateRange!.end)) {
+          return false;
+        }
+      }
+
+      return true;
+    }).toList();
+  }
+
+  String? get selectedGender => _selectedGender;
+  String? get selectedBloodGroup => _selectedBloodGroup;
+  String? get selectedRhFactor => _selectedRhFactor;
+  DateTimeRange? get selectedDateRange => _selectedDateRange;
+
+  bool get hasActiveFilters {
+    return _selectedGender != null ||
+        _selectedBloodGroup != null ||
+        _selectedRhFactor != null ||
+        _selectedDateRange != null;
+  }
+
+  int get activeFiltersCount {
+    int count = 0;
+    if (_selectedGender != null) count++;
+    if (_selectedBloodGroup != null) count++;
+    if (_selectedRhFactor != null) count++;
+    if (_selectedDateRange != null) count++;
+    return count;
+  }
+
+  void setGenderFilter(String? gender) {
+    _selectedGender = gender;
+    notifyListeners();
+  }
+
+  void setBloodGroupFilter(String? bloodGroup) {
+    _selectedBloodGroup = bloodGroup;
+    notifyListeners();
+  }
+
+  void setRhFactorFilter(String? rhFactor) {
+    _selectedRhFactor = rhFactor;
+    notifyListeners();
+  }
+
+  void setDateRangeFilter(DateTimeRange? range) {
+    _selectedDateRange = range;
+    notifyListeners();
+  }
+
+  void clearFilters() {
+    _selectedGender = null;
+    _selectedBloodGroup = null;
+    _selectedRhFactor = null;
+    _selectedDateRange = null;
+    notifyListeners();
   }
 
   bool get isLoading => _isLoading;
@@ -24,10 +125,11 @@ class PatientSearchViewModel extends ChangeNotifier {
   String get searchQuery => _searchQuery;
 
   bool get hasResults {
-    if (_searchQuery.isNotEmpty && _searchQuery.length >= 2) {
-      return _searchResults.isNotEmpty;
+    final isSearchMode = _searchQuery.isNotEmpty && _searchQuery.length >= 2;
+    if (isSearchMode) {
+      return _applyFilters(_searchResults).isNotEmpty;
     }
-    return _allPatients.isNotEmpty;
+    return _applyFilters(_allPatients).isNotEmpty;
   }
 
   PatientSearchViewModel() {
@@ -64,7 +166,7 @@ class PatientSearchViewModel extends ChangeNotifier {
 
     try {
       _searchResults = await PatientService.searchPatients(query);
-     } catch (e) {
+    } catch (e) {
       _error = e.toString();
       _searchResults = [];
     } finally {
