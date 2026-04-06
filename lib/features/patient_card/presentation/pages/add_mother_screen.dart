@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../../core/constants/app_colors.dart';
 import '../../../../models/address.dart';
 import '../../../../models/mother.dart';
 import '../../../../shared/widgets/buttons/save_button.dart';
@@ -67,7 +68,7 @@ class _AddMotherPageState extends State<AddMotherScreen> {
               ScaffoldMessenger.of(context).showSnackBar(
                 const SnackBar(
                   content: Text('Пожалуйста, заполните все поля адреса (город, улица, дом) или оставьте адрес пустым'),
-                  backgroundColor: Colors.orange,
+                  backgroundColor: AppColors.error,
                   duration: Duration(seconds: 3),
                 ),
               );
@@ -88,7 +89,7 @@ class _AddMotherPageState extends State<AddMotherScreen> {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
             content: Text('Мать успешно добавлена!'),
-            backgroundColor: Color(0xFF44E4BF),
+            backgroundColor: AppColors.primary,
           ),
         );
         Navigator.pop(context, createdMother);
@@ -98,7 +99,7 @@ class _AddMotherPageState extends State<AddMotherScreen> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('Ошибка: $e'),
-            backgroundColor: Colors.red,
+            backgroundColor: AppColors.error,
           ),
         );
       }
@@ -116,7 +117,7 @@ class _AddMotherPageState extends State<AddMotherScreen> {
           icon: const Icon(Icons.arrow_back),
           onPressed: () => Navigator.pop(context),
         ),
-        backgroundColor: Colors.white,
+        backgroundColor: AppColors.white,
         elevation: 0,
       ),
       body: Padding(
@@ -160,9 +161,9 @@ class _AddMotherPageState extends State<AddMotherScreen> {
             else
               SaveButton(
                 onPressed: _handleSave,
-                backgroundColor: _isFormValid ? const Color(0xFF44E4BF) : const Color(0xFFF3F3F3),
-                borderColor: _isFormValid ? const Color(0xFF44E4BF) : const Color(0xFFC6C6C6),
-                textColor: _isFormValid ? Colors.white : Colors.black,
+                backgroundColor: _isFormValid ? AppColors.primary : AppColors.background,
+                borderColor: _isFormValid ? AppColors.primary : AppColors.border,
+                textColor: _isFormValid ? AppColors.white : AppColors.black,
                 isEnabled: _isFormValid,
               ),
           ],

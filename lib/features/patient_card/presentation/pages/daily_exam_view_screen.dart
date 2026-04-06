@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:neo_friend/features/patient_card/presentation/pages/diary_screen.dart';
 import '../../../../core/constants/app_colors.dart';
+import '../../../../core/constants/app_strings.dart';
 import '../../data/repositories/parameter_repository.dart';
 import '../../domain/models/daily_exam_state.dart';
 
@@ -91,18 +92,15 @@ class _DailyExamViewScreenState extends State<DailyExamViewScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        // Переопределяем поведение стрелки "Назад"
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
           onPressed: () {
-            // Ваша кастомная логика
             _showExitConfirmationDialog();
           },
           tooltip: 'Назад',
         ),
         title: Text(_examTitle),
         backgroundColor: AppColors.primary,
-        // Отключаем стандартную стрелку, чтобы не было дублирования
         automaticallyImplyLeading: false,
       ),
       body: _buildBody(),
@@ -139,7 +137,7 @@ class _DailyExamViewScreenState extends State<DailyExamViewScreen> {
             const SizedBox(height: 16),
             ElevatedButton(
               onPressed: _loadParameters,
-              child: const Text('Повторить'),
+              child: const Text(AppStrings.retry),
             ),
           ],
         ),
@@ -154,14 +152,14 @@ class _DailyExamViewScreenState extends State<DailyExamViewScreen> {
             Icon(
               Icons.medical_information,
               size: 64,
-              color: Colors.grey,
+              color: AppColors.grey,
             ),
             SizedBox(height: 16),
             Text(
               'Нет данных для отображения',
               style: TextStyle(
                 fontSize: 16,
-                color: Colors.grey,
+                color: AppColors.grey,
               ),
             ),
           ],
@@ -180,7 +178,7 @@ class _DailyExamViewScreenState extends State<DailyExamViewScreen> {
               _examDateTime.isNotEmpty ? _examDateTime : 'Дата не указана',
               style: const TextStyle(
                 fontSize: 14,
-                color: Colors.grey,
+                color: AppColors.grey,
                 fontWeight: FontWeight.w500,
               ),
             ),

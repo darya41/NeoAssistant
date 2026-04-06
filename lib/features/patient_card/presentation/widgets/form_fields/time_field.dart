@@ -1,12 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:neo_friend/core/constants/app_colors.dart';
 
 class TimeField extends StatelessWidget {
   final String timeDisplay;
   final VoidCallback onTap;
   final String? hintText;
-
-  static const _defaultBackgroundColor = Color(0xFFF3F3F3);
-  static const _borderColor = Color(0xFFC6C6C6);
 
   const TimeField({
     super.key,
@@ -26,8 +24,8 @@ class TimeField extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
         decoration: BoxDecoration(
-          color: _defaultBackgroundColor,
-          border: Border.all(color: _borderColor),
+          color: AppColors.background,
+          border: Border.all(color: AppColors.border),
           borderRadius: BorderRadius.circular(8),
         ),
         child: Row(
@@ -37,7 +35,7 @@ class TimeField extends StatelessWidget {
             Text(
               displayText,
               style: TextStyle(
-                color: timeDisplay.isEmpty ? Colors.grey : Colors.black,
+                color: timeDisplay.isEmpty ? AppColors.grey : AppColors.black,
               ),
             ),
           ],

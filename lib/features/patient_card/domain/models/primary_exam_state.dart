@@ -1,4 +1,4 @@
-import '../../../../models/medical_parameter_value.dart';
+import '../entities/medical_parameter_value.dart';
 
 class PrimaryExamState {
   List<MedicalParameterValue> _parameters = [];

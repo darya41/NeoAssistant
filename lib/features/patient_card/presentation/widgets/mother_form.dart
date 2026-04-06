@@ -3,7 +3,7 @@ import '../../../../models/address.dart';
 import '../../../../models/mother.dart';
 import 'address_form.dart';
 import 'form_fields/blood_type_selector.dart';
-import 'form_fields/date_field_widget.dart';
+import 'form_fields/date_field.dart';
 import 'form_fields/checkbox_group_widget.dart';
 import 'form_fields/streptococcus_selector.dart';
 import 'form_fields/text_input_field.dart';
@@ -191,7 +191,7 @@ class _MotherFormWidgetState extends State<MotherFormWidget> {
           onChanged: (_) {},
         ),
         const SizedBox(height: 12),
-        DateFieldWidget(
+        DateField(
           selectedDate: _selectedDate,
           onTap: _selectDate,
           errorText: widget.showValidationErrors ? widget.dateError : null,

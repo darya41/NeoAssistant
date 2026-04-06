@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../../core/constants/app_colors.dart';
 import '../../../../models/patient.dart';
 import '../../../../shared/widgets/buttons/action_button.dart';
 import '../../data/repositories/mother_repository.dart';
@@ -138,24 +139,24 @@ class _PatientDetailsWidgetState extends State<PatientDetailsWidget> {
         ActionButton(
           onPressed: widget.onDiaryTap,
           text: 'Дневник наблюдений',
-          backgroundColor: const Color(0xFF44E4BF),
-          borderColor: const Color(0xFF44E4BF),
+          backgroundColor: AppColors.primary,
+          borderColor: AppColors.primary,
         ),
         const SizedBox(height: 8),
 
         ActionButton(
           onPressed: widget.onPrimaryExamTap,
           text: 'Первичный осмотр',
-          backgroundColor: Colors.white,
-          borderColor: Colors.grey,
+          backgroundColor: AppColors.white,
+          borderColor: AppColors.grey,
         ),
         const SizedBox(height: 8),
 
         ActionButton(
           onPressed: widget.onGenerateEpicrisisTap,
           text: 'Сгенерировать эпикриз',
-          backgroundColor: Colors.white,
-          borderColor: Colors.grey,
+          backgroundColor: AppColors.white,
+          borderColor: AppColors.grey,
         ),
       ],
     );
@@ -190,12 +191,12 @@ class _PatientDetailsWidgetState extends State<PatientDetailsWidget> {
                     Icon(
                       Icons.show_chart,
                       size: 48,
-                      color: Colors.grey,
+                      color: AppColors.grey,
                     ),
                     SizedBox(height: 8),
                     Text(
                       'График веса будет отображаться здесь',
-                      style: TextStyle(color: Colors.grey),
+                      style: TextStyle(color: AppColors.grey),
                     ),
                   ],
                 ),

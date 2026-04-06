@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../../../core/constants/app_colors.dart';
+import '../../../../core/constants/app_strings.dart';
 import '../../../../models/diary_entry.dart';
 import '../../data/repositories/patient_exam_repository.dart';
 import '../../../../core/utils/date_formatter.dart';
@@ -158,7 +159,7 @@ class _DiaryScreenState extends State<DiaryScreen> {
             const SizedBox(height: 16),
             ElevatedButton(
               onPressed: _loadDailyExams,
-              child: const Text('Повторить'),
+              child: const Text(AppStrings.retry),
             ),
           ],
         ),
@@ -173,14 +174,14 @@ class _DiaryScreenState extends State<DiaryScreen> {
             const Icon(
               Icons.medical_information,
               size: 64,
-              color: Colors.grey,
+              color: AppColors.grey,
             ),
             const SizedBox(height: 16),
             const Text(
               'Нет записей',
               style: TextStyle(
                 fontSize: 16,
-                color: Colors.grey,
+                color: AppColors.grey,
               ),
             ),
             const SizedBox(height: 16),

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../../../core/constants/app_colors.dart';
 import '../../../domain/entities/medical_parameter_value.dart';
 
 class ParameterRow extends StatelessWidget {
@@ -35,7 +36,7 @@ class ParameterRow extends StatelessWidget {
               text: displayValue,
               style: TextStyle(
                 fontWeight: FontWeight.normal,
-                color: hasValue ? Colors.black87 : Colors.grey,
+                color: hasValue ? Colors.black87 : AppColors.grey,
               ),
             ),
           ],

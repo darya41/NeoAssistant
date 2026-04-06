@@ -51,7 +51,7 @@ class _FilterDialogState extends State<FilterDialog> {
             FilterSection(
               title: 'Пол',
               child: _buildFilterChips(
-                items: FilterConstants.genders,
+                items: Filter.genders,
                 selectedValue: _tempGender,
                 onSelected: (value) {
                   setState(() {
@@ -65,7 +65,7 @@ class _FilterDialogState extends State<FilterDialog> {
             FilterSection(
               title: 'Группа крови',
               child: _buildFilterChips(
-                items: FilterConstants.bloodGroups,
+                items: Filter.bloodGroups,
                 selectedValue: _tempBloodGroup,
                 onSelected: (value) {
                   setState(() {
@@ -79,7 +79,7 @@ class _FilterDialogState extends State<FilterDialog> {
             FilterSection(
               title: 'Резус-фактор',
               child: _buildFilterChips(
-                items: FilterConstants.rhFactors,
+                items: Filter.rhFactors,
                 selectedValue: _tempRhFactor,
                 onSelected: (value) {
                   setState(() {

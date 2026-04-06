@@ -1,12 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:neo_friend/core/constants/app_colors.dart';
 
 class StreptococcusSelector extends StatelessWidget {
   final String? selectedValue;
   final Function(String) onSelected;
-
-  static const _defaultBackgroundColor = Color(0xFFF3F3F3);
-  static const _borderColor = Color(0xFFC6C6C6);
-  static const _activeColor = Color(0xFF44E4BF);
 
   final List<String> _options = ['положительный', 'отрицательный', 'неизвестный'];
 
@@ -38,14 +35,14 @@ class StreptococcusSelector extends StatelessWidget {
                 child: Container(
                   padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                   decoration: BoxDecoration(
-                    color: isSelected ? _activeColor : _defaultBackgroundColor,
-                    border: Border.all(color: _borderColor),
+                    color: isSelected ? AppColors.primary : AppColors.background,
+                    border: Border.all(color: AppColors.border),
                     borderRadius: BorderRadius.circular(20),
                   ),
                   child: Text(
                     option,
                     style: TextStyle(
-                      color: isSelected ? Colors.white : Colors.black,
+                      color: isSelected ? AppColors.white : AppColors.black,
                     ),
                   ),
                 ),

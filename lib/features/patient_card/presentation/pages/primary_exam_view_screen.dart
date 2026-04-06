@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../../core/constants/app_colors.dart';
 import '../../data/repositories/parameter_repository.dart';
 import '../../domain/models/primary_exam_state.dart';
 import '../widgets/form_fields/consent_section.dart';
@@ -50,7 +51,7 @@ class _PrimaryExamViewScreenState extends State<PrimaryExamViewScreen> {
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(
               content: Text('Первичный осмотр не найден'),
-              backgroundColor: Colors.orange,
+              backgroundColor: AppColors.error,
             ),
           );
         }
@@ -73,7 +74,7 @@ class _PrimaryExamViewScreenState extends State<PrimaryExamViewScreen> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Первичный осмотр новорождённого'),
-        backgroundColor: const Color(0xFF44E4BF),
+        backgroundColor: AppColors.primary,
       ),
       body: _buildBody(),
     );

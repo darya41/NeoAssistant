@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 
+import '../../../../../core/constants/app_colors.dart';
+
 class GenderSelector extends StatelessWidget {
   final String selectedGender;
   final Function(String) onGenderSelected;
-
-  static const _activeColor = Color(0xFF44E4BF);
 
   const GenderSelector({
     super.key,
@@ -39,7 +39,7 @@ class GenderSelector extends StatelessWidget {
         Radio<String>(
           value: value,
           groupValue: selectedGender,
-          activeColor: _activeColor,
+          activeColor: AppColors.primary,
           onChanged: (selected) {
             if (selected != null) {
               onGenderSelected(selected);

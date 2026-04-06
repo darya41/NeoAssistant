@@ -57,10 +57,6 @@ class _PatientDetailsScreenState extends State<PatientDetailsScreen> {
     //  Добавить в избранное
   }
 
-  void _editPatient() {
-    // Редактирование пациента
-  }
-
   void _toggleDiary() {
     Navigator.push(
       context,

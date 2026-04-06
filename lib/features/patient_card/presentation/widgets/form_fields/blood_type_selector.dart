@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 
+import '../../../../../core/constants/app_colors.dart';
+import '../../../../../core/constants/filter.dart';
+
 class BloodTypeSelector extends StatelessWidget {
   final String? selectedBloodGroup;
   final String? selectedRhFactor;
@@ -19,12 +22,6 @@ class BloodTypeSelector extends StatelessWidget {
     this.bloodGroupError,
     this.rhFactorError,
   });
-
-  static const List<String> _bloodGroups = ['A', 'B', 'AB', 'O'];
-  static const List<String> _rhFactors = ['+', '-'];
-
-  static const _defaultBackgroundColor = Color(0xFFF3F3F3);
-  static const _borderColor = Color(0xFFC6C6C6);
 
   String _getBloodGroupDescription(String group) {
     switch (group) {
@@ -71,11 +68,11 @@ class BloodTypeSelector extends StatelessWidget {
                   Container(
                     padding: const EdgeInsets.symmetric(horizontal: 16),
                     decoration: BoxDecoration(
-                      color: _defaultBackgroundColor,
+                      color: AppColors.background,
                       border: Border.all(
                         color: (showValidationErrors && bloodGroupError != null)
-                            ? Colors.red
-                            : _borderColor,
+                            ? AppColors.error
+                            : AppColors.border,
                       ),
                       borderRadius: BorderRadius.circular(8),
                     ),
@@ -84,7 +81,7 @@ class BloodTypeSelector extends StatelessWidget {
                       hint: const Text('Выберите группу'),
                       isExpanded: true,
                       underline: Container(),
-                      items: _bloodGroups.map((group) {
+                      items: Filter.bloodGroups.map((group) {
                         return DropdownMenuItem<String>(
                           value: group,
                           child: Text('$group (${_getBloodGroupDescription(group)})'),
@@ -100,7 +97,7 @@ class BloodTypeSelector extends StatelessWidget {
                         bloodGroupError!,
                         style: const TextStyle(
                           fontSize: 12,
-                          color: Colors.red,
+                          color: AppColors.error,
                         ),
                       ),
                     ),
@@ -124,11 +121,11 @@ class BloodTypeSelector extends StatelessWidget {
                   Container(
                     padding: const EdgeInsets.symmetric(horizontal: 16),
                     decoration: BoxDecoration(
-                      color: _defaultBackgroundColor,
+                      color: AppColors.background,
                       border: Border.all(
                         color: (showValidationErrors && rhFactorError != null)
-                            ? Colors.red
-                            : _borderColor,
+                            ? AppColors.error
+                            : AppColors.border,
                       ),
                       borderRadius: BorderRadius.circular(8),
                     ),
@@ -137,7 +134,7 @@ class BloodTypeSelector extends StatelessWidget {
                       hint: const Text('Rh'),
                       isExpanded: true,
                       underline: Container(),
-                      items: _rhFactors.map((rh) {
+                      items: Filter.rhFactors.map((rh) {
                         return DropdownMenuItem<String>(
                           value: rh,
                           child: Text('Rh$rh'),
@@ -153,7 +150,7 @@ class BloodTypeSelector extends StatelessWidget {
                         rhFactorError!,
                         style: const TextStyle(
                           fontSize: 12,
-                          color: Colors.red,
+                          color: AppColors.error,
                         ),
                       ),
                     ),

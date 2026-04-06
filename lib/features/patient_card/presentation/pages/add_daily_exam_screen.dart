@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:neo_friend/core/constants/app_strings.dart';
 import 'package:neo_friend/features/patient_card/presentation/pages/daily_exam_view_screen.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/storage/token_storage.dart';
@@ -195,7 +196,7 @@ class _AddDailyExamScreenState extends State<AddDailyExamScreen> {
                             const SizedBox(height: 8),
                             ElevatedButton(
                               onPressed: _loadParameters,
-                              child: const Text('Повторить'),
+                              child: const Text(AppStrings.retry),
                             ),
                           ],
                         ),

@@ -68,7 +68,7 @@ class ParameterField extends StatelessWidget {
               child: Text(
                 option,
                 style: TextStyle(
-                  color: isSelected ? Colors.white : Colors.black,
+                  color: isSelected ? AppColors.white : AppColors.black,
                   fontSize: 14,
                 ),
               ),

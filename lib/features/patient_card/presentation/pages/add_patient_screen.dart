@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import '../../../../core/constants/app_colors.dart';
+import '../../../../core/constants/app_strings.dart';
 import '../../../../core/storage/token_storage.dart';
 import '../../domain/entities/medical_parameter.dart';
 import '../../../../models/mother.dart';
@@ -37,10 +39,6 @@ class _AddPatientScreenState extends State<AddPatientScreen> {
   final Map<int, dynamic> _parameterValues = {};
 
   bool _triedToSubmit = false;
-
-  static const _defaultBackgroundColor = Color(0xFFF3F3F3);
-  static const _borderColor = Color(0xFFC6C6C6);
-  static const _activeColor = Color(0xFF44E4BF);
 
   @override
   void initState() {
@@ -133,12 +131,8 @@ class _AddPatientScreenState extends State<AddPatientScreen> {
         'height': double.parse(_childHeightController.text.trim()),
       };
 
-      print('📤 Отправка пациента: $patientData');
-
       final patientId = await PatientExamRepository.createPatient(patientData);
-      print('✅ Пациент создан с ID: $patientId');
 
-      print("aaaa");
       final examData = {
         'patient_id': patientId,
         'exam_id': examId,
@@ -149,7 +143,6 @@ class _AddPatientScreenState extends State<AddPatientScreen> {
       final patientsExamsId =
       await PatientExamRepository.createPatientExam(examData);
 
-      print("save");
       await PatientExamRepository.saveExamParameters(
         patientsExamsId,
         _parameterValues,
@@ -159,7 +152,7 @@ class _AddPatientScreenState extends State<AddPatientScreen> {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
             content: Text('Пациент и осмотр успешно добавлены!'),
-            backgroundColor: Color(0xFF44E4BF),
+            backgroundColor: AppColors.primary,
           ),
         );
         Navigator.pop(context, true);
@@ -169,7 +162,7 @@ class _AddPatientScreenState extends State<AddPatientScreen> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('Ошибка: ${e.toString().replaceFirst('Exception: ', '')}'),
-            backgroundColor: Colors.red,
+            backgroundColor: AppColors.error,
           ),
         );
       }
@@ -198,7 +191,7 @@ class _AddPatientScreenState extends State<AddPatientScreen> {
           icon: const Icon(Icons.arrow_back),
           onPressed: () => Navigator.pop(context),
         ),
-        backgroundColor: Colors.white,
+        backgroundColor: AppColors.white,
         elevation: 0,
       ),
       body: Padding(
@@ -247,28 +240,28 @@ class _AddPatientScreenState extends State<AddPatientScreen> {
                           ? 'Выберите или добавьте мать'
                           : null,
                       historyNumberError: _triedToSubmit && _historyNumberController.text.trim().isEmpty
-                          ? 'Обязательное поле'
+                          ? AppStrings.requiredField
                           : null,
                       heightError: _triedToSubmit && _childHeightController.text.trim().isEmpty
-                          ? 'Обязательное поле'
+                          ? AppStrings.requiredField
                           : null,
                       weightError: _triedToSubmit && _childWeightController.text.trim().isEmpty
-                          ? 'Обязательное поле'
+                          ? AppStrings.requiredField
                           : null,
                       dateError: _triedToSubmit && _selectedDate == null
-                          ? 'Обязательное поле'
+                          ? AppStrings.requiredField
                           : null,
                       timeError: _triedToSubmit && _selectedTime == null
-                          ? 'Обязательное поле'
+                          ? AppStrings.requiredField
                           : null,
                       genderError: _triedToSubmit && _selectedGender.isEmpty
-                          ? 'Обязательное поле'
+                          ? AppStrings.requiredField
                           : null,
                       bloodGroupError: _triedToSubmit && _selectedBloodGroup == null
-                          ? 'Обязательное поле'
+                          ? AppStrings.requiredField
                           : null,
                       rhFactorError: _triedToSubmit && _selectedRhFactor == null
-                          ? 'Обязательное поле'
+                          ? AppStrings.requiredField
                           : null,
                     ),
                     const SizedBox(height: 16),
@@ -281,13 +274,13 @@ class _AddPatientScreenState extends State<AddPatientScreen> {
                           children: [
                             Text(
                               'Ошибка загрузки параметров: $_parametersError',
-                              style: const TextStyle(color: Colors.red),
+                              style: const TextStyle(color: AppColors.error),
                               textAlign: TextAlign.center,
                             ),
                             const SizedBox(height: 8),
                             ElevatedButton(
                               onPressed: _loadParameters,
-                              child: const Text('Повторить'),
+                              child: const Text(AppStrings.retry),
                             ),
                           ],
                         ),
@@ -308,8 +301,8 @@ class _AddPatientScreenState extends State<AddPatientScreen> {
             else
               SaveButton(
                 onPressed: _handleSave,
-                backgroundColor: _isFormValid ? _activeColor : _defaultBackgroundColor,
-                borderColor: _isFormValid ? _activeColor : _borderColor,
+                backgroundColor: _isFormValid ? AppColors.primary : AppColors.background,
+                borderColor: _isFormValid ? AppColors.primary : AppColors.border,
                 textColor: _isFormValid ? Colors.white : Colors.black,
                 isEnabled: _isFormValid,
               ),
@@ -365,9 +358,9 @@ class _AddPatientScreenState extends State<AddPatientScreen> {
                 vertical: 10,
               ),
               decoration: BoxDecoration(
-                color: isSelected ? _activeColor : _defaultBackgroundColor,
+                color: isSelected ? AppColors.primary : AppColors.background,
                 border: Border.all(
-                  color: isSelected ? _activeColor : _borderColor,
+                  color: isSelected ? AppColors.primary : AppColors.border,
                   width: 1,
                 ),
                 borderRadius: BorderRadius.circular(20),
@@ -375,7 +368,7 @@ class _AddPatientScreenState extends State<AddPatientScreen> {
               child: Text(
                 option,
                 style: TextStyle(
-                  color: isSelected ? Colors.white : Colors.black,
+                  color: isSelected ? AppColors.white : AppColors.black,
                   fontSize: 14,
                 ),
               ),
@@ -388,8 +381,8 @@ class _AddPatientScreenState extends State<AddPatientScreen> {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16),
       decoration: BoxDecoration(
-        color: _defaultBackgroundColor,
-        border: Border.all(color: _borderColor),
+        color: AppColors.background,
+        border: Border.all(color: AppColors.border),
         borderRadius: BorderRadius.circular(8),
       ),
       child: DropdownButton<String>(
@@ -416,8 +409,8 @@ class _AddPatientScreenState extends State<AddPatientScreen> {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
       decoration: BoxDecoration(
-        color: _defaultBackgroundColor,
-        border: Border.all(color: _borderColor),
+        color: AppColors.background,
+        border: Border.all(color: AppColors.border),
         borderRadius: BorderRadius.circular(8),
       ),
       child: TextField(

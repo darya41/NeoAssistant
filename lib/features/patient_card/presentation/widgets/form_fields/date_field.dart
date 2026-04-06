@@ -43,7 +43,7 @@ class DateField extends StatelessWidget {
                     ? hintText
                     : '${selectedDate!.day}.${selectedDate!.month}.${selectedDate!.year}',
                 style: TextStyle(
-                  color: selectedDate == null ? Colors.grey : Colors.black,
+                  color: selectedDate == null ? AppColors.grey : AppColors.black,
                 ),
               ),
             ),

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../../../core/constants/app_colors.dart';
 import '../../../../../models/mother.dart';
 import '../../../data/repositories/mother_repository.dart';
 import '../../pages/add_mother_screen.dart';
@@ -8,9 +9,9 @@ class MotherSearchField extends StatefulWidget {
   final Function(Mother) onMotherSelected;
   final String? errorText;
 
-  static const _defaultBackgroundColor = Color(0xFFF3F3F3);
-  static const _borderColor = Color(0xFFC6C6C6);
-  static const _activeColor = Color(0xFF44E4BF);
+  static const _defaultBackgroundColor = AppColors.background;
+  static const _borderColor = AppColors.border;
+  static const _activeColor = AppColors.primary;
 
   const MotherSearchField({
     super.key,
@@ -174,7 +175,7 @@ class _MotherSearchFieldState extends State<MotherSearchField> {
             child: Text(
               widget.errorText!,
               style: const TextStyle(
-                color: Colors.red,
+                color: AppColors.error,
                 fontSize: 12,
               ),
             ),
@@ -196,12 +197,12 @@ class _MotherSearchFieldState extends State<MotherSearchField> {
           Container(
             margin: const EdgeInsets.only(top: 4),
             decoration: BoxDecoration(
-              color: Colors.white,
+              color: AppColors.white,
               border: Border.all(color: MotherSearchField._borderColor),
               borderRadius: BorderRadius.circular(8),
               boxShadow: [
                 BoxShadow(
-                  color: Colors.black,
+                  color: AppColors.black,
                   blurRadius: 4,
                   offset: const Offset(0, 2),
                 ),

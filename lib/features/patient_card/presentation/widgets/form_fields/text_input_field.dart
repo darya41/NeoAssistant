@@ -1,4 +1,5 @@
  import 'package:flutter/material.dart';
+import 'package:neo_friend/core/constants/app_colors.dart';
 
 class TextInputField extends StatelessWidget {
   final TextEditingController controller;
@@ -13,10 +14,6 @@ class TextInputField extends StatelessWidget {
   final bool showError;
   final bool readOnly;
   final VoidCallback? onTap;
-
-  static const _defaultBackgroundColor = Color(0xFFF3F3F3);
-  static const _borderColor = Color(0xFFC6C6C6);
-  static const _errorBorderColor = Colors.red;
 
   const TextInputField({
     super.key,
@@ -37,15 +34,15 @@ class TextInputField extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final borderColor = showError && errorText != null
-        ? _errorBorderColor
-        : _borderColor;
+        ? AppColors.error
+        : AppColors.border;
 
     return GestureDetector(
       onTap: onTap,
       child: Container(
         padding: EdgeInsets.symmetric(horizontal: 16, vertical: maxLines > 1 ? 12 : 4),
         decoration: BoxDecoration(
-          color: _defaultBackgroundColor,
+          color: AppColors.background,
           border: Border.all(color: borderColor),
           borderRadius: BorderRadius.circular(8),
         ),

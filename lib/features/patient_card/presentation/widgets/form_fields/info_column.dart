@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../../../../../core/constants/app_colors.dart';
+
 class InfoColumnWidget extends StatelessWidget {
   final String label;
   final String value;
@@ -23,7 +25,7 @@ class InfoColumnWidget extends StatelessWidget {
               label,
               style: const TextStyle(
                 fontSize: 12,
-                color: Colors.grey,
+                color: AppColors.grey,
                 fontWeight: FontWeight.w500,
               ),
             ),

@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../../../../../core/constants/app_colors.dart';
+
 class DropdownFieldWidget<T> extends StatelessWidget {
   final T? value;
   final String hint;
@@ -7,9 +9,6 @@ class DropdownFieldWidget<T> extends StatelessWidget {
   final String Function(T) itemLabel;
   final Function(T?) onChanged;
   final double width;
-
-  static const _defaultBackgroundColor = Color(0xFFF3F3F3);
-  static const _borderColor = Color(0xFFC6C6C6);
 
   const DropdownFieldWidget({
     super.key,
@@ -27,8 +26,8 @@ class DropdownFieldWidget<T> extends StatelessWidget {
       width: width,
       padding: const EdgeInsets.symmetric(horizontal: 8),
       decoration: BoxDecoration(
-        color: _defaultBackgroundColor,
-        border: Border.all(color: _borderColor),
+        color: AppColors.background,
+        border: Border.all(color: AppColors.border),
         borderRadius: BorderRadius.circular(8),
       ),
       child: DropdownButton<T>(

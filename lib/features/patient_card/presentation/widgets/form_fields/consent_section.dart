@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../../../../../core/constants/app_colors.dart';
+
 class ConsentSectionWidget extends StatelessWidget {
   const ConsentSectionWidget({super.key});
 
@@ -33,13 +35,13 @@ class ConsentSectionWidget extends StatelessWidget {
             ),
             child: const Row(
               children: [
-                Icon(Icons.check_circle, color: Colors.green, size: 20),
+                Icon(Icons.check_circle, color: AppColors.green, size: 20),
                 SizedBox(width: 8),
                 Text(
                   'УСТНОЕ СОГЛАСИЕ ПОЛУЧЕНО',
                   style: TextStyle(
                     fontWeight: FontWeight.bold,
-                    color: Colors.green,
+                    color: AppColors.green,
                     fontSize: 14,
                   ),
                 ),

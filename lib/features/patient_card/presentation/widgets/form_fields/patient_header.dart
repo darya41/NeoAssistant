@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../../../../../core/constants/app_colors.dart';
+
 class PatientHeader extends StatelessWidget {
   final String numberHistory;
   final String motherName;
@@ -20,7 +22,7 @@ class PatientHeader extends StatelessWidget {
           numberHistory,
           style: const TextStyle(
             fontSize: 18,
-            color: Colors.grey,
+            color: AppColors.grey,
           ),
         ),
         const SizedBox(height: 5),

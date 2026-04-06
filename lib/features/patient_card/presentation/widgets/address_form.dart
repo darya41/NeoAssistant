@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:neo_friend/core/constants/app_strings.dart';
 import '../../../../models/address.dart';
 import 'form_fields/dropdown_with_text_field.dart';
 import 'form_fields/text_input_field.dart';
@@ -116,7 +117,7 @@ class _AddressFormState extends State<AddressForm> {
             _updateAddress();
           },
           showError: _cityIsEmpty,
-          errorText: _cityIsEmpty ? 'Обязательное поле' : null,
+          errorText: _cityIsEmpty ? AppStrings.requiredField : null,
         ),
         const SizedBox(height: 12),
 
@@ -136,7 +137,7 @@ class _AddressFormState extends State<AddressForm> {
             _updateAddress();
           },
           showError: _streetIsEmpty,
-          errorText: _streetIsEmpty ? 'Обязательное поле' : null,
+          errorText: _streetIsEmpty ? AppStrings.requiredField: null,
         ),
         const SizedBox(height: 12),
 
@@ -148,7 +149,7 @@ class _AddressFormState extends State<AddressForm> {
             _updateAddress();
           },
           showError: _houseNumberIsEmpty,
-          errorText: _houseNumberIsEmpty ? 'Обязательное поле' : null,
+          errorText: _houseNumberIsEmpty ? AppStrings.requiredField : null,
         ),
         const SizedBox(height: 12),
 
