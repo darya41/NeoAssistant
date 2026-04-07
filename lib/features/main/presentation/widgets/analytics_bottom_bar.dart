@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../../profile/presentation/pages/doctor_profile_screen.dart';
 import '../pages/home_screen.dart';
-import '../pages/reminders_screen.dart';
+import '../../../reminders/presentation/pages/reminders_screen.dart';
 import '../pages/templates_screen.dart';
 import 'base_bottom_navigation_bar.dart';
 
@@ -26,7 +26,7 @@ class _AnalyticsBottomBarState extends BaseBottomNavigationBarState<AnalyticsBot
         );
         break;
       case 1:
-        Navigator.pushReplacement(
+       Navigator.pushReplacement(
           context,
           MaterialPageRoute(builder: (context) => const RemindersPageScreen()),
         );

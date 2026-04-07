@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:neo_friend/features/reminders/presentation/pages/reminders_screen.dart';
 import '../../../../shared/widgets/block/text_content_block.dart';
-import '../../../../shared/widgets/buttons/create_button.dart';
+import '../../../../shared/widgets/buttons/action_button.dart';
 import '../../data/repositories/reminder_repository.dart';
 
 class ReminderDetailScreen extends StatefulWidget {
@@ -44,7 +44,7 @@ class _ReminderDetailScreenState extends State<ReminderDetailScreen> {
     try {
       final reminder = await _repository.getReminderById(widget.reminderId);
       setState(() {
-        _isCompleted = reminder.isCompleted;  // ← загружаем реальный статус
+        _isCompleted = reminder.isCompleted;
         _isLoading = false;
       });
     } catch (e) {
@@ -63,7 +63,6 @@ class _ReminderDetailScreenState extends State<ReminderDetailScreen> {
     try {
       await _repository.markAsCompleted(widget.reminderId);
 
-      // ✅ ВАЖНО: обновляем локальное состояние!
       setState(() {
         _isCompleted = true;
         _isLoading = false;
@@ -230,21 +229,21 @@ class _ReminderDetailScreenState extends State<ReminderDetailScreen> {
             if (_isLoading)
               const CircularProgressIndicator()
             else if (isEditing)
-              CreateButton(
+              ActionButton(
                 onPressed: _deleteReminder,
                 backgroundColor: Colors.white,
                 borderColor: Colors.red,
                 text: 'Удалить',
               )
-            else if (!_isCompleted)  // ← теперь _isCompleted обновляется!
-                CreateButton(
+            else if (!_isCompleted)
+                ActionButton(
                   onPressed: _markAsCompleted,
                   backgroundColor: const Color(0xFFACF3E3),
                   borderColor: const Color(0xFF1DC9A1),
                   text: 'Выполнено',
                 )
               else
-                Container(),  // если уже выполнено, кнопка не показывается
+                Container(),
           ],
         ),
       ),

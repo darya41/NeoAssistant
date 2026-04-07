@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../../../models/reminder.dart';
-import '../../../../shared/widgets/buttons/create_button.dart';
+import '../../../../shared/widgets/buttons/action_button.dart';
 import 'create_reminder_screen.dart';
 import '../../../main/presentation/widgets/custom_bottom_navigation_bar.dart';
 import '../../data/repositories/reminder_repository.dart';
@@ -65,7 +65,6 @@ class _RemindersPageScreenState extends State<RemindersPageScreen> {
 
     final reminder = _reminders[index];
 
-    // Оптимистичное обновление UI
     setState(() {
       _reminders[index].isCompleted = value;
     });
@@ -73,7 +72,6 @@ class _RemindersPageScreenState extends State<RemindersPageScreen> {
     try {
       await _repository.toggleReminderStatus(reminder.id, value);
     } catch (e) {
-      // Откатываем изменения в случае ошибки
       setState(() {
         _reminders[index].isCompleted = !value;
       });
@@ -90,7 +88,6 @@ class _RemindersPageScreenState extends State<RemindersPageScreen> {
   Future<void> _handleDelete(int index) async {
     final reminder = _reminders[index];
 
-    // Оптимистичное удаление
     setState(() {
       _reminders.removeAt(index);
     });
@@ -105,7 +102,6 @@ class _RemindersPageScreenState extends State<RemindersPageScreen> {
         ),
       );
     } catch (e) {
-      // Возвращаем элемент в случае ошибки
       setState(() {
         _reminders.insert(index, reminder);
       });
@@ -186,7 +182,7 @@ class _RemindersPageScreenState extends State<RemindersPageScreen> {
       ),
       floatingActionButton: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 30.0),
-        child: CreateButton(
+        child: ActionButton(
           onPressed: () async {
             final result = await Navigator.push(
               context,

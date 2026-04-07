@@ -1,5 +1,5 @@
 import '../../../../core/network/api_client.dart';
-import '../../domain/entities/specialization.dart';
+import '../../../../models/specialization.dart';
 
 class SpecializationRepository {
   Future<List<Specialization>> getSpecializations() async {

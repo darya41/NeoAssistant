@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../../../shared/widgets/block/text_content_block.dart';
-import '../../../../shared/widgets/buttons/create_button.dart';
+import '../../../../shared/widgets/buttons/action_button.dart';
 
 class TemplateDetailScreen extends StatefulWidget {
   final String title;
@@ -58,7 +58,7 @@ class _TemplateDetailScreenState extends State<TemplateDetailScreen> {
             ),
 
             if (isEditing)
-              CreateButton(
+              ActionButton(
                 onPressed: () {
                   // Логика удаления
                 },

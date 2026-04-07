@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 
-class CreateButton extends StatelessWidget {
+class ActionButton extends StatelessWidget {
   final VoidCallback onPressed;
   final Color backgroundColor;
   final String text;
   final Color borderColor;
 
-  const CreateButton({
+  const ActionButton({
     super.key,
     required this.onPressed,
     required this.text,
