@@ -9,7 +9,7 @@ import '../../../../models/mother.dart';
 import '../../data/repositories/patient_exam_repository.dart';
 
 class AddPatientViewModel extends ChangeNotifier {
-  final ExamParameterRepository _parameterRepository = ExamParameterRepository(); // Изменено
+  final ExamParameterRepository _parameterRepository = ExamParameterRepository();
 final PatientRepository _patientRepository = PatientRepository();
 final PatientExamRepository _patientExamRepository = PatientExamRepository();
 

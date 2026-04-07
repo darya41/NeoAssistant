@@ -1,22 +1,19 @@
-// data/services/patient_exam_service.dart
 import '../../../../core/network/api_client.dart';
 
 class PatientExamService {
 
-  // Создание осмотра
-  Future<Map<String, dynamic>> createPatientExam(Map<String, dynamic> examData) async {
-    final response = await ApiClient.postAuth('patient-exams', examData);
-
+  Map<String, dynamic> _validateResponse(dynamic response) {
     if (response is! Map<String, dynamic>) {
       throw Exception('Неверный формат ответа от сервера');
     }
-
     return response;
   }
 
+  Future<Map<String, dynamic>> createPatientExam(Map<String, dynamic> examData) async {
+    final response = await ApiClient.postAuth('patient-exams', examData);
+    return _validateResponse(response);
+  }
 
-
-  // Получение осмотров по типу
   Future<Map<String, dynamic>> getPatientExamsByType({
     required int patientId,
     required int examTypeId,
@@ -24,11 +21,6 @@ class PatientExamService {
     final response = await ApiClient.getAuth(
         'patient-exams?patientId=$patientId&examTypeId=$examTypeId'
     );
-
-    if (response is! Map<String, dynamic>) {
-      throw Exception('Неверный формат ответа от сервера');
-    }
-
-    return response;
+    return _validateResponse(response);
   }
 }

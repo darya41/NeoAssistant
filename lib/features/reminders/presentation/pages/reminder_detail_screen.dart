@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:neo_friend/features/reminders/presentation/pages/reminders_screen.dart';
 import '../../../../shared/widgets/block/text_content_block.dart';
-import '../../../../shared/widgets/buttons/create_button.dart';
+import '../../../../shared/widgets/buttons/action_button.dart';
 import '../../data/repositories/reminder_repository.dart';
 
 class ReminderDetailScreen extends StatefulWidget {
@@ -229,14 +229,14 @@ class _ReminderDetailScreenState extends State<ReminderDetailScreen> {
             if (_isLoading)
               const CircularProgressIndicator()
             else if (isEditing)
-              CreateButton(
+              ActionButton(
                 onPressed: _deleteReminder,
                 backgroundColor: Colors.white,
                 borderColor: Colors.red,
                 text: 'Удалить',
               )
             else if (!_isCompleted)
-                CreateButton(
+                ActionButton(
                   onPressed: _markAsCompleted,
                   backgroundColor: const Color(0xFFACF3E3),
                   borderColor: const Color(0xFF1DC9A1),

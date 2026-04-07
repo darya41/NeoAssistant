@@ -1,4 +1,3 @@
-// data/repositories/exam_metadata_repository.dart
 import 'dart:developer';
 import '../services/exam_metadata_service.dart';
 
@@ -6,7 +5,6 @@ class ExamMetadataRepository {
   final ExamMetadataService _service = ExamMetadataService();
   static const String _defaultExamType = 'Осмотр';
 
-  /// Получение ID первичного осмотра
   Future<int?> getPrimaryExamId({
     required int patientId,
     required int examTypeId,
@@ -27,7 +25,6 @@ class ExamMetadataRepository {
     }
   }
 
-  /// Получение даты и времени осмотра
   Future<DateTime?> getExamDateTime(int patientExamId) async {
     try {
       final response = await _service.getExamDateTime(patientExamId);
@@ -46,7 +43,6 @@ class ExamMetadataRepository {
     }
   }
 
-  /// Получение типа осмотра по ID
   Future<String?> getExamTypeByExamId(int patientExamId) async {
     try {
       final response = await _service.getExamTypeByExamId(patientExamId);

@@ -4,7 +4,7 @@ import '../../data/repositories/exam_parameter_repository.dart';
 import '../../domain/models/daily_exam_state.dart';
 
 class DailyExamViewViewModel extends ChangeNotifier {
-  final ExamParameterRepository _parameterRepository = ExamParameterRepository(); // Изменено
+  final ExamParameterRepository _parameterRepository = ExamParameterRepository();
   final ExamMetadataRepository _metadataRepository = ExamMetadataRepository();
   final DailyExamState _state = DailyExamState();
 

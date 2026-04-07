@@ -1,4 +1,3 @@
-// data/repositories/exam_parameter_repository.dart
 import 'dart:developer';
 import '../../domain/entities/medical_parameter.dart';
 import '../../domain/entities/medical_parameter_value.dart';
@@ -7,7 +6,6 @@ import '../services/exam_parameter_service.dart';
 class ExamParameterRepository {
   final ExamParameterService _service = ExamParameterService();
 
-  /// Валидация ответа API
   Map<String, dynamic> _validateResponse(Map<String, dynamic> response) {
     if (response['success'] != true) {
       throw Exception(response['error'] ?? 'Неизвестная ошибка');
@@ -15,7 +13,6 @@ class ExamParameterRepository {
     return response;
   }
 
-  /// Получение параметров по examId
   Future<List<MedicalParameter>> getParameters(int examId) async {
     try {
       final response = await _service.getParameters(examId);
@@ -29,7 +26,6 @@ class ExamParameterRepository {
     }
   }
 
-  /// Получение параметров со значениями
   Future<List<MedicalParameterValue>> getParametersWithValues({
     required int examId,
     required int patientExamId,
@@ -53,7 +49,6 @@ class ExamParameterRepository {
     }
   }
 
-  /// Получение параметров со значениями по ID осмотра
   Future<List<MedicalParameterValue>> getParametersWithValuesByExamId({
     required int patientExamId,
   }) async {
@@ -75,7 +70,6 @@ class ExamParameterRepository {
     }
   }
 
-  /// Сохранение параметров осмотра
   Future<void> saveExamParameters(
       int patientsExamsId,
       Map<int, dynamic> parameters,

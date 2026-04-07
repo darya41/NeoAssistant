@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import '../../../../core/utils/icon_widgets.dart';
 import '../../../../shared/widgets/buttons/continue_button.dart';
 import '../../data/repositories/specialization_repository.dart';
-import '../../domain/entities/specialization.dart';
+import '../../../../models/specialization.dart';
 
 class RegistrationStep4 extends StatefulWidget {
   final VoidCallback onComplete;

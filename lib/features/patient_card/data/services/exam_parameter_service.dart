@@ -1,15 +1,16 @@
 import '../../../../core/network/api_client.dart';
 
 class ExamParameterService {
-  /// Получение параметров по examId
-  Future<Map<String, dynamic>> getParameters(int examId) async {
-    final response = await ApiClient.getAuth('parameters?examId=$examId');
-
+  Map<String, dynamic> _validateResponse(dynamic response) {
     if (response is! Map<String, dynamic>) {
       throw Exception('Неверный формат ответа от сервера');
     }
-
     return response;
+  }
+
+  Future<Map<String, dynamic>> getParameters(int examId) async {
+    final response = await ApiClient.getAuth('parameters?examId=$examId');
+    return _validateResponse(response);
   }
 
   Future<Map<String, dynamic>> getParametersWithValues({
@@ -19,30 +20,18 @@ class ExamParameterService {
     final response = await ApiClient.getAuth(
         'parameters/with-values?examId=$examId&patientExamId=$patientExamId'
     );
-
-    if (response is! Map<String, dynamic>) {
-      throw Exception('Неверный формат ответа от сервера');
-    }
-
-    return response;
+    return _validateResponse(response);
   }
 
-  /// Получение параметров со значениями по ID осмотра
   Future<Map<String, dynamic>> getParametersWithValuesByExamId({
     required int patientExamId,
   }) async {
     final response = await ApiClient.getAuth(
         'parameters/values-by-exam-id?patientExamId=$patientExamId'
     );
-
-    if (response is! Map<String, dynamic>) {
-      throw Exception('Неверный формат ответа от сервера');
-    }
-
-    return response;
+    return _validateResponse(response);
   }
 
-  // Сохранение параметров
   Future<Map<String, dynamic>> saveExamParameters(
       int patientsExamsId,
       Map<String, dynamic> requestData,
@@ -51,11 +40,6 @@ class ExamParameterService {
       'patient-exams/$patientsExamsId/parameters',
       requestData,
     );
-
-    if (response is! Map<String, dynamic>) {
-      throw Exception('Неверный формат ответа от сервера');
-    }
-
-    return response;
+    return _validateResponse(response);
   }
 }

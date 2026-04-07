@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:neo_friend/features/reminders/presentation/pages/create_reminder_screen.dart';
-import '../../../../shared/widgets/buttons/create_button.dart';
+import '../../../../shared/widgets/buttons/action_button.dart';
 import '../widgets/custom_bottom_navigation_bar.dart';
 import '../widgets/templates_list_ui.dart';
 
@@ -68,7 +68,7 @@ class _TemplatesScreenState extends State<TemplatesScreen> {
           ),
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 30.0, vertical: 16.0),
-            child: CreateButton(
+            child: ActionButton(
               onPressed: _handleCreateTemplate,
               backgroundColor: const Color(0xFFACF3E3),
               borderColor: const Color(0xFF1DC9A1),

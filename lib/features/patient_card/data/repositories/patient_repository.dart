@@ -1,4 +1,3 @@
-// data/repositories/
 import 'dart:developer';
 import '../services/patient_service.dart';
 
@@ -18,7 +17,6 @@ class PatientRepository {
     return response;
   }
 
-  /// Создание пациента
   Future<int> createPatient(Map<String, dynamic> patientData) async {
     try {
       final response = await _service.createPatient(patientData);

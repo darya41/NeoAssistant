@@ -1,4 +1,3 @@
-// data/repositories/patient_exam_repository.dart
 import 'dart:developer';
 import '../services/patient_exam_service.dart';
 
@@ -18,7 +17,6 @@ class PatientExamRepository {
     return response;
   }
 
-  /// Создание осмотра
   Future<int> createPatientExam(Map<String, dynamic> examData) async {
     try {
       final response = await _service.createPatientExam(examData);
@@ -37,7 +35,6 @@ class PatientExamRepository {
     }
   }
 
-  /// Получение осмотров по типу
   Future<List<Map<String, dynamic>>> getPatientExamsByType({
     required int patientId,
     required int examTypeId,

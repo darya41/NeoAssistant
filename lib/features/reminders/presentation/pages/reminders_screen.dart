@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../../../models/reminder.dart';
-import '../../../../shared/widgets/buttons/create_button.dart';
+import '../../../../shared/widgets/buttons/action_button.dart';
 import 'create_reminder_screen.dart';
 import '../../../main/presentation/widgets/custom_bottom_navigation_bar.dart';
 import '../../data/repositories/reminder_repository.dart';
@@ -182,7 +182,7 @@ class _RemindersPageScreenState extends State<RemindersPageScreen> {
       ),
       floatingActionButton: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 30.0),
-        child: CreateButton(
+        child: ActionButton(
           onPressed: () async {
             final result = await Navigator.push(
               context,
