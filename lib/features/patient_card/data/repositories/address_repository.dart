@@ -1,14 +1,12 @@
-import '../../../../core/network/api_client.dart';
 import '../../../../models/address.dart';
+import '../services/address_service.dart';
 
 class AddressRepository {
+  final AddressService _addressService = AddressService();
+
   Future<Address> createAddress(Address address) async {
     try {
-      final response = await ApiClient.postAuth('addresses', address.toJson());
-
-      if (response is! Map<String, dynamic>) {
-        throw Exception('Неверный формат ответа. Ожидался Map, получен ${response.runtimeType}');
-      }
+      final response = await _addressService.createAddress(address);
 
       if (response['success'] != true) {
         throw Exception(response['error'] ?? 'Ошибка создания адреса');
@@ -29,26 +27,26 @@ class AddressRepository {
         );
       }
 
-      Map<String, dynamic> addressJson;
-
-      if (addressData is List) {
-        if (addressData.isEmpty) {
-          throw Exception('Сервер вернул пустой список адресов');
-        }
-        if (addressData[0] is! Map<String, dynamic>) {
-          throw Exception('Неверный формат адреса в списке');
-        }
-        addressJson = addressData[0];
-      } else if (addressData is Map<String, dynamic>) {
-        addressJson = addressData;
-      } else {
-        throw Exception('Неверный тип data: ${addressData.runtimeType}');
-      }
-
+      final addressJson = _extractAddressData(addressData);
       return Address.fromJson(addressJson);
-
     } catch (e) {
       rethrow;
+    }
+  }
+
+  Map<String, dynamic> _extractAddressData(dynamic addressData) {
+    if (addressData is List) {
+      if (addressData.isEmpty) {
+        throw Exception('Сервер вернул пустой список адресов');
+      }
+      if (addressData[0] is! Map<String, dynamic>) {
+        throw Exception('Неверный формат адреса в списке');
+      }
+      return addressData[0];
+    } else if (addressData is Map<String, dynamic>) {
+      return addressData;
+    } else {
+      throw Exception('Неверный тип data: ${addressData.runtimeType}');
     }
   }
 }

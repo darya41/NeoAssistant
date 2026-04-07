@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_strings.dart';
 import '../../../../models/diary_entry.dart';
-import '../../data/repositories/patient_exam_repository.dart';
 import '../../../../core/utils/date_formatter.dart';
+import '../view_models/diary_viewmodel.dart';
 import 'add_daily_exam_screen.dart';
 import 'daily_exam_view_screen.dart';
 
@@ -20,145 +20,113 @@ class DiaryScreen extends StatefulWidget {
 }
 
 class _DiaryScreenState extends State<DiaryScreen> {
-  final PatientExamRepository _patientExamRepository = PatientExamRepository();
-
-  Map<DateTime, List<DiaryEntry>> _groupedEntries = {};
-  bool _isLoading = true;
-  String? _error;
-
-  bool _isNewestFirst = true;
+  late final DiaryViewModel _viewModel;
 
   @override
   void initState() {
     super.initState();
-    _loadDailyExams();
+    _viewModel = DiaryViewModel(patientId: widget.patientId);
   }
 
-  Future<void> _loadDailyExams() async {
-    setState(() {
-      _isLoading = true;
-      _error = null;
+  @override
+  void dispose() {
+    _viewModel.dispose();
+    super.dispose();
+  }
+
+  void _addObservation() {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => AddDailyExamScreen(
+          patientId: widget.patientId,
+        ),
+      ),
+    ).then((_) {
+      _viewModel.refresh();
     });
-
-    try {
-      final exams = await _patientExamRepository.getPatientExamsByType(
-        patientId: widget.patientId,
-        examTypeId: 2,
-      );
-
-      final Map<DateTime, List<DiaryEntry>> grouped = {};
-
-      for (var exam in exams) {
-        final dateTime = DateTime.parse(exam['date_time']);
-        final date = DateTime(dateTime.year, dateTime.month, dateTime.day);
-
-        if (!grouped.containsKey(date)) {
-          grouped[date] = [];
-        }
-
-        grouped[date]!.add(DiaryEntry(
-          text: 'Осмотр новорожденного',
-          time: TimeOfDay(hour: dateTime.hour, minute: dateTime.minute),
-          examId: exam['patients_exams_id'],
-          dateTime: dateTime,
-        ));
-      }
-
-      setState(() {
-        _groupedEntries = grouped;
-        _isLoading = false;
-      });
-    } catch (e) {
-      setState(() {
-        _error = e.toString();
-        _isLoading = false;
-      });
-    }
-  }
-
-  List<DateTime> _getSortedDates() {
-    List<DateTime> dates = _groupedEntries.keys.toList();
-    dates.sort((a, b) => _isNewestFirst ? b.compareTo(a) : a.compareTo(b));
-    return dates;
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text(
-          'Дневник наблюдений',
-          style: TextStyle(
-            fontSize: 20,
-            fontWeight: FontWeight.w500,
-          ),
-        ),
-        backgroundColor: AppColors.white,
-        elevation: 0,
-        foregroundColor: AppColors.black,
-        actions: [
-          PopupMenuButton<String>(
-            onSelected: (value) {
-              setState(() {
-                _isNewestFirst = value == 'newest';
-              });
-            },
-            itemBuilder: (context) => [
-              PopupMenuItem(
-                value: 'newest',
-                child: Row(
-                  children: [
-                    if (_isNewestFirst) const Icon(Icons.check, size: 18),
-                    const SizedBox(width: 8),
-                    const Text('Сначала новые'),
-                  ],
-                ),
+    return ListenableBuilder(
+      listenable: _viewModel,
+      builder: (context, child) {
+        return Scaffold(
+          appBar: AppBar(
+            title: const Text(
+              'Дневник наблюдений',
+              style: TextStyle(
+                fontSize: 20,
+                fontWeight: FontWeight.w500,
               ),
-              PopupMenuItem(
-                value: 'oldest',
-                child: Row(
-                  children: [
-                    if (!_isNewestFirst) const Icon(Icons.check, size: 18),
-                    const SizedBox(width: 8),
-                    const Text('Сначала старые'),
-                  ],
+            ),
+            backgroundColor: AppColors.white,
+            elevation: 0,
+            foregroundColor: AppColors.black,
+            actions: [
+              PopupMenuButton<String>(
+                onSelected: (value) {
+                  _viewModel.toggleSortOrder(value == 'newest');
+                },
+                itemBuilder: (context) => [
+                  PopupMenuItem(
+                    value: 'newest',
+                    child: Row(
+                      children: [
+                        if (_viewModel.isNewestFirst) const Icon(Icons.check, size: 18),
+                        const SizedBox(width: 8),
+                        const Text('Сначала новые'),
+                      ],
+                    ),
+                  ),
+                  PopupMenuItem(
+                    value: 'oldest',
+                    child: Row(
+                      children: [
+                        if (!_viewModel.isNewestFirst) const Icon(Icons.check, size: 18),
+                        const SizedBox(width: 8),
+                        const Text('Сначала старые'),
+                      ],
+                    ),
+                  ),
+                ],
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  child: Row(
+                    children: [
+                      Text(_viewModel.isNewestFirst ? 'Сначала новые' : 'Сначала старые'),
+                      const Icon(Icons.arrow_drop_down),
+                    ],
+                  ),
                 ),
               ),
             ],
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16),
-              child: Row(
-                children: const [
-                  Text('Сначала новые'),
-                  Icon(Icons.arrow_drop_down),
-                ],
-              ),
-            ),
           ),
-        ],
-      ),
-      body: _buildBody(),
+          body: _buildBody(),
+        );
+      },
     );
   }
 
   Widget _buildBody() {
-    if (_isLoading) {
+    if (_viewModel.isLoading) {
       return const Center(child: CircularProgressIndicator());
     }
 
-    if (_error != null) {
+    if (_viewModel.error != null) {
       return Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Text(
-              _error!,
+              _viewModel.error!,
               style: const TextStyle(color: AppColors.error),
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 16),
             ElevatedButton(
-              onPressed: _loadDailyExams,
+              onPressed: () => _viewModel.refresh(),
               child: const Text(AppStrings.retry),
             ),
           ],
@@ -166,7 +134,7 @@ class _DiaryScreenState extends State<DiaryScreen> {
       );
     }
 
-    if (_groupedEntries.isEmpty) {
+    if (!_viewModel.hasEntries) {
       return Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -186,7 +154,7 @@ class _DiaryScreenState extends State<DiaryScreen> {
             ),
             const SizedBox(height: 16),
             ElevatedButton(
-              onPressed: _loadDailyExams,
+              onPressed: () => _viewModel.refresh(),
               child: const Text('Обновить'),
             ),
           ],
@@ -194,7 +162,7 @@ class _DiaryScreenState extends State<DiaryScreen> {
       );
     }
 
-    final sortedDates = _getSortedDates();
+    final sortedDates = _viewModel.getSortedDates();
 
     return Column(
       children: [
@@ -204,7 +172,7 @@ class _DiaryScreenState extends State<DiaryScreen> {
             itemCount: sortedDates.length,
             itemBuilder: (context, index) {
               final date = sortedDates[index];
-              final entries = _groupedEntries[date]!;
+              final entries = _viewModel.getEntriesForDate(date);
               return _buildDateSection(date, entries);
             },
           ),
@@ -322,18 +290,5 @@ class _DiaryScreenState extends State<DiaryScreen> {
         ),
       ),
     );
-  }
-
-  void _addObservation() {
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => AddDailyExamScreen(
-          patientId: widget.patientId,
-        ),
-      ),
-    ).then((_) {
-      _loadDailyExams();
-    });
   }
 }

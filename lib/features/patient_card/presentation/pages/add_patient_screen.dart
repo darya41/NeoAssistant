@@ -1,13 +1,10 @@
 import 'package:flutter/material.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_strings.dart';
-import '../../../../core/storage/token_storage.dart';
 import '../../domain/entities/medical_parameter.dart';
-import '../../../../models/mother.dart';
-import '../../../../shared/widgets/buttons/save_button.dart';
-import '../../data/repositories/parameter_repository.dart';
-import '../../data/repositories/patient_exam_repository.dart';
+import '../view_models/add_patient_viewmodel.dart';
 import '../widgets/patient_form.dart';
+import '../../../../shared/widgets/buttons/save_button.dart';
 
 class AddPatientScreen extends StatefulWidget {
   const AddPatientScreen({super.key});
@@ -17,169 +14,30 @@ class AddPatientScreen extends StatefulWidget {
 }
 
 class _AddPatientScreenState extends State<AddPatientScreen> {
-  final ParameterRepository _parameterRepository = ParameterRepository();
-
-  final TextEditingController _motherFioController = TextEditingController();
-  final TextEditingController _historyNumberController = TextEditingController();
-  final TextEditingController _childHeightController = TextEditingController();
-  final TextEditingController _childWeightController = TextEditingController();
-
-  int _selectedMotherId = 0;
-  int examId = 1;
-  DateTime? _selectedDate;
-  TimeOfDay? _selectedTime;
-  String _selectedGender = '';
-  String? _selectedBloodGroup;
-  String? _selectedRhFactor;
-  bool _isSaving = false;
-  bool _isLoadingParameters = true;
-  String? _parametersError;
-
-  List<MedicalParameter> _parameters = [];
-  final Map<int, dynamic> _parameterValues = {};
-
-  bool _triedToSubmit = false;
+  late final AddPatientViewModel _viewModel;
 
   @override
   void initState() {
     super.initState();
-    _loadParameters();
-  }
-
-  Future<void> _loadParameters() async {
-    setState(() {
-      _isLoadingParameters = true;
-      _parametersError = null;
-    });
-
-    try {
-      final parameters = await _parameterRepository.getParameters(examId);
-      setState(() {
-        _parameters = parameters;
-        _isLoadingParameters = false;
-      });
-    } catch (e) {
-      setState(() {
-        _parametersError = e.toString().replaceFirst('Exception: ', '');
-        _isLoadingParameters = false;
-      });
-    }
-  }
-
-  bool get _isFormValid {
-    if (_motherFioController.text.trim().isEmpty ||
-        _historyNumberController.text.trim().isEmpty ||
-        _childHeightController.text.trim().isEmpty ||
-        _childWeightController.text.trim().isEmpty ||
-        _selectedDate == null ||
-        _selectedTime == null ||
-        _selectedGender.isEmpty ||
-        _selectedBloodGroup == null ||
-        _selectedRhFactor == null) {
-      return false;
-    }
-
-    for (var param in _parameters) {
-      if (!_parameterValues.containsKey(param.id)) {
-        return false;
-      }
-      final value = _parameterValues[param.id];
-      if (value == null || value.toString().trim().isEmpty) {
-        return false;
-      }
-    }
-
-    return true;
-  }
-
-  DateTime _getCombinedDateTime() {
-    final date = _selectedDate!;
-    final time = _selectedTime!;
-    return DateTime(
-      date.year,
-      date.month,
-      date.day,
-      time.hour,
-      time.minute,
-    );
-  }
-
-  Future<void> _handleSave() async {
-    setState(() => _triedToSubmit = true);
-
-    if (!_isFormValid) return;
-
-    setState(() => _isSaving = true);
-
-    try {
-      final doctorData = await TokenStorage.getDoctorData();
-
-      final doctorId = doctorData?['doctor_id'] ?? doctorData?['id'];
-
-      if (doctorId == null) {
-        throw Exception('Не удалось получить ID врача. Пожалуйста, войдите заново.');
-      }
-
-      final patientData = {
-        'mother_id': _selectedMotherId > 0 ? _selectedMotherId : null,
-        'date_of_birth': _getCombinedDateTime().toIso8601String(),
-        'gender': _selectedGender == 'Мужской' ? 'MALE' : 'FEMALE',
-        'number_history': _historyNumberController.text.trim(),
-        'blood_group': _selectedBloodGroup,
-        'rh_factor': _selectedRhFactor,
-        'weight': double.parse(_childWeightController.text.trim()),
-        'height': double.parse(_childHeightController.text.trim()),
-      };
-
-      final patientId = await PatientExamRepository.createPatient(patientData);
-
-      final examData = {
-        'patient_id': patientId,
-        'exam_id': examId,
-        'doctor_id': doctorId,
-        'date_time': _getCombinedDateTime().toIso8601String(),
-      };
-
-      final patientsExamsId =
-      await PatientExamRepository.createPatientExam(examData);
-
-      await PatientExamRepository.saveExamParameters(
-        patientsExamsId,
-        _parameterValues,
-      );
-
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Пациент и осмотр успешно добавлены!'),
-            backgroundColor: AppColors.primary,
-          ),
-        );
-        Navigator.pop(context, true);
-      }
-    } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Ошибка: ${e.toString().replaceFirst('Exception: ', '')}'),
-            backgroundColor: AppColors.error,
-          ),
-        );
-      }
-    } finally {
-      if (mounted) {
-        setState(() => _isSaving = false);
-      }
-    }
+    _viewModel = AddPatientViewModel();
   }
 
   @override
   void dispose() {
-    _motherFioController.dispose();
-    _historyNumberController.dispose();
-    _childHeightController.dispose();
-    _childWeightController.dispose();
+    _viewModel.dispose();
     super.dispose();
+  }
+
+  Future<void> _handleSave() async {
+    _viewModel.onTriedToSubmit();
+
+    if (!_viewModel.isFormValid) return;
+
+    final success = await _viewModel.savePatient(context);
+
+    if (mounted && success) {
+      Navigator.pop(context, true);
+    }
   }
 
   @override
@@ -194,120 +52,92 @@ class _AddPatientScreenState extends State<AddPatientScreen> {
         backgroundColor: AppColors.white,
         elevation: 0,
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          children: [
-            Expanded(
-              child: SingleChildScrollView(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    PatientFormWidget(
-                      motherFioController: _motherFioController,
-                      historyNumberController: _historyNumberController,
-                      heightController: _childHeightController,
-                      weightController: _childWeightController,
-                      selectedDate: _selectedDate,
-                      selectedTime: _selectedTime,
-                      selectedGender: _selectedGender,
-                      selectedBloodGroup: _selectedBloodGroup,
-                      selectedRhFactor: _selectedRhFactor,
-                      onMotherSearchChanged: () {},
-                      onMotherSelected: (Mother mother) {
-                        setState(() {
-                          _selectedMotherId = mother.id;
-                          _motherFioController.text = mother.fullName;
-                        });
-                      },
-                      onDateSelected: (date) {
-                        setState(() => _selectedDate = date);
-                      },
-                      onTimeSelected: (time) {
-                        setState(() => _selectedTime = time);
-                      },
-                      onGenderSelected: (gender) {
-                        setState(() => _selectedGender = gender);
-                      },
-                      onBloodGroupChanged: (group) {
-                        setState(() => _selectedBloodGroup = group);
-                      },
-                      onRhFactorChanged: (rh) {
-                        setState(() => _selectedRhFactor = rh);
-                      },
-                      showValidationErrors: _triedToSubmit,
-                      motherFioError: _triedToSubmit && _selectedMotherId == 0
-                          ? 'Выберите или добавьте мать'
-                          : null,
-                      historyNumberError: _triedToSubmit && _historyNumberController.text.trim().isEmpty
-                          ? AppStrings.requiredField
-                          : null,
-                      heightError: _triedToSubmit && _childHeightController.text.trim().isEmpty
-                          ? AppStrings.requiredField
-                          : null,
-                      weightError: _triedToSubmit && _childWeightController.text.trim().isEmpty
-                          ? AppStrings.requiredField
-                          : null,
-                      dateError: _triedToSubmit && _selectedDate == null
-                          ? AppStrings.requiredField
-                          : null,
-                      timeError: _triedToSubmit && _selectedTime == null
-                          ? AppStrings.requiredField
-                          : null,
-                      genderError: _triedToSubmit && _selectedGender.isEmpty
-                          ? AppStrings.requiredField
-                          : null,
-                      bloodGroupError: _triedToSubmit && _selectedBloodGroup == null
-                          ? AppStrings.requiredField
-                          : null,
-                      rhFactorError: _triedToSubmit && _selectedRhFactor == null
-                          ? AppStrings.requiredField
-                          : null,
-                    ),
-                    const SizedBox(height: 16),
-
-                    if (_isLoadingParameters)
-                      const Center(child: CircularProgressIndicator())
-                    else if (_parametersError != null)
-                      Center(
-                        child: Column(
-                          children: [
-                            Text(
-                              'Ошибка загрузки параметров: $_parametersError',
-                              style: const TextStyle(color: AppColors.error),
-                              textAlign: TextAlign.center,
-                            ),
-                            const SizedBox(height: 8),
-                            ElevatedButton(
-                              onPressed: _loadParameters,
-                              child: const Text(AppStrings.retry),
-                            ),
-                          ],
+      body: ListenableBuilder(
+        listenable: _viewModel,
+        builder: (context, child) {
+          return Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Column(
+              children: [
+                Expanded(
+                  child: SingleChildScrollView(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        PatientFormWidget(
+                          motherFioController: _viewModel.motherFioController,
+                          historyNumberController: _viewModel.historyNumberController,
+                          heightController: _viewModel.childHeightController,
+                          weightController: _viewModel.childWeightController,
+                          selectedDate: _viewModel.selectedDate,
+                          selectedTime: _viewModel.selectedTime,
+                          selectedGender: _viewModel.selectedGender,
+                          selectedBloodGroup: _viewModel.selectedBloodGroup,
+                          selectedRhFactor: _viewModel.selectedRhFactor,
+                          onMotherSearchChanged: () {},
+                          onMotherSelected: _viewModel.onMotherSelected,
+                          onDateSelected: _viewModel.onDateSelected,
+                          onTimeSelected: _viewModel.onTimeSelected,
+                          onGenderSelected: _viewModel.onGenderSelected,
+                          onBloodGroupChanged: _viewModel.onBloodGroupChanged,
+                          onRhFactorChanged: _viewModel.onRhFactorChanged,
+                          showValidationErrors: _viewModel.triedToSubmit,
+                          motherFioError: _viewModel.motherFioError,
+                          historyNumberError: _viewModel.historyNumberError,
+                          heightError: _viewModel.heightError,
+                          weightError: _viewModel.weightError,
+                          dateError: _viewModel.dateError,
+                          timeError: _viewModel.timeError,
+                          genderError: _viewModel.genderError,
+                          bloodGroupError: _viewModel.bloodGroupError,
+                          rhFactorError: _viewModel.rhFactorError,
                         ),
-                      )
-                    else if (_parameters.isEmpty)
-                        const Center(
-                          child: Text('Нет параметров для этого обследования'),
-                        )
-                      else
-                        ..._parameters.map((param) => _buildParameterField(param)),
-                  ],
+                        const SizedBox(height: 16),
+
+                        if (_viewModel.isLoadingParameters)
+                          const Center(child: CircularProgressIndicator())
+                        else if (_viewModel.parametersError != null)
+                          Center(
+                            child: Column(
+                              children: [
+                                Text(
+                                  'Ошибка загрузки параметров: ${_viewModel.parametersError}',
+                                  style: const TextStyle(color: AppColors.error),
+                                  textAlign: TextAlign.center,
+                                ),
+                                const SizedBox(height: 8),
+                                ElevatedButton(
+                                  onPressed: () => _viewModel.loadParameters(),
+                                  child: const Text(AppStrings.retry),
+                                ),
+                              ],
+                            ),
+                          )
+                        else if (_viewModel.parameters.isEmpty)
+                            const Center(
+                              child: Text('Нет параметров для этого обследования'),
+                            )
+                          else
+                            ..._viewModel.parameters.map((param) => _buildParameterField(param)),
+                      ],
+                    ),
+                  ),
                 ),
-              ),
+                const SizedBox(height: 12),
+                if (_viewModel.isSaving)
+                  const Center(child: CircularProgressIndicator())
+                else
+                  SaveButton(
+                    onPressed: _handleSave,
+                    backgroundColor: _viewModel.isFormValid ? AppColors.primary : AppColors.background,
+                    borderColor: _viewModel.isFormValid ? AppColors.primary : AppColors.border,
+                    textColor: _viewModel.isFormValid ? Colors.white : Colors.black,
+                    isEnabled: _viewModel.isFormValid,
+                  ),
+              ],
             ),
-            const SizedBox(height: 12),
-            if (_isSaving)
-              const Center(child: CircularProgressIndicator())
-            else
-              SaveButton(
-                onPressed: _handleSave,
-                backgroundColor: _isFormValid ? AppColors.primary : AppColors.background,
-                borderColor: _isFormValid ? AppColors.primary : AppColors.border,
-                textColor: _isFormValid ? Colors.white : Colors.black,
-                isEnabled: _isFormValid,
-              ),
-          ],
-        ),
+          );
+        },
       ),
     );
   }
@@ -338,19 +168,18 @@ class _AddPatientScreenState extends State<AddPatientScreen> {
 
   Widget _buildEnumField(MedicalParameter param) {
     final options = param.options!;
+    final currentValue = _viewModel.parameterValues[param.id];
 
     if (options.length <= 4) {
       return Wrap(
         spacing: 8,
         runSpacing: 8,
         children: options.map((option) {
-          final isSelected = _parameterValues[param.id] == option;
+          final isSelected = currentValue == option;
 
           return GestureDetector(
             onTap: () {
-              setState(() {
-                _parameterValues[param.id] = option;
-              });
+              _viewModel.onParameterChanged(param.id, option);
             },
             child: Container(
               padding: const EdgeInsets.symmetric(
@@ -386,7 +215,7 @@ class _AddPatientScreenState extends State<AddPatientScreen> {
         borderRadius: BorderRadius.circular(8),
       ),
       child: DropdownButton<String>(
-        value: _parameterValues[param.id],
+        value: currentValue,
         hint: const Text('Выберите значение'),
         isExpanded: true,
         underline: Container(),
@@ -397,9 +226,7 @@ class _AddPatientScreenState extends State<AddPatientScreen> {
           );
         }).toList(),
         onChanged: (value) {
-          setState(() {
-            _parameterValues[param.id] = value;
-          });
+          _viewModel.onParameterChanged(param.id, value);
         },
       ),
     );
@@ -425,9 +252,7 @@ class _AddPatientScreenState extends State<AddPatientScreen> {
           isDense: true,
         ),
         onChanged: (value) {
-          setState(() {
-            _parameterValues[param.id] = value;
-          });
+          _viewModel.onParameterChanged(param.id, value);
         },
       ),
     );

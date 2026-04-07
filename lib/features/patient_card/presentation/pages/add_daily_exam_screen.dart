@@ -2,13 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:neo_friend/core/constants/app_strings.dart';
 import 'package:neo_friend/features/patient_card/presentation/pages/daily_exam_view_screen.dart';
 import '../../../../core/constants/app_colors.dart';
-import '../../../../core/storage/token_storage.dart';
-import '../../domain/entities/medical_parameter.dart';
-import '../../../../shared/widgets/buttons/save_button.dart';
-import '../../data/repositories/parameter_repository.dart';
-import '../../data/repositories/patient_exam_repository.dart';
-import '../../domain/validators/exam_form_validator.dart';
+import '../view_models/add_daily_exam_viewmodel.dart';
 import '../widgets/daily_exam_form.dart';
+import '../../../../shared/widgets/buttons/save_button.dart';
 
 class AddDailyExamScreen extends StatefulWidget {
   final int patientId;
@@ -23,125 +19,49 @@ class AddDailyExamScreen extends StatefulWidget {
 }
 
 class _AddDailyExamScreenState extends State<AddDailyExamScreen> {
-  final ParameterRepository _parameterRepository = ParameterRepository();
-
-  final int examId = 2;
-
-  DateTime? _selectedDate;
-  TimeOfDay? _selectedTime;
-  bool _isSaving = false;
-  bool _isLoadingParameters = true;
-  String? _parametersError;
-
-  List<MedicalParameter> _parameters = [];
-  final Map<int, dynamic> _parameterValues = {};
-
-  bool _triedToSubmit = false;
+  late final AddDailyExamViewModel _viewModel;
 
   @override
   void initState() {
     super.initState();
-    _loadParameters();
-    _selectedDate = DateTime.now();
-    _selectedTime = TimeOfDay.now();
+    _viewModel = AddDailyExamViewModel();
   }
 
-  Future<void> _loadParameters() async {
-    setState(() {
-      _isLoadingParameters = true;
-      _parametersError = null;
-    });
-
-    try {
-      final parameters = await _parameterRepository.getParameters(examId);
-      setState(() {
-        _parameters = parameters;
-        _isLoadingParameters = false;
-      });
-    } catch (e) {
-      setState(() {
-        _parametersError = e.toString().replaceFirst('Exception: ', '');
-        _isLoadingParameters = false;
-      });
-    }
-  }
-
-  bool get _isFormValid {
-    return ExamFormValidator.isFormValid(
-      selectedDate: _selectedDate,
-      selectedTime: _selectedTime,
-      parameters: _parameters,
-      parameterValues: _parameterValues,
-    );
-  }
-
-  String? get _dateError {
-    return ExamFormValidator.getDateError(_selectedDate, _triedToSubmit);
-  }
-
-  String? get _timeError {
-    return ExamFormValidator.getTimeError(_selectedTime, _triedToSubmit);
-  }
-
-  DateTime _getCombinedDateTime() {
-    final date = _selectedDate!;
-    final time = _selectedTime!;
-    return DateTime(
-      date.year,
-      date.month,
-      date.day,
-      time.hour,
-      time.minute,
-    );
+  @override
+  void dispose() {
+    _viewModel.dispose();
+    super.dispose();
   }
 
   Future<void> _handleSave() async {
-    setState(() => _triedToSubmit = true);
+    _viewModel.onTriedToSubmit();
 
-    if (!_isFormValid) return;
-
-    setState(() => _isSaving = true);
+    if (!_viewModel.isFormValid) return;
 
     try {
-      final doctorData = await TokenStorage.getDoctorData();
-      final doctorId = doctorData?['doctor_id'] ?? doctorData?['id'];
+      final examId = await _viewModel.saveExam(widget.patientId);
 
-      if (doctorId == null) {
-        throw Exception('Не удалось получить ID врача. Пожалуйста, войдите заново.');
-      }
-
-      final examData = {
-        'patient_id': widget.patientId,
-        'exam_id': examId,
-        'doctor_id': doctorId,
-        'date_time': _getCombinedDateTime().toIso8601String(),
-      };
-
-
-      final patientsExamsId = await PatientExamRepository.createPatientExam(examData);
-
-      await PatientExamRepository.saveExamParameters(
-        patientsExamsId,
-        _parameterValues,
-      );
-
-      if (mounted) {
+      if (mounted && examId != null) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
             content: Text('Ежедневный осмотр успешно добавлен!'),
             backgroundColor: AppColors.primary,
           ),
         );
+
         await Future.delayed(const Duration(seconds: 4));
 
-        Navigator.push(
+        if (mounted) {
+          Navigator.push(
             context,
             MaterialPageRoute(
-            builder: (context) => DailyExamViewScreen(
-              patientId: widget.patientId, examId: patientsExamsId,
+              builder: (context) => DailyExamViewScreen(
+                patientId: widget.patientId,
+                examId: examId,
+              ),
             ),
-          ),
-        );
+          );
+        }
       }
     } catch (e) {
       if (mounted) {
@@ -152,10 +72,28 @@ class _AddDailyExamScreenState extends State<AddDailyExamScreen> {
           ),
         );
       }
-    } finally {
-      if (mounted) {
-        setState(() => _isSaving = false);
-      }
+    }
+  }
+
+  Future<void> _selectDate(BuildContext context) async {
+    final DateTime? picked = await showDatePicker(
+      context: context,
+      initialDate: _viewModel.selectedDate ?? DateTime.now(),
+      firstDate: DateTime(2000),
+      lastDate: DateTime(2100),
+    );
+    if (picked != null) {
+      _viewModel.onDateSelected(picked);
+    }
+  }
+
+  Future<void> _selectTime(BuildContext context) async {
+    final TimeOfDay? picked = await showTimePicker(
+      context: context,
+      initialTime: _viewModel.selectedTime ?? TimeOfDay.now(),
+    );
+    if (picked != null) {
+      _viewModel.onTimeSelected(picked);
     }
   }
 
@@ -172,71 +110,112 @@ class _AddDailyExamScreenState extends State<AddDailyExamScreen> {
         elevation: 0,
         foregroundColor: AppColors.black,
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          children: [
-            Expanded(
-              child: SingleChildScrollView(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-
-                    if (_isLoadingParameters)
-                      const Center(child: CircularProgressIndicator())
-                    else if (_parametersError != null)
-                      Center(
-                        child: Column(
+      body: ListenableBuilder(
+        listenable: _viewModel,
+        builder: (context, child) {
+          return Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Column(
+              children: [
+                Expanded(
+                  child: SingleChildScrollView(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
                           children: [
-                            Text(
-                              'Ошибка загрузки параметров: $_parametersError',
-                              style: const TextStyle(color: AppColors.error),
-                              textAlign: TextAlign.center,
+                            Expanded(
+                              child: InkWell(
+                                onTap: () => _selectDate(context),
+                                child: InputDecorator(
+                                  decoration: InputDecoration(
+                                    labelText: 'Дата',
+                                    errorText: _viewModel.dateError,
+                                    border: const OutlineInputBorder(),
+                                  ),
+                                  child: Text(
+                                    _viewModel.selectedDate != null
+                                        ? '${_viewModel.selectedDate!.day}/${_viewModel.selectedDate!.month}/${_viewModel.selectedDate!.year}'
+                                        : 'Выберите дату',
+                                  ),
+                                ),
+                              ),
                             ),
-                            const SizedBox(height: 8),
-                            ElevatedButton(
-                              onPressed: _loadParameters,
-                              child: const Text(AppStrings.retry),
+                            const SizedBox(width: 16),
+                            Expanded(
+                              child: InkWell(
+                                onTap: () => _selectTime(context),
+                                child: InputDecorator(
+                                  decoration: InputDecoration(
+                                    labelText: 'Время',
+                                    errorText: _viewModel.timeError,
+                                    border: const OutlineInputBorder(),
+                                  ),
+                                  child: Text(
+                                    _viewModel.selectedTime != null
+                                        ? _viewModel.selectedTime!.format(context)
+                                        : 'Выберите время',
+                                  ),
+                                ),
+                              ),
                             ),
                           ],
                         ),
-                      )
-                    else if (_parameters.isEmpty)
-                        const Center(
-                          child: Text('Нет параметров для ежедневного осмотра'),
-                        )
-                      else
-                        DailyExamForm(
-                          selectedDate: _selectedDate,
-                          selectedTime: _selectedTime,
-                          parameters: _parameters,
-                          parameterValues: _parameterValues,
-                          onParameterChanged: (id, value) {
-                            setState(() {
-                              _parameterValues[id] = value;
-                            });
-                          },
-                          showValidationErrors: _triedToSubmit,
-                          dateError: _dateError,
-                          timeError: _timeError,
-                        ),
-                  ],
+                        const SizedBox(height: 16),
+
+                        if (_viewModel.isLoadingParameters)
+                          const Center(child: CircularProgressIndicator())
+                        else if (_viewModel.parametersError != null)
+                          Center(
+                            child: Column(
+                              children: [
+                                Text(
+                                  'Ошибка загрузки параметров: ${_viewModel.parametersError}',
+                                  style: const TextStyle(color: AppColors.error),
+                                  textAlign: TextAlign.center,
+                                ),
+                                const SizedBox(height: 8),
+                                ElevatedButton(
+                                  onPressed: () => _viewModel.loadParameters(),
+                                  child: const Text(AppStrings.retry),
+                                ),
+                              ],
+                            ),
+                          )
+                        else if (_viewModel.parameters.isEmpty)
+                            const Center(
+                              child: Text('Нет параметров для ежедневного осмотра'),
+                            )
+                          else
+                            DailyExamForm(
+                              selectedDate: _viewModel.selectedDate,
+                              selectedTime: _viewModel.selectedTime,
+                              parameters: _viewModel.parameters,
+                              parameterValues: _viewModel.parameterValues,
+                              onParameterChanged: _viewModel.onParameterChanged,
+                              showValidationErrors: _viewModel.triedToSubmit,
+                              dateError: _viewModel.dateError,
+                              timeError: _viewModel.timeError,
+                            ),
+                      ],
+                    ),
+                  ),
                 ),
-              ),
+                const SizedBox(height: 12),
+                if (_viewModel.isSaving)
+                  const Center(child: CircularProgressIndicator())
+                else
+                  SaveButton(
+                    onPressed: _handleSave,
+                    backgroundColor: _viewModel.isFormValid ? AppColors.primary : AppColors.background,
+                    borderColor: _viewModel.isFormValid ? AppColors.primary : AppColors.border,
+                    textColor: _viewModel.isFormValid ? AppColors.white : AppColors.black,
+                    isEnabled: _viewModel.isFormValid,
+                  ),
+              ],
             ),
-            const SizedBox(height: 12),
-            if (_isSaving)
-              const Center(child: CircularProgressIndicator())
-            else
-              SaveButton(
-                onPressed: _handleSave,
-                backgroundColor: _isFormValid ? AppColors.primary : AppColors.background,
-                borderColor: _isFormValid ? AppColors.primary : AppColors.border,
-                textColor: _isFormValid ? AppColors.white : AppColors.black,
-                isEnabled: _isFormValid,
-              ),
-          ],
-        ),
+          );
+        },
       ),
     );
   }

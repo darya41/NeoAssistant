@@ -1,110 +1,40 @@
 import 'package:flutter/material.dart';
 import '../../../../core/constants/app_colors.dart';
-import '../../../../models/address.dart';
-import '../../../../models/mother.dart';
-import '../../../../shared/widgets/buttons/save_button.dart';
-import '../../data/repositories/address_repository.dart';
-import '../../data/repositories/mother_repository.dart';
+import '../view_models/add_mother_viewmodel.dart';
 import '../widgets/mother_form.dart';
+import '../../../../shared/widgets/buttons/save_button.dart';
 
 class AddMotherScreen extends StatefulWidget {
   const AddMotherScreen({super.key});
 
   @override
-  State<AddMotherScreen> createState() => _AddMotherPageState();
+  State<AddMotherScreen> createState() => _AddMotherScreenState();
 }
 
-class _AddMotherPageState extends State<AddMotherScreen> {
-  final MotherRepository _motherRepository = MotherRepository();
-  final AddressRepository _addressRepository = AddressRepository();
+class _AddMotherScreenState extends State<AddMotherScreen> {
+  late final AddMotherViewModel _viewModel;
 
-  Mother? _currentMother;
-  Address? _currentAddress;
-  bool _isSaving = false;
-  bool _triedToSubmit = false;
-
-  bool get _isFormValid {
-    if (_currentMother == null) return false;
-    return _currentMother!.lastName.isNotEmpty &&
-        _currentMother!.firstName.isNotEmpty &&
-        _currentMother!.bloodGroup != null &&
-        _currentMother!.rhFactor != null;
+  @override
+  void initState() {
+    super.initState();
+    _viewModel = AddMotherViewModel();
   }
 
-  bool _isAddressFilled(Address address) {
-    return (address.city != null && address.city!.isNotEmpty) ||
-        (address.street != null && address.street!.isNotEmpty) ||
-        (address.houseNumber != null && address.houseNumber!.isNotEmpty) ||
-        (address.building != null && address.building!.isNotEmpty) ||
-        (address.apartment != null && address.apartment!.isNotEmpty);
-  }
-
-  bool _isAddressValid(Address address) {
-    return (address.city != null && address.city!.isNotEmpty) &&
-        (address.street != null && address.street!.isNotEmpty) &&
-        (address.houseNumber != null && address.houseNumber!.isNotEmpty);
+  @override
+  void dispose() {
+    _viewModel.dispose();
+    super.dispose();
   }
 
   Future<void> _handleSave() async {
-    setState(() => _triedToSubmit = true);
+    _viewModel.onTriedToSubmit();
 
-    if (!_isFormValid || _currentMother == null) {
-      print('❌ Форма невалидна');
-      return;
-    }
+    if (!_viewModel.isFormValid) return;
 
-    setState(() => _isSaving = true);
+    final createdMother = await _viewModel.saveMother(context);
 
-    try {
-      int? savedAddressId;
-
-      if (_currentAddress != null) {
-        if (_isAddressFilled(_currentAddress!)) {
-          if (_isAddressValid(_currentAddress!)) {
-            final createdAddress = await _addressRepository.createAddress(_currentAddress!);
-            savedAddressId = createdAddress.id;
-          } else {
-            if (mounted) {
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(
-                  content: Text('Пожалуйста, заполните все поля адреса (город, улица, дом) или оставьте адрес пустым'),
-                  backgroundColor: AppColors.error,
-                  duration: Duration(seconds: 3),
-                ),
-              );
-            }
-            setState(() => _isSaving = false);
-            return;
-          }
-        }
-      }
-
-      final motherWithAddress = _currentMother!.copyWith(
-        addressId: savedAddressId,
-      );
-
-      final createdMother = await _motherRepository.createMother(motherWithAddress);
-
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Мать успешно добавлена!'),
-            backgroundColor: AppColors.primary,
-          ),
-        );
-        Navigator.pop(context, createdMother);
-      }
-    } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Ошибка: $e'),
-            backgroundColor: AppColors.error,
-          ),
-        );
-      }
-    } finally {
-      if (mounted) setState(() => _isSaving = false);
+    if (mounted && createdMother != null) {
+      Navigator.pop(context, createdMother);
     }
   }
 
@@ -120,54 +50,41 @@ class _AddMotherPageState extends State<AddMotherScreen> {
         backgroundColor: AppColors.white,
         elevation: 0,
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          children: [
-            Expanded(
-              child: SingleChildScrollView(
-                child: MotherFormWidget(
-                  onMotherChanged: (mother) {
-                    setState(() {
-                      _currentMother = mother;
-                    });
-                  },
-                  onAddressChanged: (address) {
-                    setState(() {
-                      _currentAddress = address;
-                    });
-                    },
-                  showValidationErrors: _triedToSubmit,
-                  lastNameError: _triedToSubmit && _currentMother?.lastName.isEmpty == true
-                      ? 'Фамилия обязательна'
-                      : null,
-                  firstNameError: _triedToSubmit && _currentMother?.firstName.isEmpty == true
-                      ? 'Имя обязательно'
-                      : null,
-                  dateError: _triedToSubmit && _currentMother?.dateOfBirth == null
-                      ? 'Дата рождения обязательна'
-                      : null,
-                  bloodGroupError: _triedToSubmit && _currentMother?.bloodGroup == null
-                      ? 'Группа крови обязательна'
-                      : null,
-                  rhFactorError: _triedToSubmit && _currentMother?.rhFactor == null
-                      ? 'Резус-фактор обязателен'
-                      : null,
+      body: ListenableBuilder(
+        listenable: _viewModel,
+        builder: (context, child) {
+          return Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Column(
+              children: [
+                Expanded(
+                  child: SingleChildScrollView(
+                    child: MotherFormWidget(
+                      onMotherChanged: _viewModel.onMotherChanged,
+                      onAddressChanged: _viewModel.onAddressChanged,
+                      showValidationErrors: _viewModel.triedToSubmit,
+                      lastNameError: _viewModel.lastNameError,
+                      firstNameError: _viewModel.firstNameError,
+                      dateError: _viewModel.dateError,
+                      bloodGroupError: _viewModel.bloodGroupError,
+                      rhFactorError: _viewModel.rhFactorError,
+                    ),
+                  ),
                 ),
-              ),
+                if (_viewModel.isSaving)
+                  const Center(child: CircularProgressIndicator())
+                else
+                  SaveButton(
+                    onPressed: _handleSave,
+                    backgroundColor: _viewModel.isFormValid ? AppColors.primary : AppColors.background,
+                    borderColor: _viewModel.isFormValid ? AppColors.primary : AppColors.border,
+                    textColor: _viewModel.isFormValid ? AppColors.white : AppColors.black,
+                    isEnabled: _viewModel.isFormValid,
+                  ),
+              ],
             ),
-            if (_isSaving)
-              const Center(child: CircularProgressIndicator())
-            else
-              SaveButton(
-                onPressed: _handleSave,
-                backgroundColor: _isFormValid ? AppColors.primary : AppColors.background,
-                borderColor: _isFormValid ? AppColors.primary : AppColors.border,
-                textColor: _isFormValid ? AppColors.white : AppColors.black,
-                isEnabled: _isFormValid,
-              ),
-          ],
-        ),
+          );
+        },
       ),
     );
   }

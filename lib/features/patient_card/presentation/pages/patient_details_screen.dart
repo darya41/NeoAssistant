@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:neo_friend/features/patient_card/presentation/pages/diary_screen.dart';
-import 'package:neo_friend/features/patient_card/presentation/pages/primary_exam_view_screen.dart';
 import '../../../../models/patient.dart';
+import '../view_models/patient_details_viewmodel.dart';
 import '../widgets/patient_details_widget.dart';
 
 class PatientDetailsScreen extends StatefulWidget {
@@ -17,69 +16,60 @@ class PatientDetailsScreen extends StatefulWidget {
 }
 
 class _PatientDetailsScreenState extends State<PatientDetailsScreen> {
+  late final PatientDetailsViewModel _viewModel;
+
+  @override
+  void initState() {
+    super.initState();
+    _viewModel = PatientDetailsViewModel(patient: widget.patient);
+  }
+
+  @override
+  void dispose() {
+    _viewModel.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(
-          widget.patient.motherName ?? 'Мать не указана',
-          style: const TextStyle(
-            fontSize: 20,
-            fontWeight: FontWeight.w500,
+    return ListenableBuilder(
+      listenable: _viewModel,
+      builder: (context, child) {
+        return Scaffold(
+          appBar: AppBar(
+            title: Text(
+              _viewModel.title,
+              style: const TextStyle(
+                fontSize: 20,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+            actions: [
+              IconButton(
+                icon: Icon(
+                  _viewModel.isFavorite ? Icons.star : Icons.star_border,
+                  color: _viewModel.isFavorite ? Colors.amber : null,
+                ),
+                onPressed: () => _viewModel.toggleFavorite(),
+              ),
+            ],
+            elevation: 4,
           ),
-        ),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.star),
-            onPressed: _toggleFavorite,
-          ),
-        ],
-        elevation: 4,
-      ),
-      body: SafeArea(
-        child: SingleChildScrollView(
-          child: Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: PatientDetailsWidget(
-              patient: widget.patient,
-              onDiaryTap: _toggleDiary,
-              onPrimaryExamTap: _togglePrimaryExam,
-              onGenerateEpicrisisTap: _generateEpicrisis,
+          body: SafeArea(
+            child: SingleChildScrollView(
+              child: Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: PatientDetailsWidget(
+                  patient: _viewModel.patient,
+                  onDiaryTap: () => _viewModel.navigateToDiary(context),
+                  onPrimaryExamTap: () => _viewModel.navigateToPrimaryExam(context),
+                  onGenerateEpicrisisTap: () => _viewModel.generateEpicrisis(context),
+                ),
+              ),
             ),
           ),
-        ),
-      ),
+        );
+      },
     );
-  }
-
-  void _toggleFavorite() {
-    //  Добавить в избранное
-  }
-
-  void _toggleDiary() {
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => DiaryScreen(
-          patientId: widget.patient.getId(),
-        ),
-      ),
-    );
-  }
-
-  void _togglePrimaryExam() {
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => PrimaryExamViewScreen(
-            patientId: widget.patient.getId(), examTypeId: 1,
-        ),
-      ),
-    );
-  }
-
-  void _generateEpicrisis() {
-    // Генерация эпикриза
   }
 }

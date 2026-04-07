@@ -1,9 +1,12 @@
-import '../../../../core/network/api_client.dart';
+// data/repositories/patient_exam_repository.dart
+import 'dart:developer';
+import '../services/patient_exam_service.dart';
 
 class PatientExamRepository {
+  final PatientExamService _service = PatientExamService();
   static const String _defaultErrorMessage = 'Неизвестная ошибка';
 
-  static Map<String, dynamic> _handleResponse(dynamic response, String context) {
+  Map<String, dynamic> _handleResponse(dynamic response, String context) {
     if (response is! Map<String, dynamic>) {
       throw Exception('$context: Неверный формат ответа от сервера');
     }
@@ -15,25 +18,10 @@ class PatientExamRepository {
     return response;
   }
 
-  static Future<int> createPatient(Map<String, dynamic> patientData) async {
+  /// Создание осмотра
+  Future<int> createPatientExam(Map<String, dynamic> examData) async {
     try {
-      final response = await ApiClient.postAuth('patients', patientData);
-      _handleResponse(response, 'создании пациента');
-
-      final patientId = response['data']?['patient_id'];
-      if (patientId == null) {
-        throw Exception('Создание пациента: ID не получен от сервера');
-      }
-
-      return patientId as int;
-    } catch (e) {
-      throw Exception('Ошибка создания пациента: $e');
-    }
-  }
-
-  static Future<int> createPatientExam(Map<String, dynamic> examData) async {
-    try {
-      final response = await ApiClient.postAuth('patient-exams', examData);
+      final response = await _service.createPatientExam(examData);
       _handleResponse(response, 'создании осмотра');
 
       final examId = response['data']?['patients_exams_id'];
@@ -41,48 +29,15 @@ class PatientExamRepository {
         throw Exception('Создание осмотра: ID не получен от сервера');
       }
 
+      log('Осмотр создан с ID: $examId', name: 'PatientExamRepository');
       return examId as int;
     } catch (e) {
+      log('Ошибка создания осмотра', error: e, name: 'PatientExamRepository');
       throw Exception('Ошибка создания осмотра: $e');
     }
   }
 
-  static Future<void> saveExamParameters(
-      int patientsExamsId,
-      Map<int, dynamic> parameters,
-      ) async {
-    if (patientsExamsId <= 0) {
-      throw Exception('Сохранение параметров: некорректный ID осмотра');
-    }
-
-    try {
-      final List<Map<String, dynamic>> paramsList = [];
-
-      for (var entry in parameters.entries) {
-        final value = entry.value?.toString().trim() ?? '';
-        if (value.isNotEmpty) {
-          paramsList.add({
-            'medical_parameter_id': entry.key,
-            'value': value,
-          });
-        }
-      }
-
-      if (paramsList.isEmpty) {
-        return;
-      }
-
-      final response = await ApiClient.postAuth(
-        'patient-exams/$patientsExamsId/parameters',
-        {'parameters': paramsList},
-      );
-
-      _handleResponse(response, 'сохранении параметров');
-    } catch (e) {
-      throw Exception('Ошибка сохранения параметров: $e');
-    }
-  }
-
+  /// Получение осмотров по типу
   Future<List<Map<String, dynamic>>> getPatientExamsByType({
     required int patientId,
     required int examTypeId,
@@ -96,8 +51,9 @@ class PatientExamRepository {
     }
 
     try {
-      final response = await ApiClient.getAuth(
-          'patient-exams?patientId=$patientId&examTypeId=$examTypeId'
+      final response = await _service.getPatientExamsByType(
+        patientId: patientId,
+        examTypeId: examTypeId,
       );
 
       if (response['success'] != true) {
@@ -105,8 +61,14 @@ class PatientExamRepository {
       }
 
       final List<dynamic> data = response['data'] ?? [];
-      return data.map((item) => Map<String, dynamic>.from(item)).toList();
+      final exams = data.map((item) => Map<String, dynamic>.from(item)).toList();
+
+      log('Загружено ${exams.length} осмотров для пациента $patientId',
+          name: 'PatientExamRepository');
+
+      return exams;
     } catch (e) {
+      log('Ошибка загрузки осмотров', error: e, name: 'PatientExamRepository');
       throw Exception('Ошибка загрузки осмотров: $e');
     }
   }

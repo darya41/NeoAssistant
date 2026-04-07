@@ -1,61 +1,44 @@
-import '../../../../core/network/api_client.dart';
+// data/repositories/mother_repository.dart
+import 'dart:developer';
 import '../../../../models/mother.dart';
+import '../services/mother_service.dart';
 
 class MotherRepository {
+  final MotherService _motherService = MotherService();
+
   Future<Mother> createMother(Mother mother) async {
     try {
-      final motherData = mother.toJson();
-
-      final response = await ApiClient.postAuth('mothers', motherData);
-
-      if (response is! Map<String, dynamic>) {
-        throw Exception('Неверный формат ответа');
-      }
+      final response = await _motherService.createMother(mother);
 
       if (response['success'] != true) {
         throw Exception(response['error'] ?? 'Ошибка создания матери');
       }
 
-      final motherDataResponse = response['data'];
+      final motherData = response['data'];
 
-      if (motherDataResponse == null) {
+      if (motherData == null) {
         throw Exception('Сервер не вернул данные матери');
       }
 
-      final Map<String, dynamic> motherJson;
-      if (motherDataResponse is List) {
-        if (motherDataResponse.isEmpty) {
-          throw Exception('Сервер вернул пустой список');
-        }
-        motherJson = motherDataResponse[0];
-      } else if (motherDataResponse is Map<String, dynamic>) {
-        motherJson = motherDataResponse;
-      } else {
-        throw Exception('Неверный тип данных: ${motherDataResponse.runtimeType}');
-      }
+      final motherJson = _extractMotherData(motherData);
 
       if (!motherJson.containsKey('mother_id') && !motherJson.containsKey('id')) {
         throw Exception('Сервер не вернул ID матери');
       }
 
-      final createdMother = Mother.fromJson(motherJson);
-
-      return createdMother;
+      return Mother.fromJson(motherJson);
     } catch (e) {
+      log('Ошибка при создании матери', error: e, name: 'MotherRepository');
       rethrow;
     }
   }
 
   Future<List<Mother>> getAllMothers() async {
     try {
-
-      final response = await ApiClient.getAuth('mothers');
-
-      if (response is! Map<String, dynamic>) {
-        return [];
-      }
+      final response = await _motherService.getAllMothers();
 
       if (response['success'] != true) {
+        log('API вернул success=false: ${response['error']}', name: 'MotherRepository');
         return [];
       }
 
@@ -65,78 +48,71 @@ class MotherRepository {
         return [];
       }
 
-      List<Mother> mothers = [];
-
-      if (mothersData is List) {
-        for (var item in mothersData) {
-          if (item is Map<String, dynamic>) {
-            final mother = Mother.fromJson(item);
-            mothers.add(mother);
-          }
-        }
-      } else if (mothersData is Map<String, dynamic>) {
-        final mother = Mother.fromJson(mothersData);
-        mothers.add(mother);
-      }
-
-      return mothers;
+      return _extractMotherList(mothersData);
     } catch (e) {
+      log('Ошибка при получении списка матерей', error: e, name: 'MotherRepository');
       return [];
     }
   }
 
   Future<Mother> getMotherById(int id) async {
     try {
-      print('📤 MotherRepository.getMotherById: $id');
+      log('MotherRepository.getMotherById: $id', name: 'MotherRepository');
 
-      final response = await ApiClient.getAuth('mothers/$id');
+      final response = await _motherService.getMotherById(id);
 
-      print('📥 Ответ сервера: $response');
-      print('📥 Тип ответа: ${response.runtimeType}');
+      log('Ответ сервера получен', name: 'MotherRepository');
 
-      // Проверяем, что ответ - это Map
-      if (response is! Map<String, dynamic>) {
-        print('❌ Ответ не является Map');
-        throw Exception('Неверный формат ответа');
-      }
-
-      // Проверяем success
       if (response['success'] != true) {
-        print('❌ Сервер вернул ошибку: ${response['error']}');
         throw Exception(response['error'] ?? 'Ошибка загрузки матери');
       }
 
-      // Получаем данные матери
       final motherData = response['data'];
-      print('📦 motherData: $motherData');
 
       if (motherData == null) {
-        print('❌ motherData = null');
         throw Exception('Мать не найдена');
       }
 
-      // Если motherData - это список, берем первый элемент
-      final Map<String, dynamic> motherJson;
-      if (motherData is List) {
-        if (motherData.isEmpty) {
-          throw Exception('Сервер вернул пустой список');
-        }
-        motherJson = motherData[0];
-      } else if (motherData is Map<String, dynamic>) {
-        motherJson = motherData;
-      } else {
-        throw Exception('Неверный тип данных: ${motherData.runtimeType}');
-      }
-
-      print('📦 motherJson: $motherJson');
-
+      final motherJson = _extractMotherData(motherData);
       final mother = Mother.fromJson(motherJson);
-      print('✅ Мать загружена: ID=${mother.id}, ФИО=${mother.fullName}');
 
+      log('Мать загружена: ID=${mother.id}, ФИО=${mother.fullName}', name: 'MotherRepository');
       return mother;
     } catch (e) {
-      print('❌ Ошибка в MotherRepository.getMotherById: $e');
+      log('Ошибка в MotherRepository.getMotherById', error: e, name: 'MotherRepository');
       rethrow;
     }
+  }
+
+  Map<String, dynamic> _extractMotherData(dynamic motherData) {
+    if (motherData is List) {
+      if (motherData.isEmpty) {
+        throw Exception('Сервер вернул пустой список');
+      }
+      if (motherData[0] is! Map<String, dynamic>) {
+        throw Exception('Неверный формат данных в списке');
+      }
+      return motherData[0];
+    } else if (motherData is Map<String, dynamic>) {
+      return motherData;
+    } else {
+      throw Exception('Неверный тип данных: ${motherData.runtimeType}');
+    }
+  }
+
+  List<Mother> _extractMotherList(dynamic mothersData) {
+    final List<Mother> mothers = [];
+
+    if (mothersData is List) {
+      for (var item in mothersData) {
+        if (item is Map<String, dynamic>) {
+          mothers.add(Mother.fromJson(item));
+        }
+      }
+    } else if (mothersData is Map<String, dynamic>) {
+      mothers.add(Mother.fromJson(mothersData));
+    }
+
+    return mothers;
   }
 }

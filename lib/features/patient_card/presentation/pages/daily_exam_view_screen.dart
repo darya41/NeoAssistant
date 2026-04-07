@@ -2,8 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:neo_friend/features/patient_card/presentation/pages/diary_screen.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_strings.dart';
-import '../../data/repositories/parameter_repository.dart';
-import '../../domain/models/daily_exam_state.dart';
+import '../view_models/daily_exam_view_viewmodel.dart';
 
 class DailyExamViewScreen extends StatefulWidget {
   final int patientId;
@@ -20,91 +19,21 @@ class DailyExamViewScreen extends StatefulWidget {
 }
 
 class _DailyExamViewScreenState extends State<DailyExamViewScreen> {
-  final ParameterRepository _repository = ParameterRepository();
-  final DailyExamState _state = DailyExamState();
-
-  String _examDateTime = '';
-  String _examTitle = 'Ежедневное наблюдение пациента';
+  late final DailyExamViewViewModel _viewModel;
 
   @override
   void initState() {
     super.initState();
-    _loadParameters();
-  }
-
-  Future<void> _loadParameters() async {
-    _state.setLoading(true);
-    if (mounted) setState(() {});
-
-    try {
-
-      final parameters = await _repository.getParametersWithValuesByExamId(
-        patientExamId: widget.examId,
-      );
-      _state.setParameters(parameters);
-
-      await _loadExamDateTime(widget.examId);
-
-      await _loadExamType(widget.examId);
-
-    } catch (e) {
-      _state.setError(e.toString());
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Ошибка загрузки: $e')),
-        );
-      }
-    } finally {
-      _state.setLoading(false);
-      if (mounted) setState(() {});
-    }
-  }
-
-  Future<void> _loadExamDateTime(int patientExamId) async {
-      final examDateTime = await _repository.getExamDateTime(patientExamId);
-      if (examDateTime != null) {
-        setState(() {
-          _examDateTime = _formatDateTime(examDateTime);
-        });
-      }
-  }
-
-  Future<void> _loadExamType(int patientExamId) async {
-      final examType = await _repository.getExamTypeByExamId(patientExamId);
-      if (examType != null) {
-        setState(() {
-          _examTitle = examType;
-        });
-      }
-  }
-
-  String _formatDateTime(DateTime dateTime) {
-    final time = '${dateTime.hour.toString().padLeft(2, '0')}:${dateTime.minute.toString().padLeft(2, '0')}';
-    const months = [
-      'января', 'февраля', 'марта', 'апреля', 'мая', 'июня',
-      'июля', 'августа', 'сентября', 'октября', 'ноября', 'декабря'
-    ];
-    final date = '${dateTime.day} ${months[dateTime.month - 1]} ${dateTime.year}';
-    return '$time   $date';
+    _viewModel = DailyExamViewViewModel(
+      patientId: widget.patientId,
+      examId: widget.examId,
+    );
   }
 
   @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
-          onPressed: () {
-            _showExitConfirmationDialog();
-          },
-          tooltip: 'Назад',
-        ),
-        title: Text(_examTitle),
-        backgroundColor: AppColors.primary,
-        automaticallyImplyLeading: false,
-      ),
-      body: _buildBody(),
-    );
+  void dispose() {
+    _viewModel.dispose();
+    super.dispose();
   }
 
   void _showExitConfirmationDialog() {
@@ -115,28 +44,56 @@ class _DailyExamViewScreenState extends State<DailyExamViewScreen> {
           patientId: widget.patientId,
         ),
       ),
-    ).then((_) {
-    });
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return ListenableBuilder(
+      listenable: _viewModel,
+      builder: (context, child) {
+        // Показываем ошибку если она есть
+        if (_viewModel.error != null && !_viewModel.isLoading) {
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            _viewModel.showErrorSnackBar(context);
+          });
+        }
+
+        return Scaffold(
+          appBar: AppBar(
+            leading: IconButton(
+              icon: const Icon(Icons.arrow_back),
+              onPressed: _showExitConfirmationDialog,
+              tooltip: 'Назад',
+            ),
+            title: Text(_viewModel.examTitle),
+            backgroundColor: AppColors.primary,
+            automaticallyImplyLeading: false,
+          ),
+          body: _buildBody(),
+        );
+      },
+    );
   }
 
   Widget _buildBody() {
-    if (_state.isLoading) {
+    if (_viewModel.isLoading) {
       return const Center(child: CircularProgressIndicator());
     }
 
-    if (_state.error != null) {
+    if (_viewModel.error != null) {
       return Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Text(
-              _state.error!,
+              _viewModel.error!,
               style: const TextStyle(color: AppColors.error),
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 16),
             ElevatedButton(
-              onPressed: _loadParameters,
+              onPressed: () => _viewModel.loadParameters(),
               child: const Text(AppStrings.retry),
             ),
           ],
@@ -144,7 +101,7 @@ class _DailyExamViewScreenState extends State<DailyExamViewScreen> {
       );
     }
 
-    if (_state.parameters.isEmpty) {
+    if (_viewModel.parameters.isEmpty) {
       return const Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -175,7 +132,9 @@ class _DailyExamViewScreenState extends State<DailyExamViewScreen> {
           Container(
             padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 4),
             child: Text(
-              _examDateTime.isNotEmpty ? _examDateTime : 'Дата не указана',
+              _viewModel.examDateTime.isNotEmpty
+                  ? _viewModel.examDateTime
+                  : 'Дата не указана',
               style: const TextStyle(
                 fontSize: 14,
                 color: AppColors.grey,
@@ -206,7 +165,7 @@ class _DailyExamViewScreenState extends State<DailyExamViewScreen> {
                   Padding(
                     padding: const EdgeInsets.all(8.0),
                     child: Text(
-                      _buildParametersText(),
+                      _viewModel.buildParametersText(),
                       style: const TextStyle(
                         fontSize: 15,
                         height: 1.6,
@@ -221,17 +180,5 @@ class _DailyExamViewScreenState extends State<DailyExamViewScreen> {
         ],
       ),
     );
-  }
-
-  String _buildParametersText() {
-    final List<String> parameterStrings = [];
-
-    for (var param in _state.parameters) {
-      final hasValue = param.value != null && param.value!.isNotEmpty;
-      final value = hasValue ? param.value! : '—';
-      parameterStrings.add('${param.name} $value');
-    }
-
-    return parameterStrings.join('. ');
   }
 }
