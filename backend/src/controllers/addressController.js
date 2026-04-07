@@ -1,51 +1,50 @@
 const db = require('../config/database');
 const AddressModel = require('../models/address');
 
-const createAddress = async (req, res) => {
-    console.log('POST /api/addresses');
-    console.log('Request body:', req.body);
+class AddressController {
+    async createAddress(req, res) {
+        try {
+            const { settlement_type, city, address_type, street, house_number, building, apartment } = req.body;
 
-    try {
-        const { settlement_type, city, address_type, street, house_number, building, apartment } = req.body;
+            if (!city || !street || !house_number) {
+                return res.status(400).json({
+                    success: false,
+                    error: 'City, street and house number are required'
+                });
+            }
 
-        if (!city || !street || !house_number) {
-            return res.status(400).json({
+            const addressId = await AddressModel.create({
+                settlement_type,
+                city,
+                address_type,
+                street,
+                house_number,
+                building,
+                apartment
+            });
+
+            const newAddress = await AddressModel.findById(addressId);
+
+            if (!newAddress) {
+                return res.status(500).json({
+                    success: false,
+                    error: 'Address created but not found'
+                });
+            }
+
+            const addressData = Array.isArray(newAddress) ? newAddress[0] : newAddress;
+
+            res.status(201).json({
+                success: true,
+                data: addressData
+            });
+        } catch (error) {
+            res.status(500).json({
                 success: false,
-                error: 'City, street and house number are required'
+                error: 'Error creating address: ' + error.message
             });
         }
-
-        const addressId = await AddressModel.create({
-            settlement_type,
-            city,
-            address_type,
-            street,
-            house_number,
-            building,
-            apartment
-        });
-
-        const newAddress = await AddressModel.findById(addressId);
-
-       if (!newAddress) {
-            return res.status(500).json({
-                success: false,
-                error: 'Address created but not found'
-            });
-        }
-
-        const addressData = Array.isArray(newAddress) ? newAddress[0] : newAddress;
-
-        res.status(201).json({
-            success: true,
-            data: addressData
-        });
-    } catch (error) {
-        res.status(500).json({
-            success: false,
-            error: 'Error creating address: ' + error.message
-        });
     }
 };
 
-module.exports = { createAddress };
+module.exports = new AddressController();

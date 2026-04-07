@@ -33,7 +33,7 @@ class PatientExamModel {
         return rows[0] || null;
     }
 
-   static async saveParameters(patientsExamsId, parameters) {
+    static async saveParameters(patientsExamsId, parameters) {
         for (const param of parameters) {
             await db.query(`
                 INSERT INTO medParamInPatientExams (patients_exams_id, med_param_exam_id, value)
@@ -48,6 +48,38 @@ class PatientExamModel {
             [id]
         );
         return rows.length > 0;
+    }
+
+    static async getExamInfo(patientsExamsId) {
+        const [rows] = await db.query(
+            'SELECT exam_id FROM patientsexams WHERE patients_exams_id = ?',
+            [patientsExamsId]
+        );
+        return rows[0];
+    }
+
+    static async saveParameterValues(patientsExamsId, valuesToInsert) {
+        if (valuesToInsert.length === 0) return 0;
+
+        const [result] = await db.query(
+            `INSERT INTO medparaminpatientexams
+                    (patients_exams_id, med_param_exam_id, value)
+                    VALUES ?
+                    ON DUPLICATE KEY UPDATE value = VALUES(value)`,
+            [valuesToInsert]
+        );
+        return result.affectedRows;
+    }
+
+    static async getPatientExamsByType(patientId, examTypeId) {
+        const [rows] = await db.query(
+            `SELECT patients_exams_id, date_time
+                        FROM patientsexams
+                        WHERE patient_id = ? AND exam_id = ?
+                        ORDER BY date_time DESC`,
+            [patientId, examTypeId]
+        );
+        return rows;
     }
 }
 
