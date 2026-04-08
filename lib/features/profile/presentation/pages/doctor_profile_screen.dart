@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:neo_friend/features/profile/presentation/pages/settings_screen.dart';
-import '../../../../core/network/api_client.dart';
-import '../../../../core/storage/token_storage.dart';
+import '../../../../core/constants/app_colors.dart';
+import '../../domain/entities/doctor.dart';
 import '../../../main/presentation/widgets/custom_bottom_navigation_bar.dart';
-import '../widgets/doctor_profile_ui.dart';
+import '../view_models/doctor_profile_viewmodel.dart';
+import '../widgets/doctor_info_card.dart';
 import 'doctor_edit_profile_screen.dart';
 
 class DoctorProfileScreen extends StatefulWidget {
@@ -14,72 +15,50 @@ class DoctorProfileScreen extends StatefulWidget {
 }
 
 class _DoctorProfileScreenState extends State<DoctorProfileScreen> {
-  Map<String, dynamic>? _doctorData;
-  bool _isLoading = true;
-  String? _errorMessage;
+  late final DoctorProfileViewModel _viewModel;
 
   @override
   void initState() {
     super.initState();
-    _checkTokenAndLoadData();
+    _viewModel = DoctorProfileViewModel();
+    _viewModel.addListener(_onViewModelChanged);
   }
 
-  Future<void> _checkTokenAndLoadData() async {
-    final isLoggedIn = await TokenStorage.isLoggedIn();
-
-    if (!isLoggedIn) {
-      setState(() {
-        _errorMessage = 'Не авторизован. Войдите снова.';
-        _isLoading = false;
-      });
-      return;
-    }
-
-    try {
-      await _loadDoctorData();
-    } catch (e) {
-      if (e.toString().contains('401') || e.toString().contains('истек')) {
-        final refreshed = await ApiClient.refreshToken();
-        if (refreshed) {
-          await _loadDoctorData();
-        } else {
-          setState(() {
-            _errorMessage = 'Сессия истекла. Войдите снова.';
-            _isLoading = false;
-          });
-        }
-      } else {
-        setState(() {
-          _errorMessage = e.toString().replaceFirst('Exception: ', '');
-          _isLoading = false;
-        });
-      }
+  void _onViewModelChanged() {
+    if (mounted) {
+      setState(() {});
     }
   }
 
-  Future<void> _loadDoctorData() async {
-    final data = await TokenStorage.getDoctorData();
+  Future<void> _handleEdit() async {
+    if (_viewModel.doctor == null) return;
 
-    if (data == null) {
-      setState(() {
-        _errorMessage = 'Данные не найдены. Войдите снова.';
-        _isLoading = false;
-      });
-      return;
+    final updatedDoctor = await Navigator.push<Doctor>(
+      context,
+      MaterialPageRoute(
+        builder: (context) => DoctorEditProfileScreen(
+          doctor: _viewModel.doctor!,
+        ),
+      ),
+    );
+
+    if (updatedDoctor != null) {
+      _viewModel.updateDoctor(updatedDoctor);
     }
-
-    setState(() {
-      _doctorData = data;
-      _isLoading = false;
-    });
   }
 
-  Future<void> _retry() async {
-    setState(() {
-      _isLoading = true;
-      _errorMessage = null;
-    });
-    await _checkTokenAndLoadData();
+  void _navigateToSettings() {
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => const SettingsScreen()),
+    );
+  }
+
+  @override
+  void dispose() {
+    _viewModel.removeListener(_onViewModelChanged);
+    _viewModel.dispose();
+    super.dispose();
   }
 
   @override
@@ -90,38 +69,26 @@ class _DoctorProfileScreenState extends State<DoctorProfileScreen> {
         actions: [
           IconButton(
             icon: const Icon(Icons.settings, color: Colors.white),
-            onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => SettingsScreen()),
-              );
-            },
+            onPressed: _navigateToSettings,
           ),
           IconButton(
             icon: const Icon(Icons.edit, color: Colors.white),
-            onPressed: () {
-              Navigator.push<Map<String, dynamic>>(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => DoctorEditProfileScreen(
-                    doctorData: _doctorData!,
-                  ),
-                ),
-              ).then((updatedData) {
-                if (updatedData != null) {
-                  setState(() {
-                    _doctorData!.addAll(updatedData);
-                  });
-                }
-              });
-            },
+            onPressed: _handleEdit,
           ),
         ],
       ),
-      body: _isLoading
-          ? const Center(child: CircularProgressIndicator())
-          : _errorMessage != null
-          ? Center(
+      body: _buildBody(),
+      bottomNavigationBar: const CustomBottomNavigationBar(currentIndex: 3),
+    );
+  }
+
+  Widget _buildBody() {
+    if (_viewModel.isLoading) {
+      return const Center(child: CircularProgressIndicator());
+    }
+
+    if (_viewModel.errorMessage != null) {
+      return Center(
         child: Padding(
           padding: const EdgeInsets.all(24.0),
           child: Column(
@@ -129,23 +96,23 @@ class _DoctorProfileScreenState extends State<DoctorProfileScreen> {
             children: [
               const Icon(
                 Icons.error_outline,
-                color: Colors.red,
+                color: AppColors.error,
                 size: 64,
               ),
               const SizedBox(height: 16),
               Text(
-                _errorMessage!,
+                _viewModel.errorMessage!,
                 style: const TextStyle(
                   fontSize: 16,
-                  color: Colors.red,
+                  color: AppColors.error,
                 ),
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: 24),
               ElevatedButton(
-                onPressed: _retry,
+                onPressed: () => _viewModel.retry(),
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFF44E4BF),
+                  backgroundColor: AppColors.primary,
                   padding: const EdgeInsets.symmetric(
                     horizontal: 32,
                     vertical: 12,
@@ -159,12 +126,16 @@ class _DoctorProfileScreenState extends State<DoctorProfileScreen> {
             ],
           ),
         ),
-      )
-          : Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: DoctorInfoCard(doctorData: _doctorData!),
-      ),
-      bottomNavigationBar: const CustomBottomNavigationBar(currentIndex: 3),
+      );
+    }
+
+    if (_viewModel.doctor == null) {
+      return const Center(child: Text('Нет данных'));
+    }
+
+    return Padding(
+      padding: const EdgeInsets.all(16.0),
+      child: DoctorInfoCard(doctor: _viewModel.doctor!),
     );
   }
 }

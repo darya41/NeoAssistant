@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:neo_friend/features/profile/presentation/pages/about_screen.dart';
-import '../../../../core/storage/token_storage.dart';
+
+import '../view_models/settings_viewmodel.dart';
 
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({super.key});
@@ -10,55 +11,51 @@ class SettingsScreen extends StatefulWidget {
 }
 
 class _SettingsScreenState extends State<SettingsScreen> {
+  late final SettingsViewModel _viewModel;
 
-  Future<void> _handleLogout() async {
-    final shouldLogout = await showDialog<bool>(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Выход из аккаунта'),
-        content: const Text('Вы уверены, что хотите выйти из аккаунта?'),
-        actions: [
-          TextButton(
-            onPressed: () {
-              Navigator.pop(context, false);
-            },
-            child: const Text('Отмена'),
-          ),
-          TextButton(
-            onPressed: () {
-              Navigator.pop(context, true);
-            },
-            child: const Text(
-              'Выйти',
-              style: TextStyle(color: Colors.red),
-            ),
-          ),
-        ],
-      ),
-    );
+  @override
+  void initState() {
+    super.initState();
+    _viewModel = SettingsViewModel();
+    _viewModel.addListener(_onViewModelChanged);
+  }
 
-    if (shouldLogout ?? false) {
-      try {
-        await TokenStorage.clearAll();
-
-        Navigator.pushNamedAndRemoveUntil(
-          context,
-          '/login',
-              (route) => false,
-        );
-      } catch (e) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Ошибка при выходе: $e'),
-            backgroundColor: Colors.red,
-            duration: Duration(seconds: 3),
-          ),
-        );
-      }
-    } else {
+  void _onViewModelChanged() {
+    if (mounted) {
+      setState(() {});
     }
   }
 
+  Future<void> _handleLogout() async {
+    final confirmed = await _viewModel.showLogoutConfirmation(context);
+
+    if (!confirmed) return;
+
+    final success = await _viewModel.logout(context);
+
+    if (success && mounted) {
+      Navigator.pushNamedAndRemoveUntil(
+        context,
+        '/login',
+            (route) => false,
+      );
+    } else if (_viewModel.errorMessage != null && mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(_viewModel.errorMessage!),
+          backgroundColor: Colors.red,
+          duration: const Duration(seconds: 3),
+        ),
+      );
+    }
+  }
+
+  @override
+  void dispose() {
+    _viewModel.removeListener(_onViewModelChanged);
+    _viewModel.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -74,19 +71,25 @@ class _SettingsScreenState extends State<SettingsScreen> {
         child: Column(
           children: [
             const SizedBox(height: 20),
-            _settingItem('О приложении'),
+            _buildSettingItem('О приложении', () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => const AboutScreen()),
+              );
+            }),
             const SizedBox(height: 200),
-            _logoutButton(),
+            _buildLogoutButton(),
             const SizedBox(height: 30),
           ],
         ),
       ),
-      bottomNavigationBar: _versionText(),
+      bottomNavigationBar: _buildVersionText(),
     );
   }
 
-  Widget _settingItem(String title) {
+  Widget _buildSettingItem(String title, VoidCallback onTap) {
     return Container(
+      margin: const EdgeInsets.symmetric(horizontal: 16),
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         border: Border.all(color: Colors.grey[300]!),
@@ -95,43 +98,46 @@ class _SettingsScreenState extends State<SettingsScreen> {
       child: ListTile(
         title: Text(
           title,
-          style: TextStyle(fontSize: 18),
+          style: const TextStyle(fontSize: 18),
         ),
         trailing: const Icon(Icons.arrow_forward_ios),
-        onTap: () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(builder: (context) => AboutScreen()),
-          );
-        },
+        onTap: onTap,
       ),
     );
   }
 
-  Widget _logoutButton() {
-    return ElevatedButton(
-      onPressed: _handleLogout,
-      style: ElevatedButton.styleFrom(
-        backgroundColor: Colors.white,
-        foregroundColor: Colors.black,
-        minimumSize: const Size(250, 50),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(8),
-          side: BorderSide(color: Colors.black, width: 2),
+  Widget _buildLogoutButton() {
+    return Center(
+      child: ElevatedButton(
+        onPressed: _viewModel.isLoggingOut ? null : _handleLogout,
+        style: ElevatedButton.styleFrom(
+          backgroundColor: Colors.white,
+          foregroundColor: Colors.black,
+          minimumSize: const Size(250, 50),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(8),
+            side: const BorderSide(color: Colors.black, width: 2),
+          ),
         ),
+        child: _viewModel.isLoggingOut
+            ? const SizedBox(
+          height: 20,
+          width: 20,
+          child: CircularProgressIndicator(strokeWidth: 2),
+        )
+            : const Text('Выйти из аккаунта'),
       ),
-      child: Text('Выйти из аккаунта'),
     );
   }
 
-  Widget _versionText() {
+  Widget _buildVersionText() {
     return Container(
       height: 60,
       color: Colors.white,
       child: Center(
         child: Text(
-          'Версия 1.03.02',
-          style: TextStyle(fontSize: 20, color: Colors.grey),
+          'Версия ${_viewModel.appVersion}',
+          style: const TextStyle(fontSize: 20, color: Colors.grey),
         ),
       ),
     );

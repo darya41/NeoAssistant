@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import '../../../../core/constants/app_colors.dart';
 import '../../../../core/validators/profile_validator.dart';
+import '../../../../shared/widgets/fields/text_input_field.dart';
 
 class ProfileFormFields extends StatefulWidget {
   final TextEditingController lastNameController;
@@ -9,6 +11,10 @@ class ProfileFormFields extends StatefulWidget {
   final TextEditingController passwordController;
   final TextEditingController confirmPasswordController;
   final TextEditingController phoneController;
+  final bool isEmailEditable;
+  final String? emailError;
+  final String? passwordError;
+  final String? confirmPasswordError;
 
   const ProfileFormFields({
     super.key,
@@ -19,6 +25,10 @@ class ProfileFormFields extends StatefulWidget {
     required this.passwordController,
     required this.confirmPasswordController,
     required this.phoneController,
+    this.isEmailEditable = true,
+    this.emailError,
+    this.passwordError,
+    this.confirmPasswordError,
   });
 
   @override
@@ -54,52 +64,53 @@ class _ProfileFormFieldsState extends State<ProfileFormFields> {
   Widget build(BuildContext context) {
     return Column(
       children: [
-        _buildTextField('Фамилия', widget.lastNameController),
+        TextInputField(
+          controller: widget.lastNameController,
+          hintText: 'Фамилия',
+        ),
         const SizedBox(height: 16),
-        _buildTextField('Имя', widget.firstNameController),
+        TextInputField(
+          controller: widget.firstNameController,
+          hintText: 'Имя',
+        ),
         const SizedBox(height: 16),
-        _buildTextField('Отчество', widget.patronymicController),
+        TextInputField(
+          controller: widget.patronymicController,
+          hintText: 'Отчество',
+        ),
         const SizedBox(height: 16),
-        _buildTextField('Email', widget.emailController, keyboardType: TextInputType.emailAddress),
+        TextInputField(
+          controller: widget.emailController,
+          hintText: 'Email',
+          keyboardType: TextInputType.emailAddress,
+          readOnly: !widget.isEmailEditable,
+          showError: widget.emailError != null,
+          errorText: widget.emailError,
+        ),
         const SizedBox(height: 16),
         _buildPasswordField('Новый пароль', widget.passwordController, isConfirm: false),
         const SizedBox(height: 16),
         _buildPasswordField('Подтвердите пароль', widget.confirmPasswordController, isConfirm: true),
         const SizedBox(height: 16),
-        _buildTextField('Телефон', widget.phoneController, keyboardType: TextInputType.phone),
+        TextInputField(
+          controller: widget.phoneController,
+          hintText: 'Телефон',
+          keyboardType: TextInputType.phone,
+        ),
       ],
     );
   }
 
-  Widget _buildTextField(String label, TextEditingController controller, {TextInputType? keyboardType}) {
-    return Container(
-      height: 56,
-      decoration: BoxDecoration(
-        color: const Color(0xFFEEEEEE),
-        borderRadius: BorderRadius.circular(8),
-      ),
-      child: TextFormField(
-        controller: controller,
-        keyboardType: keyboardType,
-        decoration: InputDecoration(
-          border: InputBorder.none,
-          contentPadding: const EdgeInsets.symmetric(horizontal: 16),
-          hintText: label,
-          hintStyle: const TextStyle(color: Colors.grey),
-        ),
-      ),
-    );
-  }
-
   Widget _buildPasswordField(String label, TextEditingController controller, {required bool isConfirm}) {
+    final isVisible = isConfirm ? _isConfirmPasswordVisible : _isPasswordVisible;
     final errorText = isConfirm
-        ? ProfileValidator.validatePasswordMatch(
+        ? (widget.confirmPasswordError ?? ProfileValidator.validatePasswordMatch(
       widget.passwordController.text,
       widget.confirmPasswordController.text,
-    )
-        : _passwordChanged
-        ? ProfileValidator.validatePassword(controller.text)
-        : null;
+    ))
+        : (_passwordChanged
+        ? (widget.passwordError ?? ProfileValidator.validatePassword(controller.text))
+        : null);
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -112,7 +123,7 @@ class _ProfileFormFieldsState extends State<ProfileFormFields> {
           ),
           child: TextFormField(
             controller: controller,
-            obscureText: isConfirm ? !_isConfirmPasswordVisible : !_isPasswordVisible,
+            obscureText: !isVisible,
             decoration: InputDecoration(
               border: InputBorder.none,
               contentPadding: const EdgeInsets.symmetric(horizontal: 16),
@@ -120,9 +131,8 @@ class _ProfileFormFieldsState extends State<ProfileFormFields> {
               hintStyle: const TextStyle(color: Colors.grey),
               suffixIcon: IconButton(
                 icon: Icon(
-                  isConfirm
-                      ? (_isConfirmPasswordVisible ? Icons.visibility_off : Icons.visibility)
-                      : (_isPasswordVisible ? Icons.visibility_off : Icons.visibility),
+                  isVisible ? Icons.visibility_off : Icons.visibility,
+                  color: Colors.grey,
                 ),
                 onPressed: () {
                   setState(() {
@@ -137,12 +147,12 @@ class _ProfileFormFieldsState extends State<ProfileFormFields> {
             ),
           ),
         ),
-        if (errorText != null)
+        if (errorText != null && errorText.isNotEmpty)
           Padding(
             padding: const EdgeInsets.only(left: 16, top: 4),
             child: Text(
               errorText,
-              style: const TextStyle(color: Colors.red, fontSize: 12),
+              style: const TextStyle(color: AppColors.error, fontSize: 12),
             ),
           ),
       ],

@@ -12,6 +12,8 @@ class Doctor {
       .where((name) => name != null && name.isNotEmpty)
       .join(' ');
 
+  String get displayPhone => workPhone ?? personalPhone ?? '';
+
   const Doctor({
     required this.id,
     required this.email,
@@ -24,27 +26,29 @@ class Doctor {
   });
 
   factory Doctor.fromJson(Map<String, dynamic> json) {
+
     return Doctor(
-      id: json['doctor_id'] ?? json['id'] ?? 0,
-      email: json['work_email'] ?? json['email'] ?? '',
-      firstName: json['first_name'] ?? '',
-      lastName: json['last_name'] ?? '',
-      patronymic: json['patronymic'],
-      specialization: json['specialization_name'] ?? json['specialization'],
-      workPhone: json['work_phone'],
-      personalPhone: json['personal_phone'],
+      id: json['id'] ?? json['doctor_id'] ?? 0,
+      email: json['email'] ?? json['work_email'] ?? '',
+      firstName: json['firstName'] ?? json['first_name'] ?? '',
+      lastName: json['lastName'] ?? json['last_name'] ?? '',
+      patronymic: json['patronymic'] ?? json['middle_name'],
+      specialization: json['specialization'],
+      workPhone: json['workPhone'] ?? json['work_phone'] ?? json['phone'],
+      personalPhone: json['personalPhone'] ?? json['personal_phone'],
     );
   }
 
   Map<String, dynamic> toJson() {
     return {
-      'doctor_id': id,
-      'work_email': email,
-      'first_name': firstName,
-      'last_name': lastName,
+      'id': id,
+      'email': email,
+      'firstName': firstName,
+      'lastName': lastName,
       'patronymic': patronymic,
-      'work_phone': workPhone,
-      'personal_phone': personalPhone,
+      'specialization': specialization,
+      'workPhone': workPhone,
+      'personalPhone': personalPhone,
     };
   }
 }
