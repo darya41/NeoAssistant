@@ -55,7 +55,11 @@ class _DoctorEditProfileScreenState extends State<DoctorEditProfileScreen> {
     });
 
     try {
+      print('Specializations ');
       final specializations = await ApiClient.get('specializations');
+
+      print('Specializations response: $specializations');
+
       setState(() {
         _specializations = List<Map<String, dynamic>>.from(specializations);
         _isLoadingSpecializations = false;
@@ -71,8 +75,9 @@ class _DoctorEditProfileScreenState extends State<DoctorEditProfileScreen> {
         }
       });
     } catch (e) {
+      print('Error loading specializations: $e');
       setState(() {
-        _specializationError = 'Ошибка загрузки должностей';
+        _specializationError = 'Ошибка загрузки должностей: ${e.toString().replaceFirst('Exception: ', '')}';
         _isLoadingSpecializations = false;
       });
     }

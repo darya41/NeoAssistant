@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../../../../core/constants/app_colors.dart';
+
 class PasswordRulesDialog extends StatelessWidget {
   const PasswordRulesDialog({super.key});
 
@@ -39,7 +41,7 @@ class PasswordRulesDialog extends StatelessWidget {
           child: const Text(
             'OK',
             style: TextStyle(
-              color: Color(0xFF44E4BF),
+              color:AppColors.primary,
             ),
           ),
         ),

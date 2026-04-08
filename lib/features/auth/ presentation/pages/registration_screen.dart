@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
-import '../../../main/presentation/pages/home_screen.dart';
+import '../../../../core/constants/app_colors.dart';
+import '../../../../core/utils/icon_widgets.dart';
+import '../view_model/registration_viewmodel.dart';
 import '../widgets/registration_step1.dart';
 import '../widgets/registration_step2.dart';
 import '../widgets/registration_step3.dart';
 import '../widgets/registration_step4.dart';
-import '../../data/repositories/auth_repository.dart';
-import '../../../../core/validators/auth_validator.dart';
 
 class RegistrationScreen extends StatefulWidget {
   const RegistrationScreen({super.key});
@@ -15,33 +15,16 @@ class RegistrationScreen extends StatefulWidget {
 }
 
 class _RegistrationScreenState extends State<RegistrationScreen> {
-  int _currentStep = 0;
-  bool _isLoading = false;
-
-  final TextEditingController _emailController = TextEditingController();
-  final TextEditingController _passwordController = TextEditingController();
-  final TextEditingController _confirmPasswordController = TextEditingController();
-  final TextEditingController _lastNameController = TextEditingController();
-  final TextEditingController _firstNameController = TextEditingController();
-  final TextEditingController _middleNameController = TextEditingController();
-  final TextEditingController _phoneController = TextEditingController();
- int? _selectedPositionId;
-
-  final AuthRepository _authRepository = AuthRepository();
+  late final RegistrationViewModel _viewModel;
 
   @override
   void initState() {
     super.initState();
-    _emailController.addListener(_updateState);
-    _passwordController.addListener(_updateState);
-    _confirmPasswordController.addListener(_updateState);
-    _lastNameController.addListener(_updateState);
-    _firstNameController.addListener(_updateState);
-    _middleNameController.addListener(_updateState);
-    _phoneController.addListener(_updateState);
+    _viewModel = RegistrationViewModel();
+    _viewModel.addListener(_onViewModelChanged);
   }
 
-  void _updateState() {
+  void _onViewModelChanged() {
     if (mounted) {
       setState(() {});
     }
@@ -49,124 +32,43 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
 
   @override
   void dispose() {
-    _emailController.removeListener(_updateState);
-    _passwordController.removeListener(_updateState);
-    _confirmPasswordController.removeListener(_updateState);
-    _lastNameController.removeListener(_updateState);
-    _firstNameController.removeListener(_updateState);
-    _middleNameController.removeListener(_updateState);
-    _phoneController.removeListener(_updateState);
-
-    _emailController.dispose();
-    _passwordController.dispose();
-    _confirmPasswordController.dispose();
-    _lastNameController.dispose();
-    _firstNameController.dispose();
-    _middleNameController.dispose();
-    _phoneController.dispose();
+    _viewModel.removeListener(_onViewModelChanged);
+    _viewModel.dispose();
     super.dispose();
   }
 
-  bool get _isStep1Valid {
-    final email = _emailController.text;
-    final password = _passwordController.text;
-    final confirmPassword = _confirmPasswordController.text;
-
-    if (!AuthValidator.isEmailValid(email)) return false;
-    if (!AuthValidator.isPasswordValid(password)) return false;
-    if (!AuthValidator.doPasswordsMatch(password, confirmPassword)) return false;
-
-    return true;
+  void _handleNextStep() {
+    _viewModel.nextStep();
   }
 
-  bool get _isStep2Valid {
-    return _lastNameController.text.trim().isNotEmpty &&
-        _firstNameController.text.trim().isNotEmpty;
-  }
-
-  bool get _isStep3Valid {
-    final digits = _phoneController.text.replaceAll(RegExp(r'[^\d]'), '');
-    return digits.length == 12;
-  }
-
-  void _nextStep() {
-    if (_currentStep == 0 && _isStep1Valid) {
-      setState(() {
-        _currentStep = 1;
-      });
-    } else if (_currentStep == 1 && _isStep2Valid) {
-      setState(() {
-        _currentStep = 2;
-      });
-    } else if (_currentStep == 2 && _isStep3Valid) {
-      setState(() {
-        _currentStep = 3;
-      });
-    } else if (_currentStep == 3 && _selectedPositionId != null) {
-      _completeRegistration();
-    }
-  }
-
-  void _previousStep() {
-    if (_currentStep > 0) {
-      setState(() {
-        _currentStep--;
-      });
+  void _handlePreviousStep() {
+    if (_viewModel.currentStep > 0) {
+      _viewModel.previousStep();
     } else {
       Navigator.pop(context);
     }
   }
 
-  Future<void> _completeRegistration() async {
-    String phoneDigits = _phoneController.text
-        .replaceAll(RegExp(r'[^\d]'), '')
-        .substring(3);
+  Future<void> _handleRegistration() async {
+    final success = await _viewModel.register();
 
-    setState(() => _isLoading = true);
-
-    try {
-      final result = await _authRepository.register(
-        email: _emailController.text.trim(),
-        password: _passwordController.text,
-        lastName: _lastNameController.text.trim(),
-        firstName: _firstNameController.text.trim(),
-        middleName: _middleNameController.text.trim().isEmpty
-            ? null
-            : _middleNameController.text.trim(),
-        phone: '+375$phoneDigits',
-        positionId: _selectedPositionId!,
+    if (success && mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Регистрация успешна! Теперь вы можете войти'),
+          backgroundColor: AppColors.primary,
+          duration: Duration(seconds: 2),
+        ),
       );
-
-      if (mounted) {
-        setState(() => _isLoading = false);
-
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Регистрация успешна! Теперь вы можете войти'),
-            backgroundColor: Color(0xFF44E4BF),
-            duration: Duration(seconds: 2),
-          ),
-        );
-
-        Navigator.pushReplacementNamed(context, '/login');
-      }
-    } catch (e) {
-      if (mounted) {
-        setState(() => _isLoading = false);
-
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(e.toString().replaceFirst('Exception: ', '')),
-            backgroundColor: Colors.red,
-          ),
-        );
-      }
+      Navigator.pushReplacementNamed(context, '/login');
+    } else if (_viewModel.errorMessage != null && mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(_viewModel.errorMessage!),
+          backgroundColor: AppColors.error,
+        ),
+      );
     }
-  }
-  void _onPositionSelected(int position) {
-    setState(() {
-      _selectedPositionId = position;
-    });
   }
 
   @override
@@ -174,50 +76,56 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Регистрация'),
-        backgroundColor: const Color(0xFF44E4BF),
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.white),
-          onPressed: _previousStep,
+        backgroundColor: AppColors.primary,
+        leading: IconWidgets.backIcon(
+          onTap: _handlePreviousStep,
+          color: AppColors.white,
         ),
       ),
-      body: _isLoading
+      body: _viewModel.isLoading
           ? const Center(child: CircularProgressIndicator())
           : _buildCurrentScreen(),
     );
   }
 
   Widget _buildCurrentScreen() {
-    switch (_currentStep) {
+    switch (_viewModel.currentStep) {
       case 0:
         return RegistrationStep1(
-          emailController: _emailController,
-          passwordController: _passwordController,
-          confirmPasswordController: _confirmPasswordController,
-          onNextStep: _nextStep,
-          isStepValid: _isStep1Valid,
+          emailController: _viewModel.emailController,
+          passwordController: _viewModel.passwordController,
+          confirmPasswordController: _viewModel.confirmPasswordController,
+          onNextStep: _handleNextStep,
+          isStepValid: _viewModel.isStep1Valid,
+          emailError: _viewModel.emailError,
+          passwordError: _viewModel.passwordError,
+          confirmPasswordError: _viewModel.confirmPasswordError,
         );
       case 1:
         return RegistrationStep2(
-          lastNameController: _lastNameController,
-          firstNameController: _firstNameController,
-          middleNameController: _middleNameController,
-          onNextStep: _nextStep,
-          isStepValid: _isStep2Valid,
+          lastNameController: _viewModel.lastNameController,
+          firstNameController: _viewModel.firstNameController,
+          middleNameController: _viewModel.middleNameController,
+          onNextStep: _handleNextStep,
+          isStepValid: _viewModel.isStep2Valid,
         );
       case 2:
         return RegistrationStep3(
-          phoneController: _phoneController,
+          phoneController: _viewModel.phoneController,
           onComplete: () {
-            if (_isStep3Valid) {
-              _nextStep();
+            if (_viewModel.isStep3Valid) {
+              _handleNextStep();
             }
           },
-          isStepValid: _isStep3Valid,
+          isStepValid: _viewModel.isStep3Valid,
+          phoneError: _viewModel.phoneError,
         );
       case 3:
         return RegistrationStep4(
-          onComplete: _completeRegistration,
-          onPositionSelected: _onPositionSelected,
+          onComplete: _handleRegistration,
+          onPositionSelected: _viewModel.selectPosition,
+          selectedPositionId: _viewModel.selectedPositionId,
+          isLoading: _viewModel.isLoading,
         );
       default:
         return Container();

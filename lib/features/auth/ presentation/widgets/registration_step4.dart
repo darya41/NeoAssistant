@@ -1,17 +1,28 @@
 import 'package:flutter/material.dart';
+import '../../../../core/constants/app_colors.dart';
 import '../../../../core/utils/icon_widgets.dart';
 import '../../../../shared/widgets/buttons/continue_button.dart';
 import '../../data/repositories/specialization_repository.dart';
-import '../../../../models/specialization.dart';
+import '../../domain/entities/specialization.dart';
+import 'error_container.dart';
+import 'form_field_container.dart';
 
 class RegistrationStep4 extends StatefulWidget {
   final VoidCallback onComplete;
   final Function(int) onPositionSelected;
+  final int? selectedPositionId;
+  final bool isLoading;
+  final String? errorMessage;
+  final VoidCallback? onRetry;
 
   const RegistrationStep4({
     super.key,
     required this.onComplete,
     required this.onPositionSelected,
+    this.selectedPositionId,
+    this.isLoading = false,
+    this.errorMessage,
+    this.onRetry,
   });
 
   @override
@@ -19,45 +30,62 @@ class RegistrationStep4 extends StatefulWidget {
 }
 
 class _RegistrationStep4State extends State<RegistrationStep4> {
-  int? _selectedPositionId;
-  String? _selectedPositionName;
-
   final TextEditingController _positionController = TextEditingController();
   final FocusNode _positionFocusNode = FocusNode();
 
   List<Specialization> _specializations = [];
-  bool _isLoading = true;
-  String? _errorMessage;
+  bool _isLoadingLocal = false;
+  String? _localErrorMessage;
+  int? _selectedPositionId;
 
   final SpecializationRepository _repository = SpecializationRepository();
 
   @override
   void initState() {
     super.initState();
+    _selectedPositionId = widget.selectedPositionId;
+    _loadSpecializations();
+
     _positionFocusNode.addListener(() {
       if (!_positionFocusNode.hasFocus && _positionController.text.isNotEmpty) {
         _selectCustomPosition();
       }
     });
-    _loadSpecializations();
+  }
+
+  @override
+  void didUpdateWidget(RegistrationStep4 oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.selectedPositionId != oldWidget.selectedPositionId) {
+      _selectedPositionId = widget.selectedPositionId;
+      if (widget.selectedPositionId != null) {
+        final spec = _specializations.firstWhere(
+              (s) => s.id == widget.selectedPositionId,
+          orElse: () => Specialization(id: 0, name: ''),
+        );
+        if (spec.name.isNotEmpty) {
+          _positionController.text = spec.name;
+        }
+      }
+    }
   }
 
   Future<void> _loadSpecializations() async {
     setState(() {
-      _isLoading = true;
-      _errorMessage = null;
+      _isLoadingLocal = true;
+      _localErrorMessage = null;
     });
 
     try {
       final specializations = await _repository.getSpecializations();
       setState(() {
         _specializations = specializations;
-        _isLoading = false;
+        _isLoadingLocal = false;
       });
     } catch (e) {
       setState(() {
-        _errorMessage = 'Не удалось загрузить список должностей';
-        _isLoading = false;
+        _localErrorMessage = 'Не удалось загрузить список должностей';
+        _isLoadingLocal = false;
       });
     }
   }
@@ -72,10 +100,7 @@ class _RegistrationStep4State extends State<RegistrationStep4> {
   void _selectCustomPosition() {
     final text = _positionController.text.trim();
     if (text.isNotEmpty) {
-      setState(() {
-        _selectedPositionId = 0;
-        _selectedPositionName = text;
-      });
+      setState(() => _selectedPositionId = 0);
       widget.onPositionSelected(0);
     }
   }
@@ -83,14 +108,18 @@ class _RegistrationStep4State extends State<RegistrationStep4> {
   void _selectPredefinedPosition(Specialization specialization) {
     setState(() {
       _selectedPositionId = specialization.id;
-      _selectedPositionName = specialization.name;
       _positionController.text = specialization.name;
     });
     widget.onPositionSelected(specialization.id);
   }
 
+  String? get _firstError => widget.errorMessage ?? _localErrorMessage;
+
   @override
   Widget build(BuildContext context) {
+    final isLoading = widget.isLoading || _isLoadingLocal;
+    final isValid = _selectedPositionId != null && !isLoading;
+
     return SafeArea(
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 24),
@@ -98,100 +127,67 @@ class _RegistrationStep4State extends State<RegistrationStep4> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             const SizedBox(height: 40),
-
             const Text(
               'Шаг 3/3',
-              style: TextStyle(
-                fontSize: 32,
-                fontWeight: FontWeight.bold,
-              ),
+              style: TextStyle(fontSize: 32, fontWeight: FontWeight.bold),
             ),
 
-            const SizedBox(height: 70),
+            const SizedBox(height: 20),
 
-            Container(
-              decoration: BoxDecoration(
-                color: Colors.grey[200],
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                child: Row(
-                  children: [
-                    IconWidgets.searchIcon(
-                      onTap: () {
-                        FocusScope.of(context).requestFocus(_positionFocusNode);
-                      },
-                    ),
-                    const SizedBox(width: 12),
+            ErrorContainer(
+              errorMessage: _firstError,
+              onRetry: () {
+                widget.onRetry?.call();
+                _loadSpecializations();
+              },
+            ),
 
-                    Expanded(
-                      child: TextField(
-                        controller: _positionController,
-                        focusNode: _positionFocusNode,
-                        decoration: const InputDecoration(
-                          border: InputBorder.none,
-                          hintText: 'Ваша должность',
-                          hintStyle: TextStyle(
-                            fontSize: 16,
-                            color: Colors.grey,
-                          ),
-                          contentPadding: EdgeInsets.zero,
-                          isDense: true,
-                        ),
-                        style: const TextStyle(fontSize: 16),
-                        onChanged: (value) {
-                          if (value.isNotEmpty) {
-                            setState(() {
-                              _selectedPositionId = 0;
-                              _selectedPositionName = value;
-                            });
-                            widget.onPositionSelected(0);
-                          } else {
-                            setState(() {
-                              _selectedPositionId = null;
-                              _selectedPositionName = null;
-                            });
-                          }
-                        },
-                        onSubmitted: (value) {
-                          _selectCustomPosition();
-                        },
+            FormFieldContainer(
+              children: [
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                  child: Row(
+                    children: [
+                      IconWidgets.searchIcon(
+                        onTap: () => FocusScope.of(context).requestFocus(_positionFocusNode),
                       ),
-                    ),
-                  ],
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: TextField(
+                          controller: _positionController,
+                          focusNode: _positionFocusNode,
+                          decoration: const InputDecoration(
+                            border: InputBorder.none,
+                            hintText: 'Ваша должность',
+                            hintStyle: TextStyle(fontSize: 16, color: Colors.grey),
+                            contentPadding: EdgeInsets.zero,
+                            isDense: true,
+                          ),
+                          style: const TextStyle(fontSize: 16),
+                          onChanged: (value) {
+                            setState(() => _selectedPositionId = value.isNotEmpty ? 0 : null);
+                            widget.onPositionSelected(value.isNotEmpty ? 0 : -1);
+                          },
+                          onSubmitted: (_) => _selectCustomPosition(),
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
-              ),
+              ],
             ),
 
             const SizedBox(height: 32),
 
-            if (_isLoading)
+            if (isLoading)
               const Center(child: CircularProgressIndicator())
-            else if (_errorMessage != null)
-              Center(
-                child: Column(
-                  children: [
-                    Text(
-                      _errorMessage!,
-                      style: const TextStyle(color: Colors.red),
-                    ),
-                    const SizedBox(height: 8),
-                    TextButton(
-                      onPressed: _loadSpecializations,
-                      child: const Text('Повторить'),
-                    ),
-                  ],
-                ),
-              )
-            else if (_specializations.isEmpty)
-                const Center(
-                  child: Text('Нет доступных должностей'),
-                )
-              else
-                GridView.builder(
+            else if (_specializations.isEmpty && _firstError == null)
+              const Center(child: Text('Нет доступных должностей'))
+            else
+              Expanded(
+                child: GridView.builder(
                   shrinkWrap: true,
-                  physics: const NeverScrollableScrollPhysics(),
+                  physics: const BouncingScrollPhysics(),
                   gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                     crossAxisCount: 2,
                     crossAxisSpacing: 16,
@@ -199,19 +195,14 @@ class _RegistrationStep4State extends State<RegistrationStep4> {
                     childAspectRatio: 3.2,
                   ),
                   itemCount: _specializations.length,
-                  itemBuilder: (context, index) {
-                    final spec = _specializations[index];
-                    return _buildGridPositionButton(spec);
-                  },
+                  itemBuilder: (context, index) => _buildGridPositionButton(_specializations[index]),
                 ),
-
-            const Spacer(),
-
+              ),
+            const SizedBox(height: 16),
             ContinueButton(
-              onPressed: _selectedPositionId != null ? widget.onComplete : () {},
-              isEnabled: _selectedPositionId != null,
+              onPressed: isValid ? widget.onComplete : null,
+              isEnabled: isValid,
             ),
-
             const SizedBox(height: 40),
           ],
         ),
@@ -226,18 +217,24 @@ class _RegistrationStep4State extends State<RegistrationStep4> {
       onTap: () => _selectPredefinedPosition(specialization),
       child: Container(
         decoration: BoxDecoration(
-          color: isSelected ? const Color(0xFF44E4BF) : Colors.grey[200],
+          color: isSelected ? AppColors.primary : Colors.grey[200],
           borderRadius: BorderRadius.circular(12),
+          border: isSelected ? null : Border.all(color: Colors.grey[300]!, width: 1),
         ),
         child: Center(
-          child: Text(
-            specialization.name,
-            style: TextStyle(
-              fontSize: 14,
-              fontWeight: FontWeight.w500,
-              color: isSelected ? Colors.white : Colors.grey[700],
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 8),
+            child: Text(
+              specialization.name,
+              style: TextStyle(
+                fontSize: 14,
+                fontWeight: FontWeight.w500,
+                color: isSelected ? Colors.white : Colors.grey[700],
+              ),
+              textAlign: TextAlign.center,
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
             ),
-            textAlign: TextAlign.center,
           ),
         ),
       ),

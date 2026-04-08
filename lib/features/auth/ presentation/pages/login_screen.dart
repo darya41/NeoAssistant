@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
-import '../../../../core/validators/auth_validator.dart';
-import '../../data/repositories/auth_repository.dart';
+import '../view_model/login_viewmodel.dart';
 import '../widgets/login_ui.dart';
 import '../../../main/presentation/pages/home_screen.dart';
 import 'registration_screen.dart';
@@ -13,85 +12,38 @@ class LoginScreen extends StatefulWidget {
 }
 
 class _LoginScreenState extends State<LoginScreen> {
-  final TextEditingController _emailController = TextEditingController();
-  final TextEditingController _passwordController = TextEditingController();
-
-  bool _isLoading = false;
-  String? _errorMessage;
-
-  final AuthRepository _authRepository = AuthRepository();
+  late final LoginViewModel _viewModel;
 
   @override
   void initState() {
     super.initState();
-    _emailController.addListener(_updateState);
-    _passwordController.addListener(_updateState);
+    _viewModel = LoginViewModel();
+    _viewModel.addListener(_onViewModelChanged);
   }
 
-  void _updateState() {
-    setState(() {});
-  }
-
-  bool get _isFormValid {
-    return _emailController.text.trim().isNotEmpty &&
-        _passwordController.text.isNotEmpty;
-  }
-
-  Future<void> _login() async {
-    final email = _emailController.text.trim();
-    final password = _passwordController.text;
-
-    if (!_isFormValid) {
-      setState(() {
-        _errorMessage = 'Заполните оба поля';
-      });
-      return;
+  void _onViewModelChanged() {
+    if (mounted) {
+      setState(() {});
     }
+  }
 
-    final validationError = AuthValidator.getLoginError(email, password);
-    if (validationError != null) {
-      setState(() {
-        _errorMessage = validationError;
-      });
-      return;
-    }
+  Future<void> _handleLogin() async {
+    final success = await _viewModel.login(context);
 
-    setState(() {
-      _isLoading = true;
-      _errorMessage = null;
-    });
-
-    try {
-      final response = await _authRepository.login(
-        email: email,
-        password: password,
+    if (success && mounted) {
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(
+          builder: (context) => const HomeScreen(title: 'Neo Friend - Главная'),
+        ),
       );
-
-      if (response['success'] && mounted) {
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(
-            builder: (context) => const HomeScreen(title: 'Neo Friend - Главная'),
-          ),
-        );
-      }
-    } catch (e) {
-      setState(() {
-        _errorMessage = e.toString().replaceFirst('Exception: ', '');
-      });
-    } finally {
-      if (mounted) {
-        setState(() => _isLoading = false);
-      }
     }
   }
 
   @override
   void dispose() {
-    _emailController.removeListener(_updateState);
-    _passwordController.removeListener(_updateState);
-    _emailController.dispose();
-    _passwordController.dispose();
+    _viewModel.removeListener(_onViewModelChanged);
+    _viewModel.dispose();
     super.dispose();
   }
 
@@ -107,13 +59,13 @@ class _LoginScreenState extends State<LoginScreen> {
   @override
   Widget build(BuildContext context) {
     return LoginUI(
-      emailController: _emailController,
-      passwordController: _passwordController,
-      onLoginPressed: _login,
+      emailController: _viewModel.emailController,
+      passwordController: _viewModel.passwordController,
+      onLoginPressed: _handleLogin,
       onCreateAccountPressed: _navigateToRegistration,
-      errorMessage: _errorMessage,
-      isLoading: _isLoading,
-      isFormValid: _isFormValid,
+      errorMessage: _viewModel.errorMessage,
+      isLoading: _viewModel.isLoading,
+      isFormValid: _viewModel.isFormValid,
     );
   }
 }

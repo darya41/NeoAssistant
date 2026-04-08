@@ -4,41 +4,53 @@ const AuthModel = require('../models/auth');
 
 const AuthController = {
     async register(req, res) {
-        try {
-            const {
-                email, password,
-                last_name, first_name, middle_name,
-                personal_phone, specialization_id
-            } = req.body;
+            try {
+                const {
+                    email, password,
+                    last_name, first_name, middle_name,
+                    personal_phone, specialization_id
+                } = req.body;
 
-            const emailExists = await AuthModel.emailExists(email);
-            if (existing.length > 0) {
-                return res.status(400).json({
+                if (!email || !password || !last_name || !first_name || !specialization_id) {
+                    return res.status(400).json({
+                        success: false,
+                        error: 'Заполните все обязательные поля'
+                    });
+                }
+
+                const emailExists = await AuthModel.emailExists(email);
+
+                if (emailExists) {
+                    return res.status(400).json({
+                        success: false,
+                        error: 'Пользователь с таким email уже существует'
+                    });
+                }
+
+                const hashedPassword = await bcrypt.hash(password, 10);
+
+                await AuthModel.createDoctor({
+                    email,
+                    hashedPassword,
+                    last_name,
+                    first_name,
+                    middle_name,
+                    personal_phone,
+                    specialization_id
+                });
+
+                res.status(201).json({
+                    success: true,
+                    message: 'Регистрация успешна'
+                });
+
+            } catch (error) {
+                res.status(500).json({
                     success: false,
-                    error: 'Пользователь с таким email уже существует'
+                    error: 'Ошибка при регистрации: ' + error.message
                 });
             }
-
-            const hashedPassword = await bcrypt.hash(password, 10);
-
-            await AuthModel.createDoctor({
-                email, hashedPassword,
-                last_name, first_name, middle_name,
-                personal_phone, specialization_id
-            });
-
-            res.status(201).json({
-                success: true,
-                message: 'Регистрация успешна'
-            });
-
-        } catch (error) {
-            res.status(500).json({
-                success: false,
-                error: 'Ошибка при регистрации'
-            });
-        }
-    },
+        },
 
     async login(req, res) {
         try {

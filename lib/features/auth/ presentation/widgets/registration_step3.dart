@@ -1,17 +1,23 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import '../../../../shared/widgets/buttons/continue_button.dart';
+import 'error_container.dart';
+import 'form_field_container.dart';
 
 class RegistrationStep3 extends StatefulWidget {
   final TextEditingController phoneController;
   final VoidCallback onComplete;
   final bool isStepValid;
+  final String? phoneError;
+  final VoidCallback? onClearError;
 
   const RegistrationStep3({
     super.key,
     required this.phoneController,
     required this.onComplete,
     required this.isStepValid,
+    this.phoneError,
+    this.onClearError,
   });
 
   @override
@@ -78,10 +84,7 @@ class _RegistrationStep3State extends State<RegistrationStep3> {
     }
 
     widget.phoneController.text = formatted;
-
-    widget.phoneController.selection = TextSelection.collapsed(
-      offset: formatted.length,
-    );
+    widget.phoneController.selection = TextSelection.collapsed(offset: formatted.length);
   }
 
   bool _isPhoneComplete() {
@@ -103,54 +106,44 @@ class _RegistrationStep3State extends State<RegistrationStep3> {
             const SizedBox(height: 40),
             const Text(
               'Шаг 2/3',
-              style: TextStyle(
-                fontSize: 32,
-                fontWeight: FontWeight.bold,
-              ),
+              style: TextStyle(fontSize: 32, fontWeight: FontWeight.bold),
             ),
+            const SizedBox(height: 20),
 
-            const SizedBox(height: 40),
+            ErrorContainer(errorMessage: widget.phoneError),
 
-            Container(
-              decoration: BoxDecoration(
-                color: Colors.grey[200],
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                child: TextField(
-                  controller: widget.phoneController,
-                  focusNode: _phoneFocusNode,
-                  keyboardType: TextInputType.phone,
-                  inputFormatters: [
-                    LengthLimitingTextInputFormatter(19),
-                  ],
-                  decoration: const InputDecoration(
-                    border: InputBorder.none,
-                    hintText: '+375 (--) --- -- --',
-                    hintStyle: TextStyle(
-                      fontSize: 16,
-                      color: Colors.grey,
+            FormFieldContainer(
+              children: [
+                GestureDetector(
+                  onTap: widget.onClearError,
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                    child: TextField(
+                      controller: widget.phoneController,
+                      focusNode: _phoneFocusNode,
+                      keyboardType: TextInputType.phone,
+                      inputFormatters: [LengthLimitingTextInputFormatter(19)],
+                      decoration: const InputDecoration(
+                        border: InputBorder.none,
+                        hintText: '+375 (--) --- -- --',
+                        hintStyle: TextStyle(fontSize: 16, color: Colors.grey),
+                        contentPadding: EdgeInsets.zero,
+                        isDense: true,
+                      ),
+                      style: TextStyle(fontSize: 16, letterSpacing: 0.5),
+                      onChanged: (value) {
+                        _formatPhoneNumber(value);
+                        widget.onClearError?.call();
+                        setState(() {});
+                      },
                     ),
-                    contentPadding: EdgeInsets.zero,
-                    isDense: true,
                   ),
-                  style: const TextStyle(
-                    fontSize: 16,
-                    letterSpacing: 0.5,
-                  ),
-                  onChanged: (value) {
-                    _formatPhoneNumber(value);
-                    setState(() {});
-                  },
                 ),
-              ),
+              ],
             ),
-
             const SizedBox(height: 40),
-
             ContinueButton(
-              onPressed: widget.onComplete,
+              onPressed: isPhoneValid ? widget.onComplete : null,
               isEnabled: isPhoneValid,
             ),
           ],
