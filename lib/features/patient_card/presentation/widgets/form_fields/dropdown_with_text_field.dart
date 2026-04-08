@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'text_input_field.dart';
+import '../../../../../shared/widgets/fields/text_input_field.dart';
 import 'dropdown_field_widget.dart';
 
 class DropdownWithTextField extends StatelessWidget {

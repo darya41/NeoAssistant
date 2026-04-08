@@ -6,7 +6,7 @@ import 'form_fields/blood_type_selector.dart';
 import 'form_fields/date_field.dart';
 import 'form_fields/checkbox_group_widget.dart';
 import 'form_fields/streptococcus_selector.dart';
-import 'form_fields/text_input_field.dart';
+import '../../../../shared/widgets/fields/text_input_field.dart';
 
 class MotherFormWidget extends StatefulWidget {
   final Function(Mother) onMotherChanged;

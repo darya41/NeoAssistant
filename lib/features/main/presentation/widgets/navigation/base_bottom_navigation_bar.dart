@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
-// Базовый класс с общей логикой
+import '../../../../../core/constants/app_colors.dart';
+
 abstract class BaseBottomNavigationBar extends StatefulWidget {
   final int currentIndex;
 
@@ -9,12 +10,10 @@ abstract class BaseBottomNavigationBar extends StatefulWidget {
     required this.currentIndex,
   });
 
-  // Используем ковариантный тип возврата
   @override
   State<BaseBottomNavigationBar> createState();
 }
 
-// Базовый класс состояния
 abstract class BaseBottomNavigationBarState<T extends BaseBottomNavigationBar> extends State<T> {
   late int _selectedIndex;
 
@@ -48,17 +47,15 @@ abstract class BaseBottomNavigationBarState<T extends BaseBottomNavigationBar> e
     navigateToScreen(index);
   }
 
-  // Абстрактный метод для навигации
   void navigateToScreen(int index);
 
-  // Общий метод для построения элемента навигации
   Widget buildNavItem({
     required IconData icon,
     required String label,
     required int index,
   }) {
     final isActive = _selectedIndex == index;
-    final activeColor = const Color(0xFF44E4BF);
+    final activeColor = AppColors.primary;
 
     return InkWell(
       onTap: () => onItemTapped(index),
@@ -99,7 +96,6 @@ abstract class BaseBottomNavigationBarState<T extends BaseBottomNavigationBar> e
     );
   }
 
-  // Общий метод для построения контейнера
   Widget buildContainer({required List<Widget> children}) {
     return Container(
       decoration: BoxDecoration(

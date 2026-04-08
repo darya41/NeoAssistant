@@ -4,7 +4,7 @@ import 'package:neo_friend/features/patient_card/presentation/pages/add_patient_
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/utils/icon_widgets.dart';
 import '../view_models/patient_search_viewmodel.dart';
-import 'filter_dialog.dart';
+import 'filter/filter_dialog.dart';
 
 class SearchField extends StatelessWidget {
   final TextEditingController _controller = TextEditingController();

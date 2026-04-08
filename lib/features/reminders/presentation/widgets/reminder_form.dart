@@ -20,15 +20,14 @@ class ReminderForm extends StatelessWidget {
     required this.onDateTap,
     required this.onDescriptionChanged,
     required this.backgroundColor,
-    this.titleController,        // ← добавить
-    this.descriptionController,   // ← добавить
+    this.titleController,
+    this.descriptionController,
   });
 
   @override
   Widget build(BuildContext context) {
     return Column(
       children: [
-        // Поле названия
         Container(
           height: 56,
           decoration: BoxDecoration(
@@ -49,7 +48,6 @@ class ReminderForm extends StatelessWidget {
         ),
         const SizedBox(height: 16),
 
-        // Поле даты
         GestureDetector(
           onTap: onDateTap,
           child: Container(
@@ -68,7 +66,6 @@ class ReminderForm extends StatelessWidget {
         ),
         const SizedBox(height: 16),
 
-        // Поле описания
         Container(
           height: 120,
           decoration: BoxDecoration(

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import '../../../../models/reminder.dart';
+import '../../../../core/constants/app_colors.dart';
+import '../../domain/entities/reminder.dart';
 import '../pages/reminder_detail_screen.dart';
 
 class RemindersListUI extends StatelessWidget {
@@ -7,7 +8,7 @@ class RemindersListUI extends StatelessWidget {
   final Function(int, bool) onCheckboxChange;
   final Function(int) onDelete;
   final bool isEditing;
-  final Function()? onRefresh; // добавим callback для обновления
+  final Function()? onRefresh;
 
   const RemindersListUI({
     super.key,
@@ -38,7 +39,7 @@ class RemindersListUI extends StatelessWidget {
                 date,
                 style: const TextStyle(
                   fontWeight: FontWeight.bold,
-                  color: Color(0xFF44E4BF),
+                  color: AppColors.primary,
                 ),
               ),
             ),
@@ -59,7 +60,6 @@ class RemindersListUI extends StatelessWidget {
                     ),
                   );
 
-                  // Если результат true - обновляем список
                   if (result == true && onRefresh != null) {
                     onRefresh!();
                   }
@@ -77,7 +77,7 @@ class RemindersListUI extends StatelessWidget {
                     child: Checkbox(
                       value: reminder.isCompleted,
                       onChanged: (value) => onCheckboxChange(index, value ?? false),
-                      checkColor: const Color(0xFF77EBF5),
+                      checkColor: AppColors.primary,
                       fillColor: WidgetStateProperty.all(Colors.transparent),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.zero,
@@ -99,11 +99,11 @@ class RemindersListUI extends StatelessWidget {
                     ? IconButton(
                   icon: const Icon(Icons.close),
                   onPressed: () => onDelete(index),
-                  color: Colors.red,
+                  color: AppColors.error,
                 )
                     : null,
               );
-            }).toList(),
+            }),
           ],
         );
       }).toList(),

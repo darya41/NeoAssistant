@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../../core/constants/app_colors.dart';
 import '../pages/template_detail_screen.dart';
 
 class TemplatesListUI extends StatelessWidget {
@@ -52,7 +53,7 @@ class TemplatesListUI extends StatelessWidget {
               ? IconButton(
             icon: const Icon(
               Icons.close,
-              color: Colors.red,
+              color: AppColors.error,
             ),
             onPressed: () {
               if (onDeleteTemplate != null) {

@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
-import '../../../../models/reminder.dart';
+import '../../../../core/constants/app_colors.dart';
 import '../../../../shared/widgets/buttons/action_button.dart';
+import '../view_models/reminders_viewmodel.dart';
+import '../widgets/error_view.dart';
+import '../widgets/reminders_app_bar.dart';
 import 'create_reminder_screen.dart';
-import '../../../main/presentation/widgets/custom_bottom_navigation_bar.dart';
-import '../../data/repositories/reminder_repository.dart';
+import '../../../main/presentation/widgets/navigation/custom_bottom_navigation_bar.dart';
 import '../widgets/reminders_list_ui.dart';
 
 class RemindersPageScreen extends StatefulWidget {
@@ -14,189 +16,121 @@ class RemindersPageScreen extends StatefulWidget {
 }
 
 class _RemindersPageScreenState extends State<RemindersPageScreen> {
-  bool _sortNewFirst = true;
-  bool _isEditing = false;
-  bool _isLoading = true;
-  String? _errorMessage;
-
-  List<Reminder> _reminders = [];
-  final ReminderRepository _repository = ReminderRepository();
+  late final RemindersViewModel _viewModel;
 
   @override
   void initState() {
     super.initState();
-    _loadReminders();
+    _viewModel = RemindersViewModel();
+    _viewModel.addListener(_onViewModelChanged);
   }
 
-  Future<void> _loadReminders() async {
-    setState(() {
-      _isLoading = true;
-      _errorMessage = null;
-    });
-
-    try {
-      final reminders = await _repository.getReminders();
-      setState(() {
-        _reminders = reminders;
-        _isLoading = false;
-      });
-    } catch (e) {
-      setState(() {
-        _errorMessage = e.toString().replaceFirst('Exception: ', '');
-        _isLoading = false;
-      });
+  void _onViewModelChanged() {
+    if (mounted) {
+      setState(() {});
     }
-  }
-
-  void _toggleSort() {
-    setState(() {
-      _sortNewFirst = !_sortNewFirst;
-    });
-  }
-
-  void _toggleEditing() {
-    setState(() {
-      _isEditing = !_isEditing;
-    });
   }
 
   Future<void> _handleCheckboxChange(int index, bool? value) async {
     if (value == null) return;
 
-    final reminder = _reminders[index];
+    final success = await _viewModel.toggleReminderStatus(index, value);
 
-    setState(() {
-      _reminders[index].isCompleted = value;
-    });
-
-    try {
-      await _repository.toggleReminderStatus(reminder.id, value);
-    } catch (e) {
-      setState(() {
-        _reminders[index].isCompleted = !value;
-      });
-
+    if (!success && mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Ошибка обновления: $e'),
-          backgroundColor: Colors.red,
+        const SnackBar(
+          content: Text('Ошибка обновления статуса'),
+          backgroundColor: AppColors.error,
         ),
       );
     }
   }
 
   Future<void> _handleDelete(int index) async {
-    final reminder = _reminders[index];
+    final success = await _viewModel.deleteReminder(index);
 
-    setState(() {
-      _reminders.removeAt(index);
-    });
-
-    try {
-      await _repository.deleteReminder(reminder.id);
-
+    if (success && mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('Напоминание удалено'),
-          backgroundColor: Color(0xFF44E4BF),
+          backgroundColor: AppColors.primary,
         ),
       );
-    } catch (e) {
-      setState(() {
-        _reminders.insert(index, reminder);
-      });
-
+    } else if (mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Ошибка удаления: $e'),
-          backgroundColor: Colors.red,
+        const SnackBar(
+          content: Text('Ошибка удаления'),
+          backgroundColor: AppColors.error,
         ),
       );
     }
   }
 
-  List<Reminder> get _sortedReminders {
-    final sorted = List<Reminder>.from(_reminders);
-    if (_sortNewFirst) {
-      sorted.sort((a, b) => b.date.compareTo(a.date));
-    } else {
-      sorted.sort((a, b) => a.date.compareTo(b.date));
+  Future<void> _handleAddReminder() async {
+    final result = await Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => const CreateReminderScreen()),
+    );
+
+    if (result == true) {
+      _viewModel.refreshAfterCreate();
     }
-    return sorted;
+  }
+
+  @override
+  void dispose() {
+    _viewModel.removeListener(_onViewModelChanged);
+    _viewModel.dispose();
+    super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            const Text('Сначала новые'),
-            IconButton(
-              icon: const Icon(Icons.arrow_drop_down),
-              onPressed: _toggleSort,
-            ),
-            const SizedBox(width: 10),
-            IconButton(
-              icon: Icon(
-                _isEditing ? Icons.save : Icons.edit,
-                color: Colors.black,
-              ),
-              onPressed: _toggleEditing,
-            ),
-          ],
-        ),
-        backgroundColor: const Color(0xFF44E4BF),
+      appBar: RemindersAppBar(
+        isEditing: _viewModel.isEditing,
+        onToggleSort: _viewModel.toggleSort,
+        onToggleEditing: _viewModel.toggleEditing,
       ),
-      body: _isLoading
-          ? const Center(child: CircularProgressIndicator())
-          : _errorMessage != null
-          ? Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            const Icon(Icons.error_outline, size: 48, color: Colors.red),
-            const SizedBox(height: 16),
-            Text(_errorMessage!),
-            const SizedBox(height: 16),
-            ElevatedButton(
-              onPressed: _loadReminders,
-              child: const Text('Повторить'),
-            ),
-          ],
-        ),
-      )
-          : _reminders.isEmpty
-          ? const Center(
-        child: Text('Нет напоминаний'),
-      )
-          : RemindersListUI(
-        reminders: _sortedReminders,
-        onCheckboxChange: _handleCheckboxChange,
-        onDelete: _handleDelete,
-        isEditing: _isEditing,
-      ),
+      body: _buildBody(),
       bottomNavigationBar: const CustomBottomNavigationBar(
         currentIndex: 1,
       ),
       floatingActionButton: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 30.0),
         child: ActionButton(
-          onPressed: () async {
-            final result = await Navigator.push(
-              context,
-              MaterialPageRoute(builder: (context) => const CreateReminderScreen()),
-            );
-            if (result == true) {
-              _loadReminders();
-            }
-          },
+          onPressed: _handleAddReminder,
           backgroundColor: const Color(0xFFACF3E3),
-          borderColor: const Color(0xFF1DC9A1),
+          borderColor: AppColors.primary,
           text: '+ Добавить напоминание',
         ),
       ),
+    );
+  }
+
+  Widget _buildBody() {
+    if (_viewModel.isLoading) {
+      return const Center(child: CircularProgressIndicator());
+    }
+
+    if (_viewModel.errorMessage != null) {
+      return ErrorView(
+        errorMessage: _viewModel.errorMessage!,
+        onRetry: () => _viewModel.loadReminders(),
+      );
+    }
+
+    if (_viewModel.isEmpty) {
+      return const Center(
+        child: Text('Нет напоминаний'),
+      );
+    }
+
+    return RemindersListUI(
+      reminders: _viewModel.sortedReminders,
+      onCheckboxChange: _handleCheckboxChange,
+      onDelete: _handleDelete,
+      isEditing: _viewModel.isEditing,
     );
   }
 }

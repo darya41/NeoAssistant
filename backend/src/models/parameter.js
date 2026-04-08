@@ -12,7 +12,6 @@ class ParameterModel {
         }
 
         const medicalParamIds = paramIdsResult.map(row => row.medical_parameter_id);
-        const medParamExamIds = paramIdsResult.map(row => row.med_param_exam_id);
 
         const [paramsResult] = await db.query(`
             SELECT
@@ -37,7 +36,7 @@ class ParameterModel {
             param.optionDescriptions = optionsResult.map(row => row.description);
         }
 
-        return { parameters, paramIdsResult };
+        return parameters;
     }
 
     static async getAllParameters() {
@@ -119,62 +118,14 @@ class ParameterModel {
 
             resultData.push({
                 name: paramInfo ? paramInfo.name : 'Неизвестный параметр',
-                value: displayValue
+                value: displayValue,
+                medical_parameter_id: link.medical_parameter_id,
+                med_param_exam_id: link.med_param_exam_id,
+                raw_value: value
             });
         }
 
         return resultData;
-    }
-
-    static async getPrimaryExamId(patientId, examTypeId) {
-        const [result] = await db.query(`
-            SELECT patients_exams_id, date_time as exam_date
-            FROM patientsexams
-            WHERE patient_id = ? AND exam_id = ?
-            ORDER BY date_time DESC
-            LIMIT 1
-        `, [patientId, examTypeId]);
-
-        return result.length > 0 ? result[0] : null;
-    }
-
-    static async getDailyExamList(patientId, examTypeId) {
-        const [results] = await db.query(`
-            SELECT patients_exams_id, date_time
-            FROM patientsexams
-            WHERE patient_id = ? AND exam_id = ?
-            ORDER BY patients_exams_id DESC
-        `, [patientId, examTypeId]);
-
-        return results.map(row => ({
-            patient_exam_id: row.patients_exams_id,
-            date_time: row.date_time
-        }));
-    }
-
-    static async getExamDateTime(patientExamId) {
-        const [result] = await db.query(`
-            SELECT date_time
-            FROM patientsexams
-            WHERE patients_exams_id = ?
-        `, [patientExamId]);
-
-        return result.length > 0 ? result[0].date_time : null;
-    }
-
-    static async getExamTypeByExamId(patientExamId) {
-        const [result] = await db.query(`
-            SELECT
-                CASE
-                    WHEN pe.exam_id = 1 THEN 'Первичный осмотр'
-                    WHEN pe.exam_id = 2 THEN 'Ежедневный осмотр'
-                    ELSE 'Осмотр'
-                END as exam_name
-            FROM patientsexams pe
-            WHERE pe.patients_exams_id = ?
-        `, [patientExamId]);
-
-        return result.length > 0 ? result[0].exam_name : 'Осмотр';
     }
 }
 

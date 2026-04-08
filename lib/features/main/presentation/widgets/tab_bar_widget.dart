@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:neo_friend/core/constants/app_colors.dart';
 
 class TabBarWidget extends StatefulWidget {
   final String activeTab;
@@ -20,7 +21,7 @@ class _TabBarWidgetState extends State<TabBarWidget> {
     return Container(
       height: 50,
       padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-      color: Color(0xFF44E4BF),
+      color: AppColors.primary,
       child: Row(
         children: [
           Expanded(
@@ -64,7 +65,7 @@ class _TabBarWidgetState extends State<TabBarWidget> {
             style: TextStyle(
               fontSize: 16,
               fontWeight: FontWeight.w500,
-              color: isActive ? Colors.black : Color(0xFF44E4BF),
+              color: isActive ? Colors.black : AppColors.primary,
             ),
           ),
         ),

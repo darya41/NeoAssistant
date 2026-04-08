@@ -1,8 +1,11 @@
-import '../../../../core/network/api_client.dart';
+import '../../domain/entities/doctor.dart';
 import '../../../../core/storage/token_storage.dart';
+import '../service/profile_service.dart';
 
 class ProfileRepository {
-  Future<Map<String, dynamic>> updateProfile({
+  final ProfileService _profileService = ProfileService();
+
+  Future<Doctor> updateProfile({
     required String lastName,
     required String firstName,
     String? patronymic,
@@ -11,56 +14,41 @@ class ProfileRepository {
     required int specializationId,
     String? password,
   }) async {
-    try {
-      final Map<String, dynamic> data = {
-        'lastName': lastName,
-        'firstName': firstName,
-        'patronymic': patronymic,
-        'email': email,
-        'phone': phone,
-        'specializationId': specializationId,
-      };
+    final Map<String, dynamic> data = {
+      'lastName': lastName,
+      'firstName': firstName,
+      'patronymic': patronymic,
+      'email': email,
+      'phone': phone,
+      'specializationId': specializationId,
+    };
 
-      if (password != null && password.isNotEmpty) {
-        data['password'] = password;
-      }
+    if (password != null && password.isNotEmpty) {
+      data['password'] = password;
+    }
 
-      final response = await ApiClient.putAuth('doctors/profile', data);
+    final response = await _profileService.updateProfile(data);
 
-      if (response['success'] == true) {
-        final currentData = await TokenStorage.getDoctorData() ?? {};
-        final updatedData = {
-          ...currentData,
-          'firstName': firstName,
-          'lastName': lastName,
-          'patronymic': patronymic,
-          'email': email,
-          'phone': phone,
-          'specialization': response['doctor']['specialization'],
-        };
+    if (response['success'] == true) {
+      final doctorData = response['doctor'] as Map<String, dynamic>;
+      final doctor = Doctor.fromJson(doctorData);
 
-        await TokenStorage.saveDoctorData(updatedData);
+      await TokenStorage.saveDoctorData(doctor.toJson());
 
-        return response;
-      } else {
-        throw Exception(response['error'] ?? 'Ошибка обновления профиля');
-      }
-    } catch (e) {
-      rethrow;
+      return doctor;
+    } else {
+      throw Exception(response['error'] ?? 'Ошибка обновления профиля');
     }
   }
 
-  Future<Map<String, dynamic>> getProfile() async {
-    try {
-      final response = await ApiClient.getAuth('doctors/profile');
+  Future<Doctor> getProfile() async {
+    final response = await _profileService.getProfile();
 
-      if (response['success'] == true) {
-        return response['doctor'];
-      } else {
-        throw Exception(response['error'] ?? 'Ошибка загрузки профиля');
-      }
-    } catch (e) {
-      rethrow;
+    if (response['success'] == true) {
+      final doctorData = response['doctor'] as Map<String, dynamic>;
+      return Doctor.fromJson(doctorData);
+    } else {
+      throw Exception(response['error'] ?? 'Ошибка загрузки профиля');
     }
   }
 }

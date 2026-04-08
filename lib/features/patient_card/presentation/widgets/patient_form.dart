@@ -4,7 +4,7 @@ import 'form_fields/blood_type_selector.dart';
 import 'form_fields/date_field.dart';
 import 'form_fields/gender_selector.dart';
 import 'form_fields/mother_search_field.dart';
-import 'form_fields/text_input_field.dart';
+import '../../../../shared/widgets/fields/text_input_field.dart';
 import 'form_fields/time_field.dart';
 
 class PatientFormWidget extends StatelessWidget {

@@ -1,22 +1,13 @@
 import 'dart:convert';
-import 'package:http/http.dart' as http;
-import '../../../../core/storage/token_storage.dart';
 import '../../../../models/patient.dart';
+import '../services/patient_service.dart';
 
-class PatientService {
-  static const String baseUrl = 'http://10.0.2.2:3000/api';
+class PatientRepository {
+  final PatientService _service = PatientService();
 
-  static Future<List<Patient>> getPatients() async {
+  Future<List<Patient>> getPatients() async {
     try {
-      final token = await TokenStorage.getAccessToken();
-
-      final response = await http.get(
-        Uri.parse('$baseUrl/patients'),
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': 'Bearer $token',
-        },
-      );
+      final response = await _service.getPatients();
 
       if (response.statusCode == 200) {
         final List<dynamic> data = json.decode(response.body);
@@ -29,17 +20,9 @@ class PatientService {
     }
   }
 
-  static Future<Patient> getPatientById(int patientId) async {
+  Future<Patient> getPatientById(int patientId) async {
     try {
-      final token = await TokenStorage.getAccessToken();
-
-      final response = await http.get(
-        Uri.parse('$baseUrl/patients/$patientId'),
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': 'Bearer $token',
-        },
-      );
+      final response = await _service.getPatientById(patientId);
 
       if (response.statusCode == 200) {
         return Patient.fromJson(json.decode(response.body));
@@ -51,17 +34,9 @@ class PatientService {
     }
   }
 
-  static Future<List<Patient>> searchPatients(String query) async {
+  Future<List<Patient>> searchPatients(String query) async {
     try {
-      final token = await TokenStorage.getAccessToken();
-
-      final response = await http.get(
-        Uri.parse('$baseUrl/patients/search?query=$query'),
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': 'Bearer $token',
-        },
-      );
+      final response = await _service.searchPatients(query);
 
       if (response.statusCode == 200) {
         final Map<String, dynamic> result = json.decode(response.body);
@@ -69,6 +44,21 @@ class PatientService {
         return data.map((json) => Patient.fromJson(json)).toList();
       } else {
         throw Exception('Ошибка поиска: ${response.statusCode}');
+      }
+    } catch (e) {
+      throw Exception('Ошибка соединения: $e');
+    }
+  }
+
+  Future<Patient> createPatient(Map<String, dynamic> patientData) async {
+    try {
+      final response = await _service.createPatient(patientData);
+
+      if (response.statusCode == 201) {
+        return Patient.fromJson(json.decode(response.body));
+      } else {
+        final error = json.decode(response.body);
+        throw Exception(error['error'] ?? 'Ошибка создания пациента');
       }
     } catch (e) {
       throw Exception('Ошибка соединения: $e');

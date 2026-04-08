@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import '../../../../core/constants/app_colors.dart';
+import 'error_container.dart';
 import 'login_form.dart';
 
 class LoginUI extends StatelessWidget {
@@ -9,6 +11,9 @@ class LoginUI extends StatelessWidget {
   final String? errorMessage;
   final bool isLoading;
   final bool isFormValid;
+  final String? emailError;
+  final String? passwordError;
+  final VoidCallback? onClearError;
 
   const LoginUI({
     super.key,
@@ -16,14 +21,18 @@ class LoginUI extends StatelessWidget {
     required this.passwordController,
     required this.onLoginPressed,
     required this.onCreateAccountPressed,
-    required this.errorMessage,
+    this.errorMessage,
     required this.isLoading,
     required this.isFormValid,
+    this.emailError,
+    this.passwordError,
+    this.onClearError,
   });
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: AppColors.white,
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 24),
@@ -37,38 +46,13 @@ class LoginUI extends StatelessWidget {
                 style: TextStyle(
                   fontSize: 32,
                   fontWeight: FontWeight.bold,
+                  color: AppColors.black,
                 ),
               ),
 
               const SizedBox(height: 20),
 
-              if (errorMessage != null && errorMessage!.isNotEmpty)
-                Container(
-                  width: double.infinity,
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                  margin: const EdgeInsets.only(bottom: 20),
-                  decoration: BoxDecoration(
-                    color: Colors.red[50],
-                    borderRadius: BorderRadius.circular(12),
-                    border: Border.all(color: Colors.red.shade200),
-                  ),
-                  child: Row(
-                    children: [
-                      const Icon(Icons.error_outline, color: Colors.red, size: 20),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: Text(
-                          errorMessage!,
-                          style: const TextStyle(
-                            color: Colors.red,
-                            fontSize: 14,
-                            fontWeight: FontWeight.w500,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
+              ErrorContainer(errorMessage: errorMessage),
 
               LoginForm(
                 emailController: emailController,
@@ -76,6 +60,9 @@ class LoginUI extends StatelessWidget {
                 onLoginPressed: onLoginPressed,
                 isLoading: isLoading,
                 isFormValid: isFormValid,
+                emailError: emailError,
+                passwordError: passwordError,
+                onClearError: onClearError,
               ),
 
               const SizedBox(height: 60),
@@ -85,17 +72,20 @@ class LoginUI extends StatelessWidget {
                   children: [
                     const Text(
                       'Ещё нет аккаунта?',
-                      style: TextStyle(fontSize: 14, color: Colors.grey),
+                      style: TextStyle(fontSize: 14, color: AppColors.grey),
                     ),
                     const SizedBox(height: 8),
                     TextButton(
                       onPressed: onCreateAccountPressed,
+                      style: TextButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                      ),
                       child: const Text(
                         'Создать аккаунт',
                         style: TextStyle(
                           fontSize: 16,
                           fontWeight: FontWeight.w600,
-                          color: Color(0xFF44E4BF),
+                          color: AppColors.primary,
                         ),
                       ),
                     ),

@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
-import 'password_rules.dart';
+import '../../../../core/constants/app_colors.dart';
 import '../../../../core/utils/icon_widgets.dart';
 import '../../../../shared/widgets/buttons/continue_button.dart';
+import 'error_container.dart';
 
 class LoginForm extends StatefulWidget {
   final TextEditingController emailController;
@@ -9,6 +10,9 @@ class LoginForm extends StatefulWidget {
   final VoidCallback onLoginPressed;
   final bool isLoading;
   final bool isFormValid;
+  final String? emailError;
+  final String? passwordError;
+  final VoidCallback? onClearError;
 
   const LoginForm({
     super.key,
@@ -17,6 +21,9 @@ class LoginForm extends StatefulWidget {
     required this.onLoginPressed,
     required this.isLoading,
     required this.isFormValid,
+    this.emailError,
+    this.passwordError,
+    this.onClearError,
   });
 
   @override
@@ -44,6 +51,21 @@ class _LoginFormState extends State<LoginForm> {
           ),
         ),
 
+        if (widget.emailError != null || widget.passwordError != null)
+          Padding(
+            padding: const EdgeInsets.only(top: 12),
+            child: Column(
+              children: [
+                if (widget.emailError != null)
+                  ErrorContainer(errorMessage: widget.emailError),
+                if (widget.passwordError != null)
+                  const SizedBox(height: 8),
+                if (widget.passwordError != null)
+                  ErrorContainer(errorMessage: widget.passwordError),
+              ],
+            ),
+          ),
+
         const SizedBox(height: 40),
 
         if (widget.isLoading)
@@ -58,66 +80,85 @@ class _LoginFormState extends State<LoginForm> {
   }
 
   Widget _buildEmailField() {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-      child: TextField(
-        controller: widget.emailController,
-        keyboardType: TextInputType.emailAddress,
-        textAlignVertical: TextAlignVertical.center,
-        decoration: const InputDecoration(
-          border: InputBorder.none,
-          contentPadding: EdgeInsets.zero,
-          isDense: true,
-          hintText: 'Электронная почта',
-          hintStyle: TextStyle(fontSize: 16, color: Colors.grey),
+    return GestureDetector(
+      onTap: widget.onClearError,
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        decoration: const BoxDecoration(
+          borderRadius: BorderRadius.only(
+            topLeft: Radius.circular(12),
+            topRight: Radius.circular(12),
+          ),
         ),
-        style: const TextStyle(fontSize: 16),
-        onChanged: (_) {
-          widget.emailController.addListener(() {});
-          widget.emailController.notifyListeners();
-        },
+        child: TextField(
+          controller: widget.emailController,
+          keyboardType: TextInputType.emailAddress,
+          textAlignVertical: TextAlignVertical.center,
+          decoration: const InputDecoration(
+            border: InputBorder.none,
+            contentPadding: EdgeInsets.zero,
+            isDense: true,
+            hintText: 'Электронная почта',
+            hintStyle: TextStyle(fontSize: 16, color: AppColors.grey),
+          ),
+          style: const TextStyle(fontSize: 16),
+          onChanged: (_) {
+            if (widget.onClearError != null) {
+              widget.onClearError!();
+            }
+            widget.emailController.addListener(() {});
+            widget.emailController.notifyListeners();
+          },
+        ),
       ),
     );
   }
 
   Widget _buildPasswordField() {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-      child: Row(
-        children: [
-          IconWidgets.infoIcon(
-            context: context,
-            onTap: () => PasswordRulesDialog.show(context),
+    return GestureDetector(
+      onTap: widget.onClearError,
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        decoration: const BoxDecoration(
+          borderRadius: BorderRadius.only(
+            bottomLeft: Radius.circular(12),
+            bottomRight: Radius.circular(12),
           ),
-          const SizedBox(width: 8),
-          Expanded(
-            child: TextField(
-              controller: widget.passwordController,
-              obscureText: _obscurePassword,
-              textAlignVertical: TextAlignVertical.center,
-              decoration: const InputDecoration(
-                border: InputBorder.none,
-                contentPadding: EdgeInsets.zero,
-                isDense: true,
-                hintText: 'Пароль',
-                hintStyle: TextStyle(fontSize: 16, color: Colors.grey),
+        ),
+        child: Row(
+          children: [
+            Expanded(
+              child: TextField(
+                controller: widget.passwordController,
+                obscureText: _obscurePassword,
+                textAlignVertical: TextAlignVertical.center,
+                decoration: const InputDecoration(
+                  border: InputBorder.none,
+                  contentPadding: EdgeInsets.zero,
+                  isDense: true,
+                  hintText: 'Пароль',
+                  hintStyle: TextStyle(fontSize: 16, color: AppColors.grey),
+                ),
+                style: const TextStyle(fontSize: 16),
+                onChanged: (_) {
+                  if (widget.onClearError != null) {
+                    widget.onClearError!();
+                  }
+                  widget.passwordController.addListener(() {});
+                  widget.passwordController.notifyListeners();
+                },
               ),
-              style: const TextStyle(fontSize: 16),
-              onChanged: (_) {
-                widget.passwordController.addListener(() {});
-                widget.passwordController.notifyListeners();
+            ),
+            IconWidgets.visibilityIcon(
+              isVisible: _obscurePassword,
+              onTap: () {
+                setState(() {
+                  _obscurePassword = !_obscurePassword;
+                });
               },
             ),
-          ),
-          IconWidgets.visibilityIcon(
-            isVisible: _obscurePassword,
-            onTap: () {
-              setState(() {
-                _obscurePassword = !_obscurePassword;
-              });
-            },
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

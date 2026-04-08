@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 class IconWidgets {
   static const double _defaultIconSize = 24.0;
   static const double _smallIconSize = 20.0;
-  static const double _largeIconSize = 26.0;
 
   static const _defaultBackgroundColor = Color(0xFFE0E0E0);
   static const _iconColor = Colors.black;
@@ -61,23 +60,6 @@ class IconWidgets {
     );
   }
 
-  static Widget micIcon({
-    required VoidCallback onTap,
-    EdgeInsetsGeometry padding = EdgeInsets.zero,
-  }) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Padding(
-        padding: padding,
-        child: Icon(
-          Icons.mic_none_sharp,
-          size: _largeIconSize ,
-          color: _iconColor,
-        ),
-      ),
-    );
-  }
-
   static Widget filterIcon({
     required VoidCallback onTap,
     EdgeInsetsGeometry padding = EdgeInsets.zero,
@@ -114,6 +96,21 @@ class IconWidgets {
           color: _iconColor,
         ),
       ),
+    );
+  }
+
+  static Widget backIcon({
+    required VoidCallback onTap,
+    Color color = Colors.white,
+    double size = _defaultIconSize,
+  }) {
+    return IconButton(
+      icon: Icon(
+        Icons.arrow_back,
+        color: color,
+        size: size,
+      ),
+      onPressed: onTap,
     );
   }
 

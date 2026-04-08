@@ -1,21 +1,88 @@
-import '../../../../core/network/api_client.dart';
-import '../../../../models/reminder.dart';
+import '../../domain/entities/reminder.dart';
+import '../service/reminder_service.dart';
 
 class ReminderRepository {
+  final ReminderService _service = ReminderService();
+
   Future<Map<String, dynamic>> getRemindersStats() async {
     try {
-      final response = await ApiClient.getAuth('reminders/stats');
+      final response = await _service.getRemindersStats();
       return {
-        'count': response['todayCount'].toString(),
-        'tomorrowCount': response['tomorrowCount'].toString(),
+        'todayCount': response['todayCount']?.toString() ?? '0',
+        'tomorrowCount': response['tomorrowCount']?.toString() ?? '0',
         'tomorrowDate': _formatDate(response['tomorrowDate']),
       };
     } catch (e) {
       return {
-        'count': '0',
+        'todayCount': '0',
         'tomorrowCount': '0',
         'tomorrowDate': '',
       };
+    }
+  }
+
+  Future<List<Reminder>> getReminders() async {
+    try {
+      final response = await _service.getReminders();
+      final List<dynamic> data = response['data'] ?? [];
+      return data.map((json) => Reminder.fromJson(json)).toList();
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  Future<void> toggleReminderStatus(int reminderId, bool isCompleted) async {
+    try {
+      await _service.updateReminderStatus(reminderId, isCompleted ? 1 : 0);
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  Future<void> markAsCompleted(int id) async {
+    try {
+      await _service.updateReminderStatus(id, 1);
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  Future<void> deleteReminder(int reminderId) async {
+    try {
+      await _service.deleteReminder(reminderId);
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  Future<Reminder> getReminderById(int id) async {
+    try {
+      final response = await _service.getReminderById(id);
+      return Reminder.fromJson(response['data']);
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  Future<Reminder> createReminder({
+    required String title,
+    String? description,
+    required DateTime date,
+  }) async {
+    try {
+      final response = await _service.createReminder({
+        'title': title,
+        'description': description,
+        'reminder_date': date.toIso8601String().split('T')[0],
+      });
+
+      if (response['success'] == true) {
+        return Reminder.fromJson(response['data']);
+      } else {
+        throw Exception(response['error'] ?? 'Ошибка создания напоминания');
+      }
+    } catch (e) {
+      rethrow;
     }
   }
 
@@ -30,75 +97,6 @@ class ReminderRepository {
       return '${date.day} ${months[date.month - 1]}';
     } catch (e) {
       return '';
-    }
-  }
-
-  Future<List<Reminder>> getReminders() async {
-    try {
-      final response = await ApiClient.getAuth('reminders');
-      final List<dynamic> data = response['data'] ?? [];
-      return data.map((json) => Reminder.fromJson(json)).toList();
-    } catch (e) {
-      rethrow;
-    }
-  }
-
-  Future<void> toggleReminderStatus(int reminderId, bool isCompleted) async {
-    try {
-      await ApiClient.putAuth('reminders/$reminderId', {
-        'is_completed': isCompleted ? 1 : 0,
-      });
-    } catch (e) {
-      rethrow;
-    }
-  }
-
-  Future<void> deleteReminder(int reminderId) async {
-    try {
-      await ApiClient.deleteAuth('reminders/$reminderId');
-    } catch (e) {
-      rethrow;
-    }
-  }
-
-  Future<Reminder> getReminderById(int id) async {
-    try {
-      final response = await ApiClient.getAuth('reminders/$id');
-      return Reminder.fromJson(response['data']);
-    } catch (e) {
-      rethrow;
-    }
-  }
-
-  Future<void> markAsCompleted(int id) async {
-    try {
-      await ApiClient.putAuth('reminders/$id', {
-        'is_completed': 1,
-      });
-    } catch (e) {
-      rethrow;
-    }
-  }
-
-  Future<Reminder> createReminder({
-    required String title,
-    String? description,
-    required DateTime date,
-  }) async {
-    try {
-      final response = await ApiClient.postAuth('reminders', {
-        'title': title,
-        'description': description,
-        'reminder_date': date.toIso8601String().split('T')[0],
-      });
-
-      if (response['success'] == true) {
-        return Reminder.fromJson(response['data']);
-      } else {
-        throw Exception(response['error'] ?? 'Ошибка создания напоминания');
-      }
-    } catch (e) {
-      rethrow;
     }
   }
 }

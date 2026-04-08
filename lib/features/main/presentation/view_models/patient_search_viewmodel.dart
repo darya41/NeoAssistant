@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 
 import '../../../../models/patient.dart';
-import '../../data/repository/patient_service.dart';
+import '../../data/repository/patient_repository.dart';
 
 class PatientSearchViewModel extends ChangeNotifier {
+  final PatientRepository _repository = PatientRepository();
+
   List<Patient> _allPatients = [];
   List<Patient> _searchResults = [];
   bool _isLoading = true;
@@ -142,7 +144,7 @@ class PatientSearchViewModel extends ChangeNotifier {
     notifyListeners();
 
     try {
-      _allPatients = await PatientService.getPatients();
+      _allPatients = await _repository.getPatients();
     } catch (e) {
       _error = e.toString();
     } finally {
@@ -165,7 +167,7 @@ class PatientSearchViewModel extends ChangeNotifier {
     notifyListeners();
 
     try {
-      _searchResults = await PatientService.searchPatients(query);
+      _searchResults = await _repository.searchPatients(query);
     } catch (e) {
       _error = e.toString();
       _searchResults = [];

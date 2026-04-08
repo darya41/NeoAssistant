@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
+import '../../../../core/constants/app_colors.dart';
 import '../../../../shared/widgets/buttons/save_button.dart';
-import '../../../../shared/widgets/forms/reminder_form.dart';
-import '../../data/repositories/reminder_repository.dart';
+import '../view_models/create_reminder_viewmodel.dart';
+import '../widgets/reminder_form.dart';
 
 class CreateReminderScreen extends StatefulWidget {
   const CreateReminderScreen({super.key});
@@ -11,91 +12,50 @@ class CreateReminderScreen extends StatefulWidget {
 }
 
 class _CreateReminderScreenState extends State<CreateReminderScreen> {
-  final ReminderRepository _repository = ReminderRepository();
+  late final CreateReminderViewModel _viewModel;
 
-  String _dateDisplay = 'Дата: 00/00/0000';
-  DateTime? _selectedDate;
+  @override
+  void initState() {
+    super.initState();
+    _viewModel = CreateReminderViewModel();
+    _viewModel.addListener(_onViewModelChanged);
+  }
 
-  static const _defaultBackgroundColor = Color(0xFFF3F3F3);
-  static const _borderColor = Color(0xFFC6C6C6);
-  static const _activeColor = Color(0xFF44E4BF);
-
-  bool _titleIsEmpty = true;
-  bool _descriptionIsEmpty = true;
-  bool _isSaving = false;
-
-  final TextEditingController _titleController = TextEditingController();
-  final TextEditingController _descriptionController = TextEditingController();
-
-  bool get _isFormValid {
-    return !_titleIsEmpty &&
-        !_descriptionIsEmpty &&
-        _selectedDate != null;
+  void _onViewModelChanged() {
+    if (mounted) {
+      setState(() {});
+    }
   }
 
   Future<void> _handleSave() async {
-    if (!_isFormValid) return;
+    final success = await _viewModel.saveReminder(context);
 
-    setState(() {
-      _isSaving = true;
-    });
-
-    try {
-      final reminder = await _repository.createReminder(
-        title: _titleController.text.trim(),
-        description: _descriptionController.text.trim().isEmpty
-            ? null
-            : _descriptionController.text.trim(),
-        date: _selectedDate!,
+    if (success && mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Напоминание создано!'),
+          backgroundColor: AppColors.primary,
+        ),
       );
-
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Напоминание создано!'),
-            backgroundColor: Color(0xFF44E4BF),
-          ),
-        );
-        Navigator.pop(context, true);
-      }
-    } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Ошибка: ${e.toString().replaceFirst('Exception: ', '')}'),
-            backgroundColor: Colors.red,
-          ),
-        );
-      }
-    } finally {
-      if (mounted) {
-        setState(() {
-          _isSaving = false;
-        });
-      }
+      Navigator.pop(context, true);
+    } else if (_viewModel.errorMessage != null && mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(_viewModel.errorMessage!),
+          backgroundColor: AppColors.error,
+        ),
+      );
     }
   }
 
-  Future<void> _selectDate() async {
-    final DateTime? picked = await showDatePicker(
-      context: context,
-      initialDate: DateTime.now(),
-      firstDate: DateTime(2020),
-      lastDate: DateTime(2100),
-    );
-    if (picked != null) {
-      final dateString = '${picked.day}/${picked.month}/${picked.year}';
-      setState(() {
-        _dateDisplay = dateString;
-        _selectedDate = picked;
-      });
-    }
+  void _handleDateTap() {
+    _viewModel.selectDate(context);
   }
 
   @override
   void dispose() {
-    _titleController.dispose();
-    _descriptionController.dispose();
+    _viewModel.removeListener(_onViewModelChanged);
+    _viewModel.dispose();
     super.dispose();
   }
 
@@ -117,37 +77,29 @@ class _CreateReminderScreenState extends State<CreateReminderScreen> {
             Expanded(
               child: SingleChildScrollView(
                 child: ReminderForm(
-                  dateDisplay: _dateDisplay,
-                  titleIsEmpty: _titleIsEmpty,
-                  descriptionIsEmpty: _descriptionIsEmpty,
-                  onTitleChanged: (text) {
-                    setState(() {
-                      _titleIsEmpty = text.isEmpty;
-                    });
-                  },
-                  onDateTap: _selectDate,
-                  onDescriptionChanged: (text) {
-                    setState(() {
-                      _descriptionIsEmpty = text.isEmpty;
-                    });
-                  },
-                  backgroundColor: _defaultBackgroundColor,
-                  titleController: _titleController,
-                  descriptionController: _descriptionController,
+                  dateDisplay: _viewModel.dateDisplay,
+                  titleIsEmpty: _viewModel.titleIsEmpty,
+                  descriptionIsEmpty: _viewModel.descriptionIsEmpty,
+                  onTitleChanged: (text) {},
+                  onDateTap: _handleDateTap,
+                  onDescriptionChanged: (text) {},
+                  backgroundColor: AppColors.background,
+                  titleController: _viewModel.titleController,
+                  descriptionController: _viewModel.descriptionController,
                 ),
               ),
             ),
             const SizedBox(height: 12),
 
-            if (_isSaving)
+            if (_viewModel.isSaving)
               const Center(child: CircularProgressIndicator())
             else
               SaveButton(
                 onPressed: _handleSave,
-                backgroundColor: _isFormValid ? _activeColor : _defaultBackgroundColor,
-                borderColor: _isFormValid ? _activeColor : _borderColor,
-                textColor: _isFormValid ? Colors.white : Colors.black,
-                isEnabled: _isFormValid,
+                backgroundColor: _viewModel.isFormValid ? AppColors.primary : AppColors.background,
+                borderColor: _viewModel.isFormValid ? AppColors.primary : AppColors.border,
+                textColor: _viewModel.isFormValid ? Colors.white : Colors.black,
+                isEnabled: _viewModel.isFormValid,
               ),
           ],
         ),

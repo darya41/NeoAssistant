@@ -1,4 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:neo_friend/features/auth/%20presentation/widgets/password_rules.dart';
+
+import '../../../../core/constants/app_colors.dart';
+import '../../../../core/utils/icon_widgets.dart';
 
 class CustomTextField extends StatelessWidget {
   final String labelText;
@@ -45,7 +49,7 @@ class CustomTextField extends StatelessWidget {
                   labelText,
                   style: const TextStyle(
                     fontSize: 12,
-                    color: Colors.grey,
+                    color: AppColors.grey,
                   ),
                 ),
               ),
@@ -69,10 +73,9 @@ class CustomTextField extends StatelessWidget {
                           shape: BoxShape.circle,
                           color: Colors.grey[300],
                         ),
-                        child: const Icon(
-                          Icons.info_outline,
-                          size: 16,
-                          color: Colors.grey,
+                        child: IconWidgets.infoIcon(
+                          context: context,
+                          onTap: () => PasswordRulesDialog.show(context),
                         ),
                       ),
                     ),
@@ -101,7 +104,7 @@ class CustomTextField extends StatelessWidget {
                       onTap: onVisibilityPressed,
                       child: Icon(
                         obscureText ? Icons.visibility_off : Icons.visibility,
-                        color: Colors.grey,
+                        color: AppColors.grey,
                         size: 20,
                       ),
                     ),
