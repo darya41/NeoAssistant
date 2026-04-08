@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../../../core/constants/app_colors.dart';
-import '../../../../core/validators/profile_validator.dart';
+import '../../domain/validators/profile_validator.dart';
 import '../../../../shared/widgets/fields/text_input_field.dart';
 
 class ProfileFormFields extends StatefulWidget {

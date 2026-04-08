@@ -1,4 +1,4 @@
-import '../../features/auth/domain/validators/auth_validator.dart';
+import '../../../auth/domain/validators/auth_validator.dart';
 
 class ProfileValidator {
   ProfileValidator._();
