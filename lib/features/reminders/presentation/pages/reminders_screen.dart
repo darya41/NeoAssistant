@@ -5,7 +5,7 @@ import '../view_models/reminders_viewmodel.dart';
 import '../widgets/error_view.dart';
 import '../widgets/reminders_app_bar.dart';
 import 'create_reminder_screen.dart';
-import '../../../main/presentation/widgets/custom_bottom_navigation_bar.dart';
+import '../../../main/presentation/widgets/navigation/custom_bottom_navigation_bar.dart';
 import '../widgets/reminders_list_ui.dart';
 
 class RemindersPageScreen extends StatefulWidget {
