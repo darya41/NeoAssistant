@@ -32,17 +32,21 @@ class _RemindersStatsState extends State<RemindersStats> {
     try {
       final stats = await _repository.getRemindersStats();
 
+      final todayCount = (stats['todayCount'] ?? 0).toString();
+      final tomorrowCount = (stats['tomorrowCount'] ?? 0).toString();
+      final tomorrowDate = stats['tomorrowDate'] ?? '';
+
       setState(() {
         _remindersData = [
           {
-            'count': stats['count'],
+            'count': todayCount,
             'label': 'напоминаний сегодня',
             'isToday': true,
           },
-          if (stats['tomorrowCount'] != '0')
+          if (tomorrowCount != '0')
             {
-              'count': stats['tomorrowCount'],
-              'label': 'напоминаний ${stats['tomorrowDate']}',
+              'count': tomorrowCount,
+              'label': 'напоминаний $tomorrowDate',
               'isToday': false,
             },
         ];

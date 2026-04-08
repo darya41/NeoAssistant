@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../../shared/widgets/buttons/save_button.dart';
-import '../../../../shared/widgets/forms/reminder_form.dart';
+import '../../../reminders/presentation/widgets/reminder_form.dart';
 
 class CreateTemplateScreen extends StatefulWidget {
   const CreateTemplateScreen({super.key});

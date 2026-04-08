@@ -1,8 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:neo_friend/features/reminders/presentation/pages/reminders_screen.dart';
+import '../../../../core/constants/app_colors.dart';
 import '../../../../shared/widgets/block/text_content_block.dart';
 import '../../../../shared/widgets/buttons/action_button.dart';
-import '../../data/repositories/reminder_repository.dart';
+import '../view_models/reminder_detail_viewmodel.dart';
+import '../widgets/edit_reminder_form.dart';
+import '../widgets/error_view.dart';
+import '../widgets/reminder_detail_app_bar.dart';
 
 class ReminderDetailScreen extends StatefulWidget {
   final int reminderId;
@@ -21,197 +25,110 @@ class ReminderDetailScreen extends StatefulWidget {
 }
 
 class _ReminderDetailScreenState extends State<ReminderDetailScreen> {
-  bool isEditing = false;
-  bool _isLoading = false;
-  bool _isCompleted = false;
-  String? _errorMessage;
-
-  final ReminderRepository _repository = ReminderRepository();
+  late final ReminderDetailViewModel _viewModel;
 
   @override
   void initState() {
     super.initState();
-    _isCompleted = false;
-    _loadReminder();
-  }
-
-  Future<void> _loadReminder() async {
-    setState(() {
-      _isLoading = true;
-      _errorMessage = null;
-    });
-
-    try {
-      final reminder = await _repository.getReminderById(widget.reminderId);
-      setState(() {
-        _isCompleted = reminder.isCompleted;
-        _isLoading = false;
-      });
-    } catch (e) {
-      setState(() {
-        _errorMessage = e.toString().replaceFirst('Exception: ', '');
-        _isLoading = false;
-      });
-    }
-  }
-
-  Future<void> _markAsCompleted() async {
-    setState(() {
-      _isLoading = true;
-    });
-
-    try {
-      await _repository.markAsCompleted(widget.reminderId);
-
-      setState(() {
-        _isCompleted = true;
-        _isLoading = false;
-      });
-
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Напоминание выполнено!'),
-            backgroundColor: Color(0xFF44E4BF),
-          ),
-        );
-
-        Future.delayed(const Duration(seconds: 1), () {
-          if (mounted) {
-            Navigator.push(
-              context,
-              MaterialPageRoute(builder: (context) => RemindersPageScreen()),
-            );
-          }
-        });
-      }
-    } catch (e) {
-      setState(() {
-        _errorMessage = e.toString().replaceFirst('Exception: ', '');
-        _isLoading = false;
-      });
-
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Ошибка: $_errorMessage'),
-            backgroundColor: Colors.red,
-          ),
-        );
-      }
-    }
-  }
-
-  Future<void> _deleteReminder() async {
-    final confirm = await showDialog<bool>(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Удаление'),
-        content: const Text('Вы уверены, что хотите удалить это напоминание?'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context, false),
-            child: const Text('Отмена'),
-          ),
-          TextButton(
-            onPressed: () => Navigator.pop(context, true),
-            style: TextButton.styleFrom(foregroundColor: Colors.red),
-            child: const Text('Удалить'),
-          ),
-        ],
-      ),
+    _viewModel = ReminderDetailViewModel(
+      reminderId: widget.reminderId,
+      initialTitle: widget.title,
+      initialDescription: widget.description,
     );
+    _viewModel.addListener(_onViewModelChanged);
+  }
 
-    if (confirm != true) return;
-
-    setState(() {
-      _isLoading = true;
-    });
-
-    try {
-      await _repository.deleteReminder(widget.reminderId);
-
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Напоминание удалено'),
-            backgroundColor: Color(0xFF44E4BF),
-          ),
-        );
-        Navigator.pop(context, true);
-      }
-    } catch (e) {
-      setState(() {
-        _errorMessage = e.toString().replaceFirst('Exception: ', '');
-        _isLoading = false;
-      });
+  void _onViewModelChanged() {
+    if (mounted) {
+      setState(() {});
     }
   }
 
-  void _toggleEditing() {
-    setState(() {
-      isEditing = !isEditing;
-    });
+  Future<void> _handleMarkAsCompleted() async {
+    final success = await _viewModel.markAsCompleted(context);
+
+    if (success && mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Напоминание выполнено!'),
+          backgroundColor: AppColors.primary,
+        ),
+      );
+
+      Future.delayed(const Duration(seconds: 1), () {
+        if (mounted) {
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(builder: (context) => const RemindersPageScreen()),
+          );
+        }
+      });
+    } else if (_viewModel.errorMessage != null && mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Ошибка: ${_viewModel.errorMessage}'),
+          backgroundColor: AppColors.error,
+        ),
+      );
+    }
+  }
+
+  Future<void> _handleDelete() async {
+    final success = await _viewModel.deleteReminder(context);
+
+    if (success && mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Напоминание удалено'),
+          backgroundColor: AppColors.primary,
+        ),
+      );
+      Navigator.pop(context, true);
+    } else if (_viewModel.errorMessage != null && mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Ошибка: ${_viewModel.errorMessage}'),
+          backgroundColor: AppColors.error,
+        ),
+      );
+    }
+  }
+
+  void _handleToggleEditing() {
+    _viewModel.toggleEditing();
+  }
+
+  Future<void> _handleSave() async {
+    await _viewModel.saveChanges();
+  }
+
+  @override
+  void dispose() {
+    _viewModel.removeListener(_onViewModelChanged);
+    _viewModel.dispose();
+    super.dispose();
+  }
+
+  void _handleBack() {
+    Navigator.pop(context);
   }
 
   @override
   Widget build(BuildContext context) {
-    if (_isLoading) {
-      return Scaffold(
-        appBar: AppBar(
-          leading: IconButton(
-            icon: const Icon(Icons.arrow_back),
-            onPressed: () => Navigator.pop(context),
-          ),
-          backgroundColor: Colors.white,
-        ),
-        body: const Center(child: CircularProgressIndicator()),
-      );
+    if (_viewModel.isLoading) {
+      return _buildLoadingScaffold();
     }
 
-    if (_errorMessage != null) {
-      return Scaffold(
-        appBar: AppBar(
-          leading: IconButton(
-            icon: const Icon(Icons.arrow_back),
-            onPressed: () => Navigator.pop(context),
-          ),
-          backgroundColor: Colors.white,
-        ),
-        body: Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              const Icon(Icons.error_outline, size: 48, color: Colors.red),
-              const SizedBox(height: 16),
-              Text(_errorMessage!),
-              const SizedBox(height: 16),
-              ElevatedButton(
-                onPressed: _loadReminder,
-                child: const Text('Повторить'),
-              ),
-            ],
-          ),
-        ),
-      );
+    if (_viewModel.errorMessage != null) {
+      return _buildErrorScaffold();
     }
 
     return Scaffold(
-      appBar: AppBar(
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
-          onPressed: () => Navigator.pop(context),
-        ),
-        actions: [
-          IconButton(
-            icon: Icon(
-              isEditing ? Icons.save : Icons.edit,
-              color: Colors.black,
-            ),
-            onPressed: _toggleEditing,
-          ),
-        ],
-        backgroundColor: Colors.white,
+      appBar: ReminderDetailAppBar(
+        isEditing: _viewModel.isEditing,
+        onSave: _handleSave,
+        onEdit: _handleToggleEditing,
+        onBack: _handleBack,
       ),
       body: Padding(
         padding: const EdgeInsets.all(20.0),
@@ -219,33 +136,69 @@ class _ReminderDetailScreenState extends State<ReminderDetailScreen> {
           children: [
             Expanded(
               child: SingleChildScrollView(
-                child: TextContentBlock(
-                  title: widget.title,
-                  description: widget.description,
+                child: _viewModel.isEditing
+                    ? EditReminderForm(
+                        title: _viewModel.title,
+                        description: _viewModel.description,
+                        onTitleChanged: _viewModel.updateTitle,
+                        onDescriptionChanged: _viewModel.updateDescription,
+                    )
+                    : TextContentBlock(
+                        title: widget.title,
+                        description: widget.description,
                 ),
               ),
             ),
             const Spacer(),
-            if (_isLoading)
+            if (_viewModel.isLoading)
               const CircularProgressIndicator()
-            else if (isEditing)
+            else if (_viewModel.isEditing)
               ActionButton(
-                onPressed: _deleteReminder,
+                onPressed: _handleDelete,
                 backgroundColor: Colors.white,
-                borderColor: Colors.red,
+                borderColor: AppColors.error,
                 text: 'Удалить',
               )
-            else if (!_isCompleted)
+            else if (!_viewModel.isCompleted)
                 ActionButton(
-                  onPressed: _markAsCompleted,
+                  onPressed: _handleMarkAsCompleted,
                   backgroundColor: const Color(0xFFACF3E3),
-                  borderColor: const Color(0xFF1DC9A1),
+                  borderColor: AppColors.primary,
                   text: 'Выполнено',
                 )
               else
                 Container(),
           ],
         ),
+      ),
+    );
+  }
+
+  Scaffold _buildLoadingScaffold() {
+    return Scaffold(
+      appBar: AppBar(
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back),
+          onPressed: () => Navigator.pop(context),
+        ),
+        backgroundColor: Colors.white,
+      ),
+      body: const Center(child: CircularProgressIndicator()),
+    );
+  }
+
+  Scaffold _buildErrorScaffold() {
+    return Scaffold(
+      appBar: AppBar(
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back),
+          onPressed: () => Navigator.pop(context),
+        ),
+        backgroundColor: Colors.white,
+      ),
+      body: ErrorView(
+        errorMessage: _viewModel.errorMessage!,
+        onRetry: () => _viewModel.clearError(),
       ),
     );
   }
