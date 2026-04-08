@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../../../../core/constants/app_colors.dart';
+
 class ReminderCard extends StatelessWidget {
   final String count;
   final String label;
@@ -17,7 +19,7 @@ class ReminderCard extends StatelessWidget {
     final countStyle = TextStyle(
       fontSize: 24,
       fontWeight: FontWeight.bold,
-      color: isToday ? const Color(0xFF44E4BF) : Colors.black,
+      color: isToday ? AppColors.primary : Colors.black,
     );
 
     return ConstrainedBox(
@@ -45,7 +47,7 @@ class ReminderCard extends StatelessWidget {
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                   decoration: BoxDecoration(
-                    color: const Color(0xFF44E4BF),
+                    color: AppColors.primary,
                     borderRadius: BorderRadius.circular(6),
                   ),
                   child: Text(

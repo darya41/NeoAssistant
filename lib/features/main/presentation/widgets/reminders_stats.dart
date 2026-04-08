@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:neo_friend/core/constants/app_colors.dart';
 import '../../../reminders/data/repositories/reminder_repository.dart';
 import 'reminder_card.dart';
 import '../../../../shared/widgets/buttons/add_reminder_button.dart';
@@ -64,7 +65,7 @@ class _RemindersStatsState extends State<RemindersStats> {
   Widget build(BuildContext context) {
     if (_isLoading) {
       return Container(
-        color: const Color(0xFF44E4BF),
+        color: AppColors.primary,
         height: 120,
         child: const Center(
           child: CircularProgressIndicator(color: Colors.white),
@@ -74,7 +75,7 @@ class _RemindersStatsState extends State<RemindersStats> {
 
     if (_errorMessage != null) {
       return Container(
-        color: const Color(0xFF44E4BF),
+        color: AppColors.primary,
         height: 120,
         child: Center(
           child: Text(
@@ -86,7 +87,7 @@ class _RemindersStatsState extends State<RemindersStats> {
     }
 
     return Container(
-      color: const Color(0xFF44E4BF),
+      color: AppColors.primary,
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
         child: Column(

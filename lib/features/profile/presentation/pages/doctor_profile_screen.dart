@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:neo_friend/features/profile/presentation/pages/settings_screen.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../domain/entities/doctor.dart';
-import '../../../main/presentation/widgets/custom_bottom_navigation_bar.dart';
+import '../../../main/presentation/widgets/navigation/custom_bottom_navigation_bar.dart';
 import '../view_models/doctor_profile_viewmodel.dart';
 import '../widgets/doctor_info_card.dart';
 import 'doctor_edit_profile_screen.dart';
