@@ -6,5 +6,6 @@ const { authenticateToken } = require('../middleware/auth');
 router.use(authenticateToken);
 
 router.get('/', protocolController.getAllProtocols);
+router.get('/:id', protocolController.getProtocolById);
 
 module.exports = router;

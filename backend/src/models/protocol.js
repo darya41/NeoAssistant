@@ -8,6 +8,14 @@ class ProtocolModel {
         );
         return rows;
     }
+
+    static async findById(id) {
+            const [rows] = await db.query(
+                'SELECT * FROM clinicalprotocol WHERE protocol_id = ?',
+                [id]
+            );
+            return rows[0];
+        }
 }
 
 module.exports = ProtocolModel;

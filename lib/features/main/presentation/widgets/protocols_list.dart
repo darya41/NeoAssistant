@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:neo_friend/features/main/presentation/pages/home_screen.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../protocol/data/repositories/protocol_repository.dart';
 import '../../../protocol/domain/entities/protocol.dart';
+import '../../../protocol/presentation/page/protocol_detail_screen.dart';
 
 class ProtocolsList extends StatefulWidget {
   const ProtocolsList({super.key});
@@ -125,8 +125,7 @@ class _ProtocolsListState extends State<ProtocolsList> {
     Navigator.push(
       context,
       MaterialPageRoute(
-        //builder: (context) => ProtocolDetailScreen(protocol: protocol),
-          builder: (context) => HomeScreen(title: 'aaaaa',),
+        builder: (context) => ProtocolDetailScreen(protocol: protocol),
       ),
     );
   }
