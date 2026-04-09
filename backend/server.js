@@ -16,6 +16,7 @@ const reminderRoutes = require('./src/routes/reminderRoutes');
 const doctorRoutes = require('./src/routes/doctorRoutes');
 const specializationRoutes = require('./src/routes/specializationRoutes');
 const examTypeRoutes = require('./src/routes/examTypeRoutes');
+const protocolRoutes = require('./src/routes/protocolRoutes');
 
 const app = express();
 
@@ -48,6 +49,7 @@ app.use('/api/reminders', reminderRoutes);
 app.use('/api/doctors', doctorRoutes);
 app.use('/api/specializations', specializationRoutes);
 app.use('/api/exam-types', examTypeRoutes);
+app.use('/api/protocols', protocolRoutes);
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
