@@ -16,6 +16,17 @@ class ProtocolModel {
             );
             return rows[0];
         }
+
+    static async search(query) {
+      const [rows] = await db.query(
+        `SELECT * FROM protocols
+         WHERE LOWER(title) LIKE LOWER(?)
+            OR LOWER(description) LIKE LOWER(?)
+         ORDER BY id`,
+        [`%${query}%`, `%${query}%`]
+      );
+      return rows;
+    }
 }
 
 module.exports = ProtocolModel;

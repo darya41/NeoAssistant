@@ -43,6 +43,32 @@ class ProtocolController {
                 });
             }
         }
+
+        async searchProtocols(req, res) {
+          try {
+            const { q } = req.query;
+
+            if (!q || q.trim() === '') {
+              const protocols = await ProtocolModel.findAll();
+              return res.status(200).json({
+                success: true,
+                data: protocols
+              });
+            }
+
+            const protocols = await ProtocolModel.search(q);
+
+            res.status(200).json({
+              success: true,
+              data: protocols
+            });
+          } catch (error) {
+            res.status(500).json({
+              success: false,
+              error: 'Error searching protocols: ' + error.message
+            });
+          }
+        }
 }
 
 module.exports = new ProtocolController();

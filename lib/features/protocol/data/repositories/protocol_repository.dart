@@ -62,4 +62,16 @@ class ProtocolRepository {
       throw Exception('Неверный тип data: ${data.runtimeType}');
     }
   }
+
+  Future<List<Protocol>> searchProtocols(String query) async {
+    if (query.isEmpty) {
+      return getAllProtocols();
+    }
+
+    try {
+      return await _protocolService.searchProtocols(query);
+    } catch (e) {
+      throw Exception('Ошибка поиска протоколов: $e');
+    }
+  }
 }

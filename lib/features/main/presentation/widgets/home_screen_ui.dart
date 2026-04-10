@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import '../view_models/protocol_search_viewmodel.dart';
 import 'reminders_stats.dart';
 import 'tab_bar_widget.dart';
 import 'search_field.dart';
@@ -9,6 +10,7 @@ import 'patient_cards.dart';
 import 'protocols_list.dart';
 import '../view_models/patient_search_viewmodel.dart';
 import '../view_models/home_viewmodel.dart';
+
 
 class HomeScreenUI extends StatefulWidget {
   const HomeScreenUI({super.key});
@@ -20,12 +22,14 @@ class HomeScreenUI extends StatefulWidget {
 class _HomeScreenUIState extends State<HomeScreenUI> {
   late final HomeViewModel _homeViewModel;
   late final PatientSearchViewModel _patientSearchViewModel;
+  late final ProtocolSearchViewModel _protocolSearchViewModel;
 
   @override
   void initState() {
     super.initState();
     _homeViewModel = HomeViewModel();
     _patientSearchViewModel = PatientSearchViewModel();
+    _protocolSearchViewModel = ProtocolSearchViewModel();
   }
 
   @override
@@ -41,6 +45,7 @@ class _HomeScreenUIState extends State<HomeScreenUI> {
       providers: [
         ChangeNotifierProvider.value(value: _homeViewModel),
         ChangeNotifierProvider.value(value: _patientSearchViewModel),
+        ChangeNotifierProvider.value(value: _protocolSearchViewModel),
       ],
       child: Scaffold(
         backgroundColor: Colors.white,

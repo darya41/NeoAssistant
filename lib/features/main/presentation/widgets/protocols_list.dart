@@ -1,65 +1,35 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import '../../../../core/constants/app_colors.dart';
-import '../../../protocol/data/repositories/protocol_repository.dart';
 import '../../../protocol/domain/entities/protocol.dart';
 import '../../../protocol/presentation/page/protocol_detail_screen.dart';
+import '../view_models/protocol_search_viewmodel.dart';
 
-class ProtocolsList extends StatefulWidget {
+class ProtocolsList extends StatelessWidget {
   const ProtocolsList({super.key});
 
   @override
-  State<ProtocolsList> createState() => _ProtocolsListState();
-}
-
-class _ProtocolsListState extends State<ProtocolsList> {
-  final ProtocolRepository _protocolRepository = ProtocolRepository();
-  List<Protocol> _protocols = [];
-  bool _isLoading = true;
-  String? _error;
-
-  @override
-  void initState() {
-    super.initState();
-    _loadProtocols();
-  }
-
-  Future<void> _loadProtocols() async {
-    setState(() {
-      _isLoading = true;
-      _error = null;
-    });
-
-    try {
-      final protocols = await _protocolRepository.getAllProtocols();
-      setState(() {
-        _protocols = protocols;
-        _isLoading = false;
-      });
-    } catch (e) {
-      setState(() {
-        _error = e.toString();
-        _isLoading = false;
-      });
-    }
-  }
-
-  @override
   Widget build(BuildContext context) {
-    if (_isLoading) {
+    final viewModel = context.watch<ProtocolSearchViewModel>();
+    final protocols = viewModel.filteredProtocols;
+    final isLoading = viewModel.isLoading;
+    final error = viewModel.error;
+
+    if (isLoading) {
       return const Center(child: CircularProgressIndicator());
     }
 
-    if (_error != null) {
+    if (error != null) {
       return Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             const Icon(Icons.error_outline, size: 48, color: AppColors.error),
             const SizedBox(height: 16),
-            Text('Ошибка: $_error'),
+            Text('Ошибка: $error'),
             const SizedBox(height: 16),
             ElevatedButton(
-              onPressed: _loadProtocols,
+              onPressed: () => viewModel.refresh(),
               child: const Text('Повторить'),
             ),
           ],
@@ -67,7 +37,7 @@ class _ProtocolsListState extends State<ProtocolsList> {
       );
     }
 
-    if (_protocols.isEmpty) {
+    if (protocols.isEmpty) {
       return const Center(
         child: Text('Нет доступных протоколов'),
       );
@@ -75,19 +45,19 @@ class _ProtocolsListState extends State<ProtocolsList> {
 
     return ListView.separated(
       padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
-      itemCount: _protocols.length,
+      itemCount: protocols.length,
       separatorBuilder: (context, index) => const SizedBox(height: 16),
       itemBuilder: (context, index) {
-        final protocol = _protocols[index];
-        return _buildProtocolCard(protocol);
+        final protocol = protocols[index];
+        return _buildProtocolCard(protocol, context);
       },
     );
   }
 
-  Widget _buildProtocolCard(Protocol protocol) {
+  Widget _buildProtocolCard(Protocol protocol, BuildContext context) {
     return InkWell(
       onTap: () {
-        _navigateToDetail(protocol);
+        _navigateToDetail(protocol, context);
       },
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -121,7 +91,7 @@ class _ProtocolsListState extends State<ProtocolsList> {
     );
   }
 
-  void _navigateToDetail(Protocol protocol) {
+  void _navigateToDetail(Protocol protocol, BuildContext context) {
     Navigator.push(
       context,
       MaterialPageRoute(
