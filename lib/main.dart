@@ -13,6 +13,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Цифровой помощник врача-неонатолога',
+      locale: const Locale('ru', 'RU'),
       theme: ThemeData(
         primaryColor: const Color(0xFF44E4BF),
           colorScheme: ColorScheme.fromSwatch(

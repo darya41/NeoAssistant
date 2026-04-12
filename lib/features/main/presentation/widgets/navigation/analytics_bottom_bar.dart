@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:neo_friend/features/calculator/presentation/pages/calculators_screen.dart';
 import '../../../../profile/presentation/pages/doctor_profile_screen.dart';
 import '../../pages/home_screen.dart';
 import '../../../../reminders/presentation/pages/reminders_screen.dart';
@@ -34,7 +35,7 @@ class _AnalyticsBottomBarState extends BaseBottomNavigationBarState<AnalyticsBot
       case 2:
         Navigator.pushReplacement(
           context,
-          MaterialPageRoute(builder: (context) => TemplatesScreen()),
+          MaterialPageRoute(builder: (context) => CalculatorsScreen()),
         );
         break;
       case 3:
