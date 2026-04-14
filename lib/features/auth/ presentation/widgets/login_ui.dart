@@ -11,8 +11,6 @@ class LoginUI extends StatelessWidget {
   final String? errorMessage;
   final bool isLoading;
   final bool isFormValid;
-  final String? emailError;
-  final String? passwordError;
   final VoidCallback? onClearError;
   final VoidCallback onGuestLoginPressed;
 
@@ -26,8 +24,6 @@ class LoginUI extends StatelessWidget {
     this.errorMessage,
     required this.isLoading,
     required this.isFormValid,
-    this.emailError,
-    this.passwordError,
     this.onClearError,
   });
 
@@ -62,8 +58,6 @@ class LoginUI extends StatelessWidget {
                 onLoginPressed: onLoginPressed,
                 isLoading: isLoading,
                 isFormValid: isFormValid,
-                emailError: emailError,
-                passwordError: passwordError,
                 onClearError: onClearError,
               ),
 

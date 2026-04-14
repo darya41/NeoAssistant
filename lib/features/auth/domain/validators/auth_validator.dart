@@ -34,6 +34,22 @@ class AuthValidator {
     return null;
   }
 
+  static String? getSimpleEmailError(String email) {
+    if (email.isEmpty) return null;
+    if (!isEmailValid(email)) {
+      return 'Некорректная почта';
+    }
+    return null;
+  }
+
+  static String? getSimplePasswordError(String password) {
+    if (password.isEmpty) return null;
+    if (!isPasswordValid(password)) {
+      return 'Некорректный пароль';
+    }
+    return null;
+  }
+
   static bool isPasswordValid(String password) {
     if (password.isEmpty) return false;
 
@@ -95,10 +111,10 @@ class AuthValidator {
   }
 
   static String? getLoginError(String email, String password) {
-    final emailError = getEmailError(email);
+    final emailError = getSimpleEmailError(email);
     if (emailError != null) return emailError;
 
-    final passwordError = getPasswordError(password);
+    final passwordError = getSimplePasswordError(password);
     if (passwordError != null) return passwordError;
 
     return null;
