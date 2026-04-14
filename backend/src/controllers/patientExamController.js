@@ -129,7 +129,11 @@ class PatientExamController {
                 data: results
             });
         } catch (error) {
-            res.status(500).json({ success: false, error: 'Error getting patient exams' });
+
+            res.status(500).json({
+            success: false,
+            data:results,
+            error: 'Error getting patient exams' });
         }
     };
 };

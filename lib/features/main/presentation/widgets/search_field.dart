@@ -10,22 +10,88 @@ import 'filter/filter_dialog.dart';
 
 class SearchField extends StatelessWidget {
   final TextEditingController _controller = TextEditingController();
+  final bool isGuest;
 
-  SearchField({super.key});
+  SearchField({super.key, this.isGuest = false});
 
   @override
   Widget build(BuildContext context) {
     final homeViewModel = context.watch<HomeViewModel>();
+
+    if (isGuest) {
+      return _buildGuestSearch(homeViewModel, context);
+    }
+
+    return _buildAuthenticatedSearch(homeViewModel, context);
+  }
+
+  Widget _buildGuestSearch(HomeViewModel homeViewModel, BuildContext context) {
+    final protocolViewModel = context.watch<ProtocolSearchViewModel>();
+
+    return Container(
+      color: AppColors.primary,
+      padding: const EdgeInsets.fromLTRB(24, 0, 24, 16),
+      child: Row(
+        children: [
+          Expanded(
+            child: Container(
+              height: 40,
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(10),
+              ),
+              padding: const EdgeInsets.only(left: 8.0),
+              child: Row(
+                children: [
+                  IconWidgets.searchIcon(onTap: () {}),
+                  const SizedBox(width: 16),
+                  Expanded(
+                    child: TextField(
+                      controller: _controller,
+                      decoration: InputDecoration(
+                        border: InputBorder.none,
+                        hintText: 'Поиск по протоколам...',
+                        hintStyle: const TextStyle(
+                          fontSize: 14,
+                          color: Colors.grey,
+                        ),
+                        contentPadding: const EdgeInsets.symmetric(horizontal: 12),
+                        suffixIcon: _controller.text.isNotEmpty
+                            ? IconButton(
+                          icon: const Icon(Icons.clear, size: 18),
+                          onPressed: () {
+                            _controller.clear();
+                            protocolViewModel.clearSearch();
+                          },
+                        )
+                            : null,
+                      ),
+                      style: const TextStyle(fontSize: 14),
+                      onChanged: (value) {
+                        protocolViewModel.searchProtocols(value);
+                      },
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildAuthenticatedSearch(HomeViewModel homeViewModel, BuildContext context) {
     final patientViewModel = context.watch<PatientSearchViewModel>();
     final protocolViewModel = context.watch<ProtocolSearchViewModel>();
 
     final isCardioeka = homeViewModel.isCardioeka;
 
     final currentQuery = isCardioeka
-        ? patientViewModel.searchQuery
-        : protocolViewModel.searchQuery;
+        ? (patientViewModel.searchQuery)
+        : (protocolViewModel.searchQuery);
 
-    final hasActiveFilters = isCardioeka && patientViewModel.hasActiveFilters;
+    final hasActiveFilters = isCardioeka && (patientViewModel.hasActiveFilters);
 
     return Container(
       color: AppColors.primary,
@@ -88,11 +154,10 @@ class SearchField extends StatelessWidget {
                         children: [
                           IconWidgets.filterIcon(
                             onTap: () {
-                              final viewModel = context.read<PatientSearchViewModel>();
                               showDialog(
                                 context: context,
                                 builder: (context) => FilterDialog(
-                                  viewModel: viewModel,
+                                  viewModel: patientViewModel,
                                 ),
                               );
                             },

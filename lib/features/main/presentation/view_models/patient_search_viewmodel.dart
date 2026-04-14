@@ -156,7 +156,7 @@ class PatientSearchViewModel extends ChangeNotifier {
   Future<void> search(String query) async {
     _searchQuery = query;
 
-    if (query.isEmpty || query.length < 2) {
+    if (query.isEmpty) {
       _searchResults = [];
       notifyListeners();
       return;

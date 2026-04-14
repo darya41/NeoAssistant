@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:neo_friend/core/constants/app_colors.dart';
+import '../../../../core/services/guest_service.dart';
 import '../../../reminders/data/repositories/reminder_repository.dart';
 import 'reminder_card.dart';
 import '../../../../shared/widgets/buttons/add_reminder_button.dart';
@@ -13,18 +13,37 @@ class RemindersStats extends StatefulWidget {
 
 class _RemindersStatsState extends State<RemindersStats> {
   final ReminderRepository _repository = ReminderRepository();
-
-  List<Map<String, dynamic>> _remindersData = [];
+  bool _isGuest = false;
   bool _isLoading = true;
   String? _errorMessage;
+  List<Map<String, dynamic>> _remindersData = [];
 
   @override
   void initState() {
     super.initState();
-    _loadRemindersStats();
+    _checkGuestMode();
+  }
+
+  Future<void> _checkGuestMode() async {
+    if (!mounted) return;
+
+    _isGuest = await GuestService.isGuestMode();
+
+    if (!mounted) return;
+
+    if (!_isGuest) {
+      await _loadRemindersStats();
+    } else {
+      setState(() {
+        _isLoading = false;
+        _remindersData = [];
+      });
+    }
   }
 
   Future<void> _loadRemindersStats() async {
+    if (!mounted) return;
+
     setState(() {
       _isLoading = true;
       _errorMessage = null;
@@ -33,27 +52,26 @@ class _RemindersStatsState extends State<RemindersStats> {
     try {
       final stats = await _repository.getRemindersStats();
 
-      final todayCount = (stats['todayCount'] ?? 0).toString();
-      final tomorrowCount = (stats['tomorrowCount'] ?? 0).toString();
-      final tomorrowDate = stats['tomorrowDate'] ?? '';
+      if (!mounted) return;
 
       setState(() {
         _remindersData = [
           {
-            'count': todayCount,
+            'count': stats['todayCount'].toString(),
             'label': 'напоминаний сегодня',
             'isToday': true,
           },
-          if (tomorrowCount != '0')
+          if (stats['tomorrowCount'] != '0')
             {
-              'count': tomorrowCount,
-              'label': 'напоминаний $tomorrowDate',
+              'count': stats['tomorrowCount'].toString(),
+              'label': 'напоминаний ${stats['tomorrowDate']}',
               'isToday': false,
             },
         ];
         _isLoading = false;
       });
     } catch (e) {
+      if (!mounted) return;
       setState(() {
         _errorMessage = e.toString();
         _isLoading = false;
@@ -63,9 +81,13 @@ class _RemindersStatsState extends State<RemindersStats> {
 
   @override
   Widget build(BuildContext context) {
+    if (_isGuest) {
+      return const SizedBox.shrink();
+    }
+
     if (_isLoading) {
       return Container(
-        color: AppColors.primary,
+        color: const Color(0xFF44E4BF),
         height: 120,
         child: const Center(
           child: CircularProgressIndicator(color: Colors.white),
@@ -75,7 +97,7 @@ class _RemindersStatsState extends State<RemindersStats> {
 
     if (_errorMessage != null) {
       return Container(
-        color: AppColors.primary,
+        color: const Color(0xFF44E4BF),
         height: 120,
         child: Center(
           child: Text(
@@ -87,7 +109,7 @@ class _RemindersStatsState extends State<RemindersStats> {
     }
 
     return Container(
-      color: AppColors.primary,
+      color: const Color(0xFF44E4BF),
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
         child: Column(

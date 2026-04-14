@@ -11,9 +11,10 @@ import 'protocols_list.dart';
 import '../view_models/patient_search_viewmodel.dart';
 import '../view_models/home_viewmodel.dart';
 
-
 class HomeScreenUI extends StatefulWidget {
-  const HomeScreenUI({super.key});
+  final bool isGuest;
+
+  const HomeScreenUI({super.key, this.isGuest = false});
 
   @override
   State<HomeScreenUI> createState() => _HomeScreenUIState();
@@ -21,30 +22,64 @@ class HomeScreenUI extends StatefulWidget {
 
 class _HomeScreenUIState extends State<HomeScreenUI> {
   late final HomeViewModel _homeViewModel;
-  late final PatientSearchViewModel _patientSearchViewModel;
+  PatientSearchViewModel? _patientSearchViewModel;
   late final ProtocolSearchViewModel _protocolSearchViewModel;
+  bool _isInitialized = false;
 
   @override
   void initState() {
     super.initState();
+    _initialize();
+  }
+
+  Future<void> _initialize() async {
+    if (_isInitialized) return;
+    _isInitialized = true;
+
     _homeViewModel = HomeViewModel();
-    _patientSearchViewModel = PatientSearchViewModel();
+
+    if (widget.isGuest) {
+      _homeViewModel.switchToAnalytics();
+    }
+
+    if (!widget.isGuest) {
+      _patientSearchViewModel = PatientSearchViewModel();
+    }
+
     _protocolSearchViewModel = ProtocolSearchViewModel();
+
+    if (mounted) {
+      setState(() {});
+    }
   }
 
   @override
   void dispose() {
+
     _homeViewModel.dispose();
-    _patientSearchViewModel.dispose();
+    if (!widget.isGuest) {
+      if (_patientSearchViewModel != null) {
+        _patientSearchViewModel!.dispose();
+      }
+    }
+    _protocolSearchViewModel.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
+
+    if (!_isInitialized) {
+      return const Scaffold(
+        body: Center(child: CircularProgressIndicator()),
+      );
+    }
+
     return MultiProvider(
       providers: [
         ChangeNotifierProvider.value(value: _homeViewModel),
-        ChangeNotifierProvider.value(value: _patientSearchViewModel),
+        if (_patientSearchViewModel != null)
+          ChangeNotifierProvider.value(value: _patientSearchViewModel!),
         ChangeNotifierProvider.value(value: _protocolSearchViewModel),
       ],
       child: Scaffold(
@@ -52,22 +87,24 @@ class _HomeScreenUIState extends State<HomeScreenUI> {
         body: SafeArea(
           child: Column(
             children: [
-              const RemindersStats(),
-              Consumer<HomeViewModel>(
-                builder: (context, viewModel, child) {
-                  return TabBarWidget(
-                    activeTab: viewModel.activeTab,
-                    onTabChanged: viewModel.onTabChanged,
-                  );
-                },
+              if (!widget.isGuest)
+                const RemindersStats(),
+
+              TabBarWidget(
+                activeTab: _homeViewModel.activeTab,
+                onTabChanged: _homeViewModel.onTabChanged,
+                isGuest: widget.isGuest,
               ),
-              SearchField(),
+
+              SearchField(isGuest: widget.isGuest),
+
               Expanded(
                 child: Consumer<HomeViewModel>(
                   builder: (context, viewModel, child) {
-                    return viewModel.isCardioeka
-                        ? const PatientCards()
-                        : const ProtocolsList();
+                    if (widget.isGuest || !viewModel.isCardioeka) {
+                      return const ProtocolsList();
+                    }
+                    return const PatientCards();
                   },
                 ),
               ),
@@ -76,12 +113,14 @@ class _HomeScreenUIState extends State<HomeScreenUI> {
         ),
         bottomNavigationBar: Consumer<HomeViewModel>(
           builder: (context, viewModel, child) {
-            return viewModel.isCardioeka
-                ? CustomBottomNavigationBar(
+            if (widget.isGuest || !viewModel.isCardioeka) {
+              return AnalyticsBottomBar(
+                currentIndex: viewModel.analyticsTabIndex,
+                isGuest: widget.isGuest,
+              );
+            }
+            return CustomBottomNavigationBar(
               currentIndex: viewModel.mainTabIndex,
-            )
-                : AnalyticsBottomBar(
-              currentIndex: viewModel.analyticsTabIndex,
             );
           },
         ),

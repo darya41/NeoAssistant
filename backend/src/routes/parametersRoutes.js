@@ -1,13 +1,13 @@
 const express = require('express');
 const router = express.Router();
-const {
-    getParameters,
-    getParametersWithValuesByExamId,
-} = require('../controllers/parametersController');
+const parametersController = require('../controllers/parametersController');
 const { authenticateToken } = require('../middleware/auth');
+const { requireAuth } = require('../middleware/requireAuth');
 
-router.get('/', authenticateToken, getParameters);
-router.get('/values-by-exam-id', authenticateToken, getParametersWithValuesByExamId);
+router.use(authenticateToken);
+router.use(requireAuth);
 
+router.get('/', parametersController.getParameters);
+router.get('/values-by-exam-id', parametersController.getParametersWithValuesByExamId);
 
 module.exports = router;
