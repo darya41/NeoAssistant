@@ -14,6 +14,7 @@ class LoginUI extends StatelessWidget {
   final String? emailError;
   final String? passwordError;
   final VoidCallback? onClearError;
+  final VoidCallback onGuestLoginPressed;
 
   const LoginUI({
     super.key,
@@ -21,6 +22,7 @@ class LoginUI extends StatelessWidget {
     required this.passwordController,
     required this.onLoginPressed,
     required this.onCreateAccountPressed,
+    required this.onGuestLoginPressed,
     this.errorMessage,
     required this.isLoading,
     required this.isFormValid,
@@ -65,7 +67,25 @@ class LoginUI extends StatelessWidget {
                 onClearError: onClearError,
               ),
 
-              const SizedBox(height: 60),
+              const SizedBox(height: 16),
+
+              OutlinedButton(
+                onPressed: onGuestLoginPressed,
+                style: OutlinedButton.styleFrom(
+                  foregroundColor: AppColors.primary,
+                  side: const BorderSide(color: AppColors.primary),
+                  minimumSize: const Size(double.infinity, 50),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                ),
+                child: const Text(
+                  'Продолжить как гость',
+                  style: TextStyle(fontSize: 16),
+                ),
+              ),
+
+              const SizedBox(height: 40),
 
               Center(
                 child: Column(

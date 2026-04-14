@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import '../../../../core/constants/app_colors.dart';
+import '../../../../core/services/guest_service.dart';
 import '../view_model/login_viewmodel.dart';
 import '../widgets/login_ui.dart';
 import '../../../main/presentation/pages/home_screen.dart';
@@ -40,6 +42,30 @@ class _LoginScreenState extends State<LoginScreen> {
     }
   }
 
+  Future<void> _handleGuestLogin() async {
+    try {
+      await GuestService.loginAsGuest();
+
+      if (mounted) {
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(
+            builder: (context) => const HomeScreen(title: 'Neo Friend - Главная'),
+          ),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Ошибка входа как гость: $e'),
+            backgroundColor: AppColors.error,
+          ),
+        );
+      }
+    }
+  }
+
   @override
   void dispose() {
     _viewModel.removeListener(_onViewModelChanged);
@@ -62,10 +88,14 @@ class _LoginScreenState extends State<LoginScreen> {
       emailController: _viewModel.emailController,
       passwordController: _viewModel.passwordController,
       onLoginPressed: _handleLogin,
+      onGuestLoginPressed: _handleGuestLogin,
       onCreateAccountPressed: _navigateToRegistration,
       errorMessage: _viewModel.errorMessage,
       isLoading: _viewModel.isLoading,
       isFormValid: _viewModel.isFormValid,
+      emailError: _viewModel.emailError,
+      passwordError: _viewModel.passwordError,
+      onClearError: _viewModel.clearError,
     );
   }
 }

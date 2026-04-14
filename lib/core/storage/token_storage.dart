@@ -7,6 +7,7 @@ class TokenStorage {
   static const _accessTokenKey = 'access_token';
   static const _refreshTokenKey = 'refresh_token';
   static const _doctorDataKey = 'doctor_data';
+  static const _isGuestKey = 'is_guest_mode';
 
   static Future<void> saveTokens({
     required String accessToken,
@@ -16,6 +17,13 @@ class TokenStorage {
     await _storage.write(key: _accessTokenKey, value: accessToken);
     await _storage.write(key: _refreshTokenKey, value: refreshToken);
     await _storage.write(key: _doctorDataKey, value: json.encode(doctorData));
+    await _storage.write(key: _isGuestKey, value: 'false');
+  }
+
+  static Future<void> saveGuestMode() async {
+    await _storage.write(key: _accessTokenKey, value: 'guest_token');
+    await _storage.write(key: _refreshTokenKey, value: 'guest_token');
+    await _storage.write(key: _isGuestKey, value: 'true');
   }
 
   static Future<String?> getAccessToken() async {
@@ -38,9 +46,16 @@ class TokenStorage {
     return null;
   }
 
+  static Future<bool> isGuestMode() async {
+    final isGuest = await _storage.read(key: _isGuestKey);
+    final result = isGuest == 'true';
+    return result;
+  }
+
   static Future<bool> isLoggedIn() async {
     final token = await getAccessToken();
-    return token != null;
+    final isGuest = await isGuestMode();
+    return token != null && token.isNotEmpty && !isGuest;
   }
 
   static Future<void> clearAll() async {
