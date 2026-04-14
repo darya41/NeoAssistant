@@ -23,6 +23,10 @@ class DoctorController {
             }
 
             let hashedPassword = null;
+                   if (password) {
+                       const bcrypt = require('bcrypt');
+                       hashedPassword = await bcrypt.hash(password, 10);
+                   }
             const affectedRows = await DoctorModel.updateProfile(doctorId, {
                 lastName,
                 firstName,

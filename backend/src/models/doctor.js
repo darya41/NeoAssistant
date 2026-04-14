@@ -43,10 +43,11 @@ class DoctorModel {
             updates.push('specialization_id = ?');
             params.push(specializationId);
         }
-        if (hashedPassword !== undefined) {
-            updates.push('password = ?');
-            params.push(hashedPassword);
-        }
+
+         if (hashedPassword !== undefined && hashedPassword !== null) {
+                updates.push('password = ?');
+                params.push(hashedPassword);
+         }
 
         if (updates.length === 0) {
             return 0;
@@ -58,6 +59,20 @@ class DoctorModel {
         const [result] = await db.query(query, params);
         return result.affectedRows;
     }
+
+    static async findByIdWithSpecialization(doctorId) {
+            const [rows] = await db.query(
+                `SELECT d.doctor_id, d.work_email as email,
+                        d.first_name, d.last_name, d.patronymic,
+                        d.work_phone as phone, s.name as specialization,
+                        d.specialization_id
+                 FROM doctors d
+                 LEFT JOIN specializations s ON d.specialization_id = s.specialization_id
+                 WHERE d.doctor_id = ?`,
+                [doctorId]
+            );
+            return rows[0];
+        }
 }
 
 module.exports = DoctorModel;
