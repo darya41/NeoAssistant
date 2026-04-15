@@ -125,7 +125,22 @@ const AuthController = {
                 });
             }
 
-            const decoded = jwt.verify(refreshToken, process.env.REFRESH_SECRET);
+            if (refreshToken === 'guest_token') {
+                return res.status(401).json({
+                    success: false,
+                    error: 'Недействительный refresh token'
+                });
+            }
+
+            let decoded;
+            try {
+                decoded = jwt.verify(refreshToken, process.env.REFRESH_SECRET);
+            } catch (err) {
+                return res.status(401).json({
+                    success: false,
+                    error: 'Недействительный refresh token'
+                });
+            }
 
             const doctor = await AuthModel.findByRefreshToken(decoded.id, refreshToken);
 

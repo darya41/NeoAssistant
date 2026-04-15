@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'core/constants/app_colors.dart';
 import 'features/auth/ presentation/pages/login_screen.dart';
 import 'features/auth/ presentation/pages/loading_screen.dart';
+import 'features/main/presentation/pages/home_screen.dart';
 
 void main() {
   runApp(const MyApp());
@@ -15,18 +17,19 @@ class MyApp extends StatelessWidget {
       title: 'Цифровой помощник врача-неонатолога',
       locale: const Locale('ru', 'RU'),
       theme: ThemeData(
-        primaryColor: const Color(0xFF44E4BF),
+        primaryColor: AppColors.primary,
           colorScheme: ColorScheme.fromSwatch(
           primarySwatch: Colors.blue,
         ),
         appBarTheme: const AppBarTheme(
-          backgroundColor: Color(0xFF44E4BF),
+          backgroundColor: AppColors.primary,
         ),
       ),
       initialRoute: '/',
       routes: {
         '/': (context) => const LoadingScreen(),
         '/login': (context) => const LoginScreen(),
+        '/main': (context) => const HomeScreen(title: 'Главная'),
       },
       debugShowCheckedModeBanner: false,
     );
