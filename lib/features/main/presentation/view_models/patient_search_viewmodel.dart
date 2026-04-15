@@ -19,7 +19,7 @@ class PatientSearchViewModel extends ChangeNotifier {
   DateTimeRange? _selectedDateRange;
 
   List<Patient> get displayedPatients {
-    final isSearchMode = _searchQuery.isNotEmpty && _searchQuery.length >= 2;
+    final isSearchMode = _searchQuery.isNotEmpty;
     List<Patient> sourcePatients = isSearchMode ? _searchResults : _allPatients;
 
     return _applyFilters(sourcePatients);
@@ -127,7 +127,7 @@ class PatientSearchViewModel extends ChangeNotifier {
   String get searchQuery => _searchQuery;
 
   bool get hasResults {
-    final isSearchMode = _searchQuery.isNotEmpty && _searchQuery.length >= 2;
+    final isSearchMode = _searchQuery.isNotEmpty;
     if (isSearchMode) {
       return _applyFilters(_searchResults).isNotEmpty;
     }

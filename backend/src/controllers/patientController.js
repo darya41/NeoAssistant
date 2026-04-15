@@ -84,7 +84,7 @@ class PatientController {
                 dateFrom, dateTo
             } = req.query;
 
-            if ((!query || query.length < 2) &&
+            if ((!query) &&
                 !gender && !bloodGroup && !rhFactor && !dateFrom && !dateTo) {
                 return res.json({
                     success: true,

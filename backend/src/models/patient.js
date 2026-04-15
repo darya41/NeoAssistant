@@ -124,7 +124,7 @@ class PatientModel {
 
         const params = [];
 
-        if (query && query.length >= 2) {
+        if (query && query.length >= 1) {
             sql += ` AND (
                 p.number_history LIKE ?
                 OR CONCAT(m.last_name, ' ', m.first_name, ' ', COALESCE(m.patronymic, '')) LIKE ?
