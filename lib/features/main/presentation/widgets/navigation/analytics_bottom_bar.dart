@@ -25,7 +25,7 @@ class _AnalyticsBottomBarState extends BaseBottomNavigationBarState<AnalyticsBot
       case 0:
         Navigator.pushReplacement(
           context,
-          MaterialPageRoute(builder: (context) => const HomeScreen(title: 'Главная')),
+          MaterialPageRoute(builder: (context) => const HomeScreen(title: 'Главная', initialTab: 'Аналитика',)),
         );
         break;
       case 1:
@@ -41,7 +41,7 @@ class _AnalyticsBottomBarState extends BaseBottomNavigationBarState<AnalyticsBot
         }
         Navigator.pushReplacement(
           context,
-          MaterialPageRoute(builder: (context) => const RemindersPageScreen()),
+          MaterialPageRoute(builder: (context) => const RemindersPageScreen(useAnalyticsBottomBar: true,)),
         );
         break;
       case 2:
@@ -63,7 +63,7 @@ class _AnalyticsBottomBarState extends BaseBottomNavigationBarState<AnalyticsBot
         }
         Navigator.pushReplacement(
           context,
-          MaterialPageRoute(builder: (context) => DoctorProfileScreen()),
+          MaterialPageRoute(builder: (context) => DoctorProfileScreen(useAnalyticsBottomBar: true,)),
         );
         break;
     }

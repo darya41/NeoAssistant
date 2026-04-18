@@ -6,10 +6,16 @@ import '../widgets/error_view.dart';
 import '../widgets/reminders_app_bar.dart';
 import 'create_reminder_screen.dart';
 import '../../../main/presentation/widgets/navigation/custom_bottom_navigation_bar.dart';
+import '../../../main/presentation/widgets/navigation/analytics_bottom_bar.dart';
 import '../widgets/reminders_list_ui.dart';
 
 class RemindersPageScreen extends StatefulWidget {
-  const RemindersPageScreen({super.key});
+  final bool useAnalyticsBottomBar;
+
+  const RemindersPageScreen({
+    super.key,
+    this.useAnalyticsBottomBar = false,
+  });
 
   @override
   State<RemindersPageScreen> createState() => _RemindersPageScreenState();
@@ -17,6 +23,7 @@ class RemindersPageScreen extends StatefulWidget {
 
 class _RemindersPageScreenState extends State<RemindersPageScreen> {
   late final RemindersViewModel _viewModel;
+  final int _currentIndex = 1;
 
   @override
   void initState() {
@@ -93,9 +100,7 @@ class _RemindersPageScreenState extends State<RemindersPageScreen> {
         onToggleEditing: _viewModel.toggleEditing,
       ),
       body: _buildBody(),
-      bottomNavigationBar: const CustomBottomNavigationBar(
-        currentIndex: 1,
-      ),
+      bottomNavigationBar: _buildBottomNavigationBar(),
       floatingActionButton: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 30.0),
         child: ActionButton(
@@ -106,6 +111,19 @@ class _RemindersPageScreenState extends State<RemindersPageScreen> {
         ),
       ),
     );
+  }
+
+  Widget _buildBottomNavigationBar() {
+    if (widget.useAnalyticsBottomBar) {
+      return AnalyticsBottomBar(
+        currentIndex: _currentIndex,
+        isGuest: false,
+      );
+    } else {
+      return CustomBottomNavigationBar(
+        currentIndex: _currentIndex,
+      );
+    }
   }
 
   Widget _buildBody() {

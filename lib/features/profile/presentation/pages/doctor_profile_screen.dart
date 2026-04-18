@@ -3,12 +3,18 @@ import 'package:neo_friend/features/profile/presentation/pages/settings_screen.d
 import '../../../../core/constants/app_colors.dart';
 import '../../domain/entities/doctor.dart';
 import '../../../main/presentation/widgets/navigation/custom_bottom_navigation_bar.dart';
+import '../../../main/presentation/widgets/navigation/analytics_bottom_bar.dart';
 import '../view_models/doctor_profile_viewmodel.dart';
 import '../widgets/doctor_info_card.dart';
 import 'doctor_edit_profile_screen.dart';
 
 class DoctorProfileScreen extends StatefulWidget {
-  const DoctorProfileScreen({super.key});
+  final bool useAnalyticsBottomBar;
+
+  const DoctorProfileScreen({
+    super.key,
+    this.useAnalyticsBottomBar = false,
+  });
 
   @override
   State<DoctorProfileScreen> createState() => _DoctorProfileScreenState();
@@ -16,6 +22,7 @@ class DoctorProfileScreen extends StatefulWidget {
 
 class _DoctorProfileScreenState extends State<DoctorProfileScreen> {
   late final DoctorProfileViewModel _viewModel;
+  final int _currentIndex = 3;
 
   @override
   void initState() {
@@ -78,8 +85,21 @@ class _DoctorProfileScreenState extends State<DoctorProfileScreen> {
         ],
       ),
       body: _buildBody(),
-      bottomNavigationBar: const CustomBottomNavigationBar(currentIndex: 3),
+      bottomNavigationBar: _buildBottomNavigationBar(),
     );
+  }
+
+  Widget _buildBottomNavigationBar() {
+    if (widget.useAnalyticsBottomBar) {
+      return AnalyticsBottomBar(
+        currentIndex: _currentIndex,
+        isGuest: false,
+      );
+    } else {
+      return CustomBottomNavigationBar(
+        currentIndex: _currentIndex,
+      );
+    }
   }
 
   Widget _buildBody() {

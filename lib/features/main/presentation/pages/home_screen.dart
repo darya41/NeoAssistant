@@ -5,8 +5,12 @@ import '../widgets/home_screen_ui.dart';
 
 class HomeScreen extends StatefulWidget {
   final String title;
+  final String? initialTab;
 
-  const HomeScreen({super.key, required this.title});
+  const HomeScreen({
+    super.key,
+    required this.title,
+    this.initialTab,});
 
   @override
   State<HomeScreen> createState() => _HomeScreenState();
@@ -47,7 +51,10 @@ class _HomeScreenState extends State<HomeScreen> {
         title: Text(widget.title),
         backgroundColor: AppColors.primary,
       ),
-      body: HomeScreenUI(isGuest: _isGuest),
+      body: HomeScreenUI(
+          isGuest: _isGuest,
+          initialTab: widget.initialTab,
+      ),
     );
   }
 }
