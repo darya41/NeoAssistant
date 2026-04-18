@@ -45,7 +45,7 @@ app.use('/api/addresses', addressRoutes);
 app.use('/api/mothers', motherRoutes);
 app.use('/api/parameters', parametersRoutes);
 app.use('/api/patients', patientRoutes);
-app.use('/api/exams', patientExamRoutes);
+app.use('/api/patient-exams', patientExamRoutes);
 app.use('/api/reminders', reminderRoutes);
 app.use('/api/doctors', doctorRoutes);
 app.use('/api/specializations', specializationRoutes);

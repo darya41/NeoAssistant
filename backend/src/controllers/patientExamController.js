@@ -126,13 +126,11 @@ class PatientExamController {
 
             res.json({
                 success: true,
-                data: results
+                data: exams
             });
         } catch (error) {
-
             res.status(500).json({
             success: false,
-            data:results,
             error: 'Error getting patient exams' });
         }
     };

@@ -47,6 +47,10 @@ class _DiaryScreenState extends State<DiaryScreen> {
     });
   }
 
+  void _goBack() {
+      Navigator.pop(context);
+  }
+
   @override
   Widget build(BuildContext context) {
     return ListenableBuilder(
@@ -60,6 +64,10 @@ class _DiaryScreenState extends State<DiaryScreen> {
                 fontSize: 20,
                 fontWeight: FontWeight.w500,
               ),
+            ),
+            leading: IconButton(
+              icon: const Icon(Icons.arrow_back),
+              onPressed: _goBack,
             ),
             backgroundColor: AppColors.white,
             elevation: 0,

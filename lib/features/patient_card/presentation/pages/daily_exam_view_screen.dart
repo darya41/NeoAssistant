@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:neo_friend/features/patient_card/presentation/pages/diary_screen.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_strings.dart';
 import '../view_models/daily_exam_view_viewmodel.dart';
@@ -37,14 +36,7 @@ class _DailyExamViewScreenState extends State<DailyExamViewScreen> {
   }
 
   void _showExitConfirmationDialog() {
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => DiaryScreen(
-          patientId: widget.patientId,
-        ),
-      ),
-    );
+    Navigator.pop(context);
   }
 
   @override
@@ -52,7 +44,6 @@ class _DailyExamViewScreenState extends State<DailyExamViewScreen> {
     return ListenableBuilder(
       listenable: _viewModel,
       builder: (context, child) {
-        // Показываем ошибку если она есть
         if (_viewModel.error != null && !_viewModel.isLoading) {
           WidgetsBinding.instance.addPostFrameCallback((_) {
             _viewModel.showErrorSnackBar(context);
