@@ -6,6 +6,7 @@ import '../../../../core/utils/date_formatter.dart';
 import '../view_models/diary_viewmodel.dart';
 import 'add_daily_exam_screen.dart';
 import 'daily_exam_view_screen.dart';
+import 'dart:developer';
 
 class DiaryScreen extends StatefulWidget {
   final int patientId;
@@ -56,6 +57,7 @@ class _DiaryScreenState extends State<DiaryScreen> {
     return ListenableBuilder(
       listenable: _viewModel,
       builder: (context, child) {
+        log('ListenableBuilder rebuild: isLoading=${_viewModel.isLoading}, hasError=${_viewModel.error != null}, hasEntries=${_viewModel.hasEntries}');
         return Scaffold(
           appBar: AppBar(
             title: const Text(
@@ -123,6 +125,7 @@ class _DiaryScreenState extends State<DiaryScreen> {
     }
 
     if (_viewModel.error != null) {
+      log('Showing error: ${_viewModel.error}');
       return Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -143,30 +146,56 @@ class _DiaryScreenState extends State<DiaryScreen> {
     }
 
     if (!_viewModel.hasEntries) {
-      return Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            const Icon(
-              Icons.medical_information,
-              size: 64,
-              color: AppColors.grey,
-            ),
-            const SizedBox(height: 16),
-            const Text(
-              'Нет записей',
-              style: TextStyle(
-                fontSize: 16,
-                color: AppColors.grey,
+      return Column(
+        children: [
+          const Expanded(
+            child: Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(
+                    Icons.medical_information,
+                    size: 64,
+                    color: AppColors.grey,
+                  ),
+                  SizedBox(height: 16),
+                  Text(
+                    'Нет записей',
+                    style: TextStyle(
+                      fontSize: 16,
+                      color: AppColors.grey,
+                    ),
+                  ),
+                  SizedBox(height: 16),
+                ],
               ),
             ),
-            const SizedBox(height: 16),
-            ElevatedButton(
-              onPressed: () => _viewModel.refresh(),
-              child: const Text('Обновить'),
+          ),
+          Padding(
+            padding: const EdgeInsets.all(16),
+            child: SizedBox(
+              width: double.infinity,
+              child: ElevatedButton(
+                onPressed: _addObservation,
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: AppColors.primary,
+                  foregroundColor: AppColors.white,
+                  padding: const EdgeInsets.symmetric(vertical: 14),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                ),
+                child: const Text(
+                  '+ Добавить наблюдение',
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+              ),
             ),
-          ],
-        ),
+          ),
+        ],
       );
     }
 
@@ -181,6 +210,7 @@ class _DiaryScreenState extends State<DiaryScreen> {
             itemBuilder: (context, index) {
               final date = sortedDates[index];
               final entries = _viewModel.getEntriesForDate(date);
+              log('Building item $index: date=$date, entries=${entries.length}');
               return _buildDateSection(date, entries);
             },
           ),
@@ -231,10 +261,13 @@ class _DiaryScreenState extends State<DiaryScreen> {
             ),
           ),
         ),
-        ...entries.asMap().entries.map((entry) => _buildEntryCard(
-          entry.value,
-          entry.key + 1,
-        )),
+        ...entries.asMap().entries.map((entry) {
+          log('Building entry card #${entry.key + 1} for date $dateFormat');
+          return _buildEntryCard(
+            entry.value,
+            entry.key + 1,
+          );
+        }),
         const SizedBox(height: 8),
       ],
     );

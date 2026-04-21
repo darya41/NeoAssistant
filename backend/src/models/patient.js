@@ -158,6 +158,25 @@ class PatientModel {
         const [rows] = await db.query(sql, params);
         return rows;
     }
+
+    static async getParameterMappings(examId, medicalParamIds) {
+            console.log('🔍 getParameterMappings called:', { examId, medicalParamIds });
+
+            if (!medicalParamIds || medicalParamIds.length === 0) {
+                return [];
+            }
+
+            const placeholders = medicalParamIds.map(() => '?').join(',');
+            const [rows] = await db.query(
+                `SELECT medical_parameter_id, med_param_exam_id
+                 FROM MedParamInExams
+                 WHERE exam_id = ? AND medical_parameter_id IN (${placeholders})`,
+                [examId, ...medicalParamIds]
+            );
+
+            console.log('📊 getParameterMappings result:', rows);
+            return rows;
+        }
 }
 
 module.exports = PatientModel;

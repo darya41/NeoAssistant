@@ -42,13 +42,10 @@ class ExamTypeController {
 
             const exam = await ExamModel.getPrimaryExamId(patientId, examTypeId);
 
-            res.json({
+             res.json({
                 success: true,
-                data: {
-                    patient_exam_id: result[0].patients_exams_id,
-                    exam_date: result[0].exam_date
-                }
-            });
+                data: exam
+             });
         } catch (error) {
             res.status(500).json({ success: false, error: 'Error getting primary exam id' });
         }
@@ -87,12 +84,12 @@ class ExamTypeController {
                 });
             }
 
-            const exam = await ExamModel.getExamDateTime(patientExamId);
+            const examDateTime = await ExamModel.getExamDateTime(patientExamId);
 
             res.json({
                 success: true,
                 data: {
-                    date_time: result[0].date_time
+                    date_time: examDateTime
                 }
             });
         } catch (error) {

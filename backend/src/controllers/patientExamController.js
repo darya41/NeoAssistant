@@ -44,73 +44,109 @@ class PatientExamController {
         }
     };
 
-    async saveExamParameters (req, res) {
+   async saveExamParameters(req, res) {
+       try {
+           console.log('=========================================');
+           console.log('📝 saveExamParameters called');
+           console.log('📝 Timestamp:', new Date().toISOString());
 
-        try {
-            const patientsExamsId = req.params.id;
-            const { parameters } = req.body;
+           const patientsExamsId = req.params.id;
+           const { parameters } = req.body;
 
-            if (!parameters || !Array.isArray(parameters)) {
-                return res.status(400).json({
-                    success: false,
-                    error: 'parameters array is required'
-                });
-            }
+           console.log('📝 patientsExamsId:', patientsExamsId);
+           console.log('📝 parameters count:', parameters?.length || 0);
+           console.log('📝 parameters:', JSON.stringify(parameters, null, 2));
 
+           if (!parameters || !Array.isArray(parameters)) {
+               console.log('❌ Invalid parameters: not an array');
+               return res.status(400).json({
+                   success: false,
+                   error: 'parameters array is required'
+               });
+           }
+
+           console.log('🔍 Getting exam info for patientsExamsId:', patientsExamsId);
            const examInfo = await PatientExamModel.getExamInfo(patientsExamsId);
+           console.log('📊 examInfo:', examInfo);
 
-            if (!examInfo) {
-                return res.status(404).json({
-                    success: false,
-                    error: 'Осмотр не найден'
-                });
-            }
+           if (!examInfo) {
+               console.log('❌ Exam not found for ID:', patientsExamsId);
+               return res.status(404).json({
+                   success: false,
+                   error: 'Осмотр не найден'
+               });
+           }
 
-            const examId = examInfo.exam_id;
+           const examId = examInfo.exam_id;
+           console.log('📊 examId:', examId);
 
-            const medicalParamIds = parameters.map(p => p.medical_parameter_id);
-            const mappings = await PatientExamModel.getParameterMappings(examId, medicalParamIds);
+           const medicalParamIds = parameters.map(p => p.medical_parameter_id);
+           console.log('🔍 medicalParamIds:', medicalParamIds);
 
-            const mappingMap = new Map();
-            mappings.forEach(m => {
-                mappingMap.set(m.medical_parameter_id, m.med_param_exam_id);
-            });
+           console.log('🔍 Getting parameter mappings for examId:', examId);
+           const mappings = await PatientModel.getParameterMappings(examId, medicalParamIds);
+           console.log('📊 mappings count:', mappings?.length || 0);
+           console.log('📊 mappings:', JSON.stringify(mappings, null, 2));
 
-            let savedCount = 0;
-            const valuesToInsert = [];
+           const mappingMap = new Map();
+           mappings.forEach(m => {
+               mappingMap.set(m.medical_parameter_id, m.med_param_exam_id);
+           });
+           console.log('📊 mappingMap size:', mappingMap.size);
 
-            for (const param of parameters) {
-                const medParamExamId = mappingMap.get(param.medical_parameter_id);
+           let savedCount = 0;
+           const valuesToInsert = [];
 
-                if (medParamExamId) {
-                    valuesToInsert.push([
-                        patientsExamsId,
-                        medParamExamId,
-                        param.value
-                    ]);
-                    savedCount++;
-                }
-            }
+           for (const param of parameters) {
+               const medParamExamId = mappingMap.get(param.medical_parameter_id);
+               console.log(`🔍 param ${param.medical_parameter_id}: medParamExamId = ${medParamExamId}`);
 
-            if (valuesToInsert.length > 0) {
+               if (medParamExamId) {
+                   valuesToInsert.push([
+                       patientsExamsId,
+                       medParamExamId,
+                       param.value
+                   ]);
+                   savedCount++;
+               }
+           }
+
+           console.log('📊 valuesToInsert count:', valuesToInsert.length);
+           console.log('📊 savedCount:', savedCount);
+           console.log('📊 total parameters:', parameters.length);
+
+           if (valuesToInsert.length > 0) {
+               console.log('💾 Saving parameter values...');
                await PatientExamModel.saveParameterValues(patientsExamsId, valuesToInsert);
-            }
+               console.log('✅ Parameters saved successfully');
+           } else {
+               console.log('⚠️ No parameters to save');
+           }
 
-            res.status(201).json({
-                success: true,
-                message: 'Параметры сохранены',
-                saved: savedCount,
-                total: parameters.length
-            });
+           console.log('✅ saveExamParameters completed successfully');
+           console.log('=========================================');
 
-        } catch (error) {
-            res.status(500).json({
-                success: false,
-                error: 'Ошибка сохранения параметров: ' + error.message
-            });
-        }
-    };
+           res.status(201).json({
+               success: true,
+               message: 'Параметры сохранены',
+               saved: savedCount,
+               total: parameters.length
+           });
 
+       } catch (error) {
+           console.error('=========================================');
+           console.error('❌ ERROR in saveExamParameters');
+           console.error('❌ Error message:', error.message);
+           console.error('❌ Error stack:', error.stack);
+           console.error('❌ Timestamp:', new Date().toISOString());
+           console.error('=========================================');
+
+           res.status(500).json({
+               success: false,
+               error: 'Ошибка сохранения параметров: ' + error.message
+           });
+       }
+   }
     async getPatientExamsByType (req, res) {
         try {
             const { patientId, examTypeId } = req.query;

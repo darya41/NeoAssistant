@@ -15,28 +15,37 @@ class ExamMetadataRepository {
         examTypeId: examTypeId,
       );
 
-      if (response['success'] != true) return null;
+      int? result;
 
-      final data = response['data'];
-      return data?['patient_exam_id'] as int?;
+      if (response['patient_exam_id'] != null) {
+        result = response['patient_exam_id'] as int?;
+      } else if (response['patients_exams_id'] != null) {
+        result = response['patients_exams_id'] as int?;
+      } else if (response['id'] != null) {
+        result = response['id'] as int?;
+      }
+
+      return result;
+
     } catch (e) {
       log('Ошибка получения ID первичного осмотра', error: e, name: 'ExamMetadataRepository');
-      return null;
+     return null;
     }
   }
 
   Future<DateTime?> getExamDateTime(int patientExamId) async {
+
     try {
       final response = await _service.getExamDateTime(patientExamId);
+      String? dateTimeStr = _extractDateTimeString(response);
 
-      if (response['success'] != true) return null;
+      if (dateTimeStr == null || dateTimeStr.isEmpty) {
+        return null;
+      }
 
-      final data = response['data'];
-      final dateTimeStr = data?['date_time'] as String?;
+      final result = DateTime.parse(dateTimeStr);
+      return result;
 
-      if (dateTimeStr == null || dateTimeStr.isEmpty) return null;
-
-      return DateTime.parse(dateTimeStr);
     } catch (e) {
       log('Ошибка получения даты осмотра', error: e, name: 'ExamMetadataRepository');
       return null;
@@ -44,18 +53,121 @@ class ExamMetadataRepository {
   }
 
   Future<String?> getExamTypeByExamId(int patientExamId) async {
+
     try {
       final response = await _service.getExamTypeByExamId(patientExamId);
 
-      if (response['success'] != true) return _defaultExamType;
+      String? examName = _extractExamNameString(response);
 
-      final data = response['data'];
-      final examName = data?['exam_name'] as String?;
+      final result = examName?.isNotEmpty == true ? examName : _defaultExamType;
+      return result;
 
-      return examName?.isNotEmpty == true ? examName : _defaultExamType;
     } catch (e) {
       log('Ошибка получения типа осмотра', error: e, name: 'ExamMetadataRepository');
       return _defaultExamType;
     }
+  }
+
+  String? _extractDateTimeString(Map<String, dynamic> response) {
+    if (response.containsKey('date_time')) {
+      final dateTimeField = response['date_time'];
+
+      if (dateTimeField is String) {
+        return dateTimeField;
+      }
+
+      if (dateTimeField is Map<String, dynamic>) {
+        if (dateTimeField.containsKey('date_time')) {
+          final nestedDateTime = dateTimeField['date_time'];
+          if (nestedDateTime is String) {
+            return nestedDateTime;
+          }
+        }
+        if (dateTimeField.containsKey('datetime')) {
+          final nestedDateTime = dateTimeField['datetime'];
+          if (nestedDateTime is String) {
+            return nestedDateTime;
+          }
+        }
+      }
+    }
+
+    if (response.containsKey('datetime')) {
+      final datetimeField = response['datetime'];
+      if (datetimeField is String) {
+        return datetimeField;
+      }
+      if (datetimeField is Map<String, dynamic> && datetimeField.containsKey('datetime')) {
+        final nestedDateTime = datetimeField['datetime'];
+        if (nestedDateTime is String) {
+          return nestedDateTime;
+        }
+      }
+    }
+
+    if (response.containsKey('exam_date')) {
+      final examDateField = response['exam_date'];
+      if (examDateField is String) {
+        return examDateField;
+      }
+    }
+
+    if (response.containsKey('created_at')) {
+      final createdAtField = response['created_at'];
+      if (createdAtField is String) {
+        return createdAtField;
+      }
+    }
+
+    return null;
+  }
+
+  String? _extractExamNameString(Map<String, dynamic> response) {
+    if (response.containsKey('exam_name')) {
+      final examNameField = response['exam_name'];
+
+      if (examNameField is String) {
+        return examNameField;
+      }
+
+      if (examNameField is Map<String, dynamic>) {
+        if (examNameField.containsKey('exam_name')) {
+          final nestedExamName = examNameField['exam_name'];
+          if (nestedExamName is String) {
+            return nestedExamName;
+          }
+        }
+
+        if (examNameField.containsKey('name')) {
+          final nestedName = examNameField['name'];
+          if (nestedName is String) {
+            return nestedName;
+          }
+        }
+      }
+    }
+
+    if (response.containsKey('name')) {
+      final nameField = response['name'];
+      if (nameField is String) {
+        return nameField;
+      }
+    }
+
+    if (response.containsKey('title')) {
+      final titleField = response['title'];
+      if (titleField is String) {
+        return titleField;
+      }
+    }
+
+    if (response.containsKey('exam_type')) {
+      final examTypeField = response['exam_type'];
+      if (examTypeField is String) {
+        return examTypeField;
+      }
+    }
+
+    return null;
   }
 }

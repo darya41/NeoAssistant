@@ -35,7 +35,7 @@ class _DailyExamViewScreenState extends State<DailyExamViewScreen> {
     super.dispose();
   }
 
-  void _showExitConfirmationDialog() {
+  void _goBack() {
     Navigator.pop(context);
   }
 
@@ -54,7 +54,7 @@ class _DailyExamViewScreenState extends State<DailyExamViewScreen> {
           appBar: AppBar(
             leading: IconButton(
               icon: const Icon(Icons.arrow_back),
-              onPressed: _showExitConfirmationDialog,
+              onPressed: _goBack,
               tooltip: 'Назад',
             ),
             title: Text(_viewModel.examTitle),

@@ -46,9 +46,17 @@ class AddDailyExamViewModel extends ChangeNotifier {
   }
 
   AddDailyExamViewModel() {
-    _selectedDate = DateTime.now();
-    _selectedTime = TimeOfDay.now();
+    _setDateTime();
     loadParameters();
+  }
+
+  void _setDateTime() {
+    const minskOffsetHours = 3;
+    final nowUtc = DateTime.now().toUtc();
+    final minskDateTime = nowUtc.add(Duration(hours: minskOffsetHours));
+
+    _selectedDate = DateTime(minskDateTime.year, minskDateTime.month, minskDateTime.day);
+    _selectedTime = TimeOfDay(hour: minskDateTime.hour, minute: minskDateTime.minute);
   }
 
   Future<void> loadParameters() async {

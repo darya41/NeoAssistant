@@ -10,4 +10,5 @@ router.use(requireAuth);
 router.get('/', parametersController.getParameters);
 router.get('/values-by-exam-id', parametersController.getParametersWithValuesByExamId);
 
+router.get('/with-values', parametersController.getParametersWithValues);
 module.exports = router;
