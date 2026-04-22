@@ -1,19 +1,24 @@
 import 'package:flutter/material.dart';
 import 'package:neo_friend/features/profile/presentation/pages/settings_screen.dart';
 import '../../../../core/constants/app_colors.dart';
+import '../../../auth/ presentation/pages/login_screen.dart';
+import '../../../main/presentation/pages/home_screen.dart';
 import '../../domain/entities/doctor.dart';
 import '../../../main/presentation/widgets/navigation/custom_bottom_navigation_bar.dart';
 import '../../../main/presentation/widgets/navigation/analytics_bottom_bar.dart';
 import '../view_models/doctor_profile_viewmodel.dart';
 import '../widgets/doctor_info_card.dart';
+import '../widgets/guest_profile.dart';
 import 'doctor_edit_profile_screen.dart';
 
 class DoctorProfileScreen extends StatefulWidget {
   final bool useAnalyticsBottomBar;
+  final bool isGuest;
 
   const DoctorProfileScreen({
     super.key,
     this.useAnalyticsBottomBar = false,
+    this.isGuest = false,
   });
 
   @override
@@ -61,6 +66,25 @@ class _DoctorProfileScreenState extends State<DoctorProfileScreen> {
     );
   }
 
+  void _navigateToLogin() {
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(builder: (context) => const LoginScreen()),
+    );
+  }
+
+  void _navigateToHomeAsGuest() {
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(
+        builder: (context) => const HomeScreen(
+          title: 'Главная',
+          initialTab: 'Аналитика',
+        ),
+      ),
+    );
+  }
+
   @override
   void dispose() {
     _viewModel.removeListener(_onViewModelChanged);
@@ -73,7 +97,9 @@ class _DoctorProfileScreenState extends State<DoctorProfileScreen> {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: const Color(0xFF44E4BF),
-        actions: [
+        actions: widget.isGuest
+            ? []
+            : [
           IconButton(
             icon: const Icon(Icons.settings, color: Colors.white),
             onPressed: _navigateToSettings,
@@ -93,7 +119,7 @@ class _DoctorProfileScreenState extends State<DoctorProfileScreen> {
     if (widget.useAnalyticsBottomBar) {
       return AnalyticsBottomBar(
         currentIndex: _currentIndex,
-        isGuest: false,
+        isGuest: widget.isGuest,
       );
     } else {
       return CustomBottomNavigationBar(
@@ -103,6 +129,13 @@ class _DoctorProfileScreenState extends State<DoctorProfileScreen> {
   }
 
   Widget _buildBody() {
+    if (widget.isGuest) {
+      return GuestProfile(
+        onLoginPressed: _navigateToLogin,
+        onContinueAsGuest: _navigateToHomeAsGuest,
+      );
+    }
+
     if (_viewModel.isLoading) {
       return const Center(child: CircularProgressIndicator());
     }
