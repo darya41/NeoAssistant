@@ -5,13 +5,21 @@ import '../services/patient_service.dart';
 class PatientRepository {
   final PatientService _service = PatientService();
 
-  Future<List<Patient>> getPatients() async {
+  Future<Map<String, dynamic>> getPatients({int page = 1, int limit = 15}) async {
     try {
-      final response = await _service.getPatients();
+      final response = await _service.getPatients(page: page, limit: limit);
 
       if (response.statusCode == 200) {
-        final List<dynamic> data = json.decode(response.body);
-        return data.map((json) => Patient.fromJson(json)).toList();
+        final Map<String, dynamic> responseData = json.decode(response.body);
+        final List<dynamic> data = responseData['data'];
+        final pagination = responseData['pagination'];
+
+        return {
+          'patients': data.map((json) => Patient.fromJson(json)).toList(),
+          'hasNext': pagination['hasNext'] ?? false,
+          'currentPage': pagination['currentPage'] ?? page,
+          'total': pagination['total'] ?? 0,
+        };
       } else {
         throw Exception('Ошибка загрузки пациентов: ${response.statusCode}');
       }
@@ -34,14 +42,39 @@ class PatientRepository {
     }
   }
 
-  Future<List<Patient>> searchPatients(String query) async {
+  Future<Map<String, dynamic>> searchPatients({
+    required String query,
+    int page = 1,
+    int limit = 15,
+    String? gender,
+    String? bloodGroup,
+    String? rhFactor,
+    String? dateFrom,
+    String? dateTo,
+  }) async {
     try {
-      final response = await _service.searchPatients(query);
+      final response = await _service.searchPatients(
+        query: query,
+        page: page,
+        limit: limit,
+        gender: gender,
+        bloodGroup: bloodGroup,
+        rhFactor: rhFactor,
+        dateFrom: dateFrom,
+        dateTo: dateTo,
+      );
 
       if (response.statusCode == 200) {
-        final Map<String, dynamic> result = json.decode(response.body);
-        final List<dynamic> data = result['data'] ?? [];
-        return data.map((json) => Patient.fromJson(json)).toList();
+        final Map<String, dynamic> responseData = json.decode(response.body);
+        final List<dynamic> data = responseData['data'];
+        final pagination = responseData['pagination'] ?? {};
+
+        return {
+          'patients': data.map((json) => Patient.fromJson(json)).toList(),
+          'hasNext': pagination['hasNext'] ?? false,
+          'currentPage': pagination['currentPage'] ?? page,
+          'total': pagination['total'] ?? 0,
+        };
       } else {
         throw Exception('Ошибка поиска: ${response.statusCode}');
       }

@@ -2,7 +2,12 @@ const db = require('../config/database');
 
 class PatientModel {
 
-    static async findAll() {
+    static async findAllPaginated(limit, offset) {
+        const [countResult] = await db.query(
+            'SELECT COUNT(*) as total FROM patients'
+        );
+        const total = countResult[0].total;
+
         const [rows] = await db.query(`
             SELECT
                 p.patient_id,
@@ -18,8 +23,10 @@ class PatientModel {
             FROM patients p
             LEFT JOIN mothers m ON p.mother_id = m.mother_id
             ORDER BY p.patient_id DESC
-        `);
-        return rows;
+            LIMIT ? OFFSET ?
+        `, [limit, offset]);
+
+        return { patients: rows, total };
     }
 
     static async findById(id) {
@@ -102,9 +109,7 @@ class PatientModel {
         );
         return rows.length > 0;
     }
-
-    static async search(query, filters = {}) {
-
+    static async searchWithPagination(query, filters = {}, limit, offset) {
         let sql = `
             SELECT
                 p.patient_id,
@@ -122,10 +127,21 @@ class PatientModel {
             WHERE 1=1
         `;
 
+        let countSql = `
+            SELECT COUNT(*) as total
+            FROM patients p
+            LEFT JOIN mothers m ON p.mother_id = m.mother_id
+            WHERE 1=1
+        `;
+
         const params = [];
 
-        if (query && query.length >= 1) {
+        if (query && query.trim().length >= 1) {
             sql += ` AND (
+                p.number_history LIKE ?
+                OR CONCAT(m.last_name, ' ', m.first_name, ' ', COALESCE(m.patronymic, '')) LIKE ?
+            )`;
+            countSql += ` AND (
                 p.number_history LIKE ?
                 OR CONCAT(m.last_name, ' ', m.first_name, ' ', COALESCE(m.patronymic, '')) LIKE ?
             )`;
@@ -135,28 +151,36 @@ class PatientModel {
 
         if (filters.gender) {
             sql += ` AND p.gender = ?`;
+            countSql += ` AND p.gender = ?`;
             params.push(filters.gender === 'Мужской' ? 'MALE' : 'FEMALE');
         }
 
         if (filters.bloodGroup) {
             sql += ` AND p.blood_group = ?`;
+            countSql += ` AND p.blood_group = ?`;
             params.push(filters.bloodGroup);
         }
 
         if (filters.rhFactor) {
             sql += ` AND p.rh_factor = ?`;
+            countSql += ` AND p.rh_factor = ?`;
             params.push(filters.rhFactor);
         }
 
         if (filters.dateFrom && filters.dateTo) {
             sql += ` AND p.date_of_birth BETWEEN ? AND ?`;
+            countSql += ` AND p.date_of_birth BETWEEN ? AND ?`;
             params.push(filters.dateFrom, filters.dateTo);
         }
 
-        sql += ` ORDER BY p.patient_id DESC LIMIT 100`;
+        const [countResult] = await db.query(countSql, params);
+        const total = countResult[0].total;
 
-        const [rows] = await db.query(sql, params);
-        return rows;
+        sql += ` ORDER BY p.patient_id DESC LIMIT ? OFFSET ?`;
+        const dataParams = [...params, limit, offset];
+        const [rows] = await db.query(sql, dataParams);
+
+        return { patients: rows, total };
     }
 
     static async getParameterMappings(examId, medicalParamIds) {
@@ -174,7 +198,6 @@ class PatientModel {
                 [examId, ...medicalParamIds]
             );
 
-            console.log('📊 getParameterMappings result:', rows);
             return rows;
         }
 }

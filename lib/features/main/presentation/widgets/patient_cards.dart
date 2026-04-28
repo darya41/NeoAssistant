@@ -111,12 +111,69 @@ class PatientCards extends StatelessWidget {
 
     return ListView.separated(
       padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
-      itemCount: patients.length,
+      itemCount: patients.length + 1,
       separatorBuilder: (context, index) => const SizedBox(height: 16),
       itemBuilder: (context, index) {
+        if (index == patients.length) {
+          return _buildLoadMoreButton(viewModel);
+        }
+
         final patient = patients[index];
         return _buildPatientCard(context, patient, viewModel);
       },
+    );
+  }
+
+  Widget _buildLoadMoreButton(PatientSearchViewModel viewModel) {
+    if (!viewModel.hasMore) {
+      if (viewModel.displayedPatients.isNotEmpty) {
+        return Padding(
+          padding: const EdgeInsets.symmetric(vertical: 24),
+          child: Center(
+            child: Text(
+              'Загружено ${viewModel.displayedPatients.length} пациентов',
+              style: const TextStyle(fontSize: 14, color: Colors.grey),
+            ),
+          ),
+        );
+      }
+      return const SizedBox.shrink();
+    }
+
+    if (viewModel.isLoadingMore) {
+      return const Padding(
+        padding: EdgeInsets.symmetric(vertical: 24),
+        child: Center(
+          child: Column(
+            children: [
+              CircularProgressIndicator(),
+              SizedBox(height: 12),
+              Text('Загрузка...', style: TextStyle(fontSize: 14, color: Colors.grey)),
+            ],
+          ),
+        ),
+      );
+    }
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 16),
+      child: Center(
+        child: ElevatedButton(
+          onPressed: () => viewModel.loadMorePatients(),
+          style: ElevatedButton.styleFrom(
+            backgroundColor: AppColors.primary,
+            foregroundColor: Colors.white,
+            minimumSize: const Size(200, 48),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(24),
+            ),
+          ),
+          child: const Text(
+            'Загрузить ещё',
+            style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
+          ),
+        ),
+      ),
     );
   }
 
@@ -150,7 +207,7 @@ class PatientCards extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text(
-                  patient.numberHistory,
+                  patient.numberHistory ?? 'Нет истории',
                   style: const TextStyle(fontSize: 12, color: Colors.grey),
                 ),
               ],
