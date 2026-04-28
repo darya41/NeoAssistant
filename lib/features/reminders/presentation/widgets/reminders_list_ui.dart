@@ -9,6 +9,9 @@ class RemindersListUI extends StatelessWidget {
   final Function(int) onDelete;
   final bool isEditing;
   final Function()? onRefresh;
+  final Function()? onLoadMore;
+  final bool hasMore;
+  final bool isLoadingMore;
 
   const RemindersListUI({
     super.key,
@@ -17,6 +20,9 @@ class RemindersListUI extends StatelessWidget {
     required this.onDelete,
     required this.isEditing,
     this.onRefresh,
+    this.onLoadMore,
+    this.hasMore = false,
+    this.isLoadingMore = false,
   });
 
   @override
@@ -27,86 +33,138 @@ class RemindersListUI extends StatelessWidget {
       groupedReminders.putIfAbsent(dateKey, () => []).add(reminder);
     }
 
-    return ListView(
-      children: groupedReminders.entries.map((entry) {
-        final date = entry.key;
-        final remindersForDate = entry.value;
+    return RefreshIndicator(
+      onRefresh: () async {
+        if (onRefresh != null) {
+          onRefresh!();
+        }
+      },
+      child: ListView(
+        children: [
+          ...groupedReminders.entries.map((entry) {
+            final date = entry.key;
+            final remindersForDate = entry.value;
 
-        return Column(
-          children: [
-            ListTile(
-              title: Text(
-                date,
-                style: const TextStyle(
-                  fontWeight: FontWeight.bold,
-                  color: AppColors.primary,
+            return Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                  child: Text(
+                    date,
+                    style: const TextStyle(
+                      fontWeight: FontWeight.bold,
+                      color: AppColors.primary,
+                      fontSize: 16,
+                    ),
+                  ),
+                ),
+                ...remindersForDate.asMap().entries.map((item) {
+                  final index = reminders.indexOf(item.value);
+                  final reminder = item.value;
+
+                  return ListTile(
+                    onTap: () async {
+                      final result = await Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => ReminderDetailScreen(
+                            reminderId: reminder.id,
+                            title: reminder.title,
+                            description: reminder.description ?? '',
+                          ),
+                        ),
+                      );
+
+                      if (result == true && onRefresh != null) {
+                        onRefresh!();
+                      }
+                    },
+                    leading: Container(
+                      width: 24,
+                      height: 24,
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.zero,
+                        border: reminder.isCompleted
+                            ? Border.all(color: Colors.grey, width: 1)
+                            : null,
+                      ),
+                      child: Center(
+                        child: Checkbox(
+                          value: reminder.isCompleted,
+                          onChanged: (value) => onCheckboxChange(index, value ?? false),
+                          checkColor: AppColors.primary,
+                          fillColor: WidgetStateProperty.all(Colors.transparent),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.zero,
+                          ),
+                          materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                        ),
+                      ),
+                    ),
+                    title: Text(
+                      reminder.title,
+                      style: TextStyle(
+                        color: reminder.isCompleted ? Colors.grey : Colors.black,
+                        decoration: reminder.isCompleted
+                            ? TextDecoration.lineThrough
+                            : TextDecoration.none,
+                      ),
+                    ),
+                    trailing: isEditing && !reminder.isCompleted
+                        ? IconButton(
+                      icon: const Icon(Icons.delete_outline),
+                      onPressed: () => onDelete(index),
+                      color: AppColors.error,
+                    )
+                        : null,
+                  );
+                }),
+                const Divider(height: 1, thickness: 0.5),
+              ],
+            );
+          }),
+
+          if (hasMore)
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: 24),
+              child: Center(
+                child: isLoadingMore
+                    ? const CircularProgressIndicator()
+                    : ElevatedButton(
+                  onPressed: onLoadMore,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppColors.primary,
+                    foregroundColor: Colors.white,
+                    minimumSize: const Size(200, 48),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(24),
+                    ),
+                  ),
+                  child: const Text(
+                    'Ещё (3 дня)',
+                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
+                  ),
                 ),
               ),
             ),
-            ...remindersForDate.asMap().entries.map((item) {
-              final index = reminders.indexOf(item.value);
-              final reminder = item.value;
 
-              return ListTile(
-                onTap: () async {
-                  final result = await Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => ReminderDetailScreen(
-                        reminderId: reminder.id,
-                        title: reminder.title,
-                        description: reminder.description ?? '',
-                      ),
-                    ),
-                  );
+          const SizedBox(height: 20),
 
-                  if (result == true && onRefresh != null) {
-                    onRefresh!();
-                  }
-                },
-                leading: Container(
-                  width: 24,
-                  height: 24,
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.zero,
-                    border: reminder.isCompleted
-                        ? Border.all(color: Colors.grey, width: 1)
-                        : null,
-                  ),
-                  child: Center(
-                    child: Checkbox(
-                      value: reminder.isCompleted,
-                      onChanged: (value) => onCheckboxChange(index, value ?? false),
-                      checkColor: AppColors.primary,
-                      fillColor: WidgetStateProperty.all(Colors.transparent),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.zero,
-                      ),
-                      materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                    ),
-                  ),
+          if (!hasMore && reminders.isNotEmpty)
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: 10),
+              child: Center(
+                child: Text(
+                  'Показаны все напоминания',
+                  style: TextStyle(fontSize: 14, color: Colors.grey[600]),
                 ),
-                title: Text(
-                  reminder.title,
-                  style: TextStyle(
-                    color: reminder.isCompleted ? Colors.grey : Colors.black,
-                    decoration: reminder.isCompleted
-                        ? TextDecoration.lineThrough
-                        : TextDecoration.none,
-                  ),
-                ),
-                trailing: isEditing && !reminder.isCompleted
-                    ? IconButton(
-                  icon: const Icon(Icons.close),
-                  onPressed: () => onDelete(index),
-                  color: AppColors.error,
-                )
-                    : null,
-              );
-            }),
-          ],
-        );
-      }).toList(),
+              ),
+            ),
+
+          const SizedBox(height: 100),
+        ],
+      ),
     );
   }
 }

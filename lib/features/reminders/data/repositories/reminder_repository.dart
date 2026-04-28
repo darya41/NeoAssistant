@@ -21,11 +21,14 @@ class ReminderRepository {
     }
   }
 
-  Future<List<Reminder>> getReminders() async {
+  Future<Map<String, dynamic>> getRemindersWithPagination({int daysToShow = 0}) async {
     try {
-      final response = await _service.getReminders();
+      final response = await _service.getRemindersWithPagination(daysToShow: daysToShow);
       final List<dynamic> data = response['data'] ?? [];
-      return data.map((json) => Reminder.fromJson(json)).toList();
+      return {
+        'reminders': data.map((json) => Reminder.fromJson(json)).toList(),
+        'summary': response['summary'] ?? {},
+      };
     } catch (e) {
       rethrow;
     }

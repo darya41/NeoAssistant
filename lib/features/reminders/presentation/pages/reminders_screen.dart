@@ -84,6 +84,10 @@ class _RemindersPageScreenState extends State<RemindersPageScreen> {
     }
   }
 
+  Future<void> _handleLoadMore() async {
+    await _viewModel.loadMoreDays();
+  }
+
   @override
   void dispose() {
     _viewModel.removeListener(_onViewModelChanged);
@@ -139,16 +143,44 @@ class _RemindersPageScreenState extends State<RemindersPageScreen> {
     }
 
     if (_viewModel.isEmpty) {
-      return const Center(
-        child: Text('Нет напоминаний'),
+      return Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const Icon(Icons.notifications_none, size: 64, color: Colors.grey),
+            const SizedBox(height: 16),
+            const Text(
+              'Нет напоминаний',
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.w500),
+            ),
+            const SizedBox(height: 8),
+            const Text(
+              'Добавьте первое напоминание',
+              style: TextStyle(fontSize: 14, color: Colors.grey),
+            ),
+            const SizedBox(height: 24),
+            ElevatedButton(
+              onPressed: _handleAddReminder,
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppColors.primary,
+                foregroundColor: Colors.white,
+              ),
+              child: const Text('Создать напоминание'),
+            ),
+          ],
+        ),
       );
     }
 
     return RemindersListUI(
-      reminders: _viewModel.sortedReminders,
+      reminders: _viewModel.reminders,
       onCheckboxChange: _handleCheckboxChange,
       onDelete: _handleDelete,
       isEditing: _viewModel.isEditing,
+      onRefresh: () => _viewModel.loadReminders(),
+      onLoadMore: _handleLoadMore,
+      hasMore: _viewModel.hasMore,
+      isLoadingMore: _viewModel.isLoadingMore,
     );
   }
 }

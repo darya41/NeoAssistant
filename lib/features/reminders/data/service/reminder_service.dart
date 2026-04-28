@@ -5,8 +5,9 @@ class ReminderService {
     return await ApiClient.getAuth('reminders/stats');
   }
 
-  Future<Map<String, dynamic>> getReminders() async {
-    return await ApiClient.getAuth('reminders');
+  Future<Map<String, dynamic>> getRemindersWithPagination({int daysToShow = 0}) async {
+    final response = await ApiClient.getAuth('reminders/paginated?daysToShow=$daysToShow');
+    return response;
   }
 
   Future<void> updateReminderStatus(int reminderId, int isCompleted) async {
