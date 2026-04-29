@@ -32,4 +32,14 @@ class FavoriteService {
 
     return response;
   }
+
+  Future<Map<String, dynamic>> getFavorites() async {
+    final response = await ApiClient.getAuth('favorites');
+
+    if (response is! Map<String, dynamic>) {
+      throw Exception('Неверный формат ответа от сервера');
+    }
+
+    return response;
+  }
 }

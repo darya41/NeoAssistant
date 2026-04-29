@@ -48,4 +48,19 @@ class FavoriteRepository {
       await addFavorite(patientId);
     }
   }
+
+  Future<List<int>> getFavoritePatientIds() async {
+    try {
+      final response = await _favoriteService.getFavorites();
+
+      if (response['success'] != true) {
+        throw Exception(response['error'] ?? 'Ошибка получения избранного');
+      }
+
+      final List<dynamic> data = response['data'] ?? [];
+      return data.map((json) => json['patient_id'] as int).toList();
+    } catch (e) {
+      rethrow;
+    }
+  }
 }

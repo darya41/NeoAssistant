@@ -84,6 +84,23 @@ class FavoriteController {
             });
         }
     }
+
+     async getFavorites(req, res) {
+            try {
+                const doctorId = req.user.id;
+                const favorites = await FavoriteModel.getFavoritesByDoctorId(doctorId);
+
+                res.json({
+                    success: true,
+                    data: favorites
+                });
+            } catch (error) {
+                res.status(500).json({
+                    success: false,
+                    error: 'Ошибка получения избранного'
+                });
+            }
+        }
 }
 
 module.exports = new FavoriteController();

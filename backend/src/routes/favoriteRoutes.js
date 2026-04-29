@@ -7,6 +7,7 @@ const { requireAuth } = require('../middleware/requireAuth');
 router.use(authenticateToken);
 router.use(requireAuth);
 
+router.get('/', favoriteController.getFavorites);
 router.get('/check/:patientId', favoriteController.checkFavorite);
 router.post('/', favoriteController.addFavorite);
 router.delete('/:patientId', favoriteController.removeFavorite);

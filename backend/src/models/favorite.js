@@ -24,6 +24,14 @@ class FavoriteModel {
         );
         return result.affectedRows;
     }
+
+    static async getFavoritesByDoctorId(doctorId) {
+            const [rows] = await db.query(
+                'SELECT patient_id, created_at FROM favorite_patients WHERE doctor_id = ? ORDER BY created_at DESC',
+                [doctorId]
+            );
+            return rows;
+        }
 }
 
 module.exports = FavoriteModel;
