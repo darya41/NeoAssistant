@@ -19,6 +19,7 @@ const examTypeRoutes = require('./src/routes/examTypeRoutes');
 const protocolRoutes = require('./src/routes/protocolRoutes');
 const calculatorRoutes = require('./src/routes/calculatorRoutes');
 const favoriteRoutes = require('./src/routes/favoriteRoutes');
+const mkbRoutes = require('./src/routes/mkbRoutes');
 
 const app = express();
 
@@ -54,6 +55,7 @@ app.use('/api/exam-types', examTypeRoutes);
 app.use('/api/protocols', protocolRoutes);
 app.use('/api/calculators', calculatorRoutes);
 app.use('/api/favorites', favoriteRoutes);
+app.use('/api/mkb', mkbRoutes);
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {

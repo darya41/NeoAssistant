@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import '../view_models/protocol_search_viewmodel.dart';
+import '../../../protocol/presentation/view_model/protocol_search_viewmodel.dart';
 import 'reminders_stats.dart';
 import 'tab_bar_widget.dart';
 import 'search_field.dart';
 import 'navigation/custom_bottom_navigation_bar.dart';
 import 'navigation/analytics_bottom_bar.dart';
 import 'patient_cards.dart';
-import 'protocols_list.dart';
+import '../../../protocol/presentation/widget/protocols_tab_container.dart';
 import '../view_models/patient_search_viewmodel.dart';
 import '../view_models/home_viewmodel.dart';
 
@@ -111,7 +111,7 @@ class _HomeScreenUIState extends State<HomeScreenUI> {
                 child: Consumer<HomeViewModel>(
                   builder: (context, viewModel, child) {
                     if (widget.isGuest || !viewModel.isCardioeka) {
-                      return const ProtocolsList();
+                      return const ProtocolsTabContainer();
                     }
                     return const PatientCards();
                   },
