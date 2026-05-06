@@ -21,6 +21,7 @@ const calculatorRoutes = require('./src/routes/calculatorRoutes');
 const favoriteRoutes = require('./src/routes/favoriteRoutes');
 const mkbRoutes = require('./src/routes/mkbRoutes');
 const diagnosticRoutes = require('./src/routes/diagnosticRoutes');
+const medicationRoutes = require('./src/routes/medicationRoutes');
 
 const app = express();
 
@@ -58,6 +59,7 @@ app.use('/api/calculators', calculatorRoutes);
 app.use('/api/favorites', favoriteRoutes);
 app.use('/api/diagnostics', diagnosticRoutes);
 app.use('/api/mkb', mkbRoutes);
+app.use('/api/medications', medicationRoutes);
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
