@@ -41,7 +41,7 @@ class PasswordRulesDialog extends StatelessWidget {
           child: const Text(
             'OK',
             style: TextStyle(
-              color:AppColors.primary,
+              color:AppColors.brand_40 ,
             ),
           ),
         ),

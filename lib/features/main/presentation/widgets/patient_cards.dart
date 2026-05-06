@@ -161,7 +161,7 @@ class PatientCards extends StatelessWidget {
         child: ElevatedButton(
           onPressed: () => viewModel.loadMorePatients(),
           style: ElevatedButton.styleFrom(
-            backgroundColor: AppColors.primary,
+            backgroundColor: AppColors.brand_40 ,
             foregroundColor: Colors.white,
             minimumSize: const Size(200, 48),
             shape: RoundedRectangleBorder(

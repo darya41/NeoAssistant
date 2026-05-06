@@ -178,7 +178,7 @@ class _DiaryScreenState extends State<DiaryScreen> {
               child: ElevatedButton(
                 onPressed: _addObservation,
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: AppColors.primary,
+                  backgroundColor: AppColors.brand_40,
                   foregroundColor: AppColors.white,
                   padding: const EdgeInsets.symmetric(vertical: 14),
                   shape: RoundedRectangleBorder(
@@ -222,7 +222,7 @@ class _DiaryScreenState extends State<DiaryScreen> {
             child: ElevatedButton(
               onPressed: _addObservation,
               style: ElevatedButton.styleFrom(
-                backgroundColor: AppColors.primary,
+                backgroundColor: AppColors.brand_40,
                 foregroundColor: AppColors.white,
                 padding: const EdgeInsets.symmetric(vertical: 14),
                 shape: RoundedRectangleBorder(
@@ -257,7 +257,7 @@ class _DiaryScreenState extends State<DiaryScreen> {
             style: TextStyle(
               fontSize: 16,
               fontWeight: FontWeight.w600,
-              color: isToday ? AppColors.primary : Colors.grey.shade700,
+              color: isToday ? AppColors.brand_40 : Colors.grey.shade700,
             ),
           ),
         ),

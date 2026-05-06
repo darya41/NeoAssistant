@@ -58,7 +58,7 @@ class _DailyExamViewScreenState extends State<DailyExamViewScreen> {
               tooltip: 'Назад',
             ),
             title: Text(_viewModel.examTitle),
-            backgroundColor: AppColors.primary,
+            backgroundColor: AppColors.brand_40,
             automaticallyImplyLeading: false,
           ),
           body: _buildBody(),

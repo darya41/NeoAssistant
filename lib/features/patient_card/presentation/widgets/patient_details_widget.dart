@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../models/patient.dart';
-import '../../../../shared/widgets/buttons/action_button.dart';
+import '../../../../shared/widgets/buttons/continue_button.dart';
 import '../../data/repositories/mother_repository.dart';
 import '../../domain/models/patient_details_state.dart';
 import 'form_fields/info_column.dart';
@@ -136,15 +136,17 @@ class _PatientDetailsWidgetState extends State<PatientDetailsWidget> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        ActionButton(
+        ContinueButton(
+          isEnabled: true,
           onPressed: widget.onDiaryTap,
           text: 'Дневник наблюдений',
-          backgroundColor: AppColors.primary,
-          borderColor: AppColors.primary,
+          backgroundColor: AppColors.brand_40,
+          borderColor: AppColors.brand_40,
         ),
         const SizedBox(height: 8),
 
-        ActionButton(
+        ContinueButton(
+          isEnabled: true,
           onPressed: widget.onPrimaryExamTap,
           text: 'Первичный осмотр',
           backgroundColor: AppColors.white,
@@ -152,7 +154,8 @@ class _PatientDetailsWidgetState extends State<PatientDetailsWidget> {
         ),
         const SizedBox(height: 8),
 
-        ActionButton(
+        ContinueButton(
+          isEnabled: true,
           onPressed: widget.onGenerateEpicrisisTap,
           text: 'Сгенерировать эпикриз',
           backgroundColor: AppColors.white,

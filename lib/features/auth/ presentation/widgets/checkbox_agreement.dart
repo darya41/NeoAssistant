@@ -21,7 +21,7 @@ class CheckboxAgreement extends StatelessWidget {
         Checkbox(
           value: value,
           onChanged: onChanged,
-          activeColor: AppColors.primary,
+          activeColor: AppColors.brand_40 ,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(4),
           ),

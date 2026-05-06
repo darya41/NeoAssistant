@@ -15,6 +15,7 @@ class RegistrationStep1 extends StatefulWidget {
   final String? passwordError;
   final String? confirmPasswordError;
   final VoidCallback? onClearError;
+  final VoidCallback? onDataChanged;
 
   const RegistrationStep1({
     super.key,
@@ -27,6 +28,7 @@ class RegistrationStep1 extends StatefulWidget {
     this.passwordError,
     this.confirmPasswordError,
     this.onClearError,
+    this.onDataChanged,
   });
 
   @override
@@ -44,6 +46,11 @@ class _RegistrationStep1State extends State<RegistrationStep1> {
     return null;
   }
 
+  void _onDataChanged() {
+    widget.onClearError?.call();
+    widget.onDataChanged?.call();
+  }
+
   @override
   Widget build(BuildContext context) {
     return SafeArea(
@@ -57,11 +64,8 @@ class _RegistrationStep1State extends State<RegistrationStep1> {
               'Регистрация',
               style: TextStyle(fontSize: 32, fontWeight: FontWeight.bold),
             ),
-
             const SizedBox(height: 20),
-
             ErrorContainer(errorMessage: _firstError),
-
             FormFieldContainer(
               children: [
                 _buildEmailField(),
@@ -71,9 +75,7 @@ class _RegistrationStep1State extends State<RegistrationStep1> {
                 _buildConfirmPasswordField(),
               ],
             ),
-
             const SizedBox(height: 40),
-
             ContinueButton(
               onPressed: widget.onNextStep,
               isEnabled: widget.isStepValid,
@@ -87,18 +89,20 @@ class _RegistrationStep1State extends State<RegistrationStep1> {
   Widget _buildEmailField() {
     return GestureDetector(
       onTap: widget.onClearError,
-      child: const Padding(
-        padding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
         child: TextField(
-          decoration: InputDecoration(
+          controller: widget.emailController,
+          decoration: const InputDecoration(
             border: InputBorder.none,
             hintText: 'Электронная почта',
             hintStyle: TextStyle(fontSize: 16, color: Colors.grey),
             contentPadding: EdgeInsets.zero,
             isDense: true,
           ),
-          style: TextStyle(fontSize: 16),
+          style: const TextStyle(fontSize: 16),
           keyboardType: TextInputType.emailAddress,
+          onChanged: (_) => _onDataChanged(),
         ),
       ),
     );
@@ -128,7 +132,7 @@ class _RegistrationStep1State extends State<RegistrationStep1> {
                   isDense: true,
                 ),
                 style: const TextStyle(fontSize: 16),
-                onChanged: (_) => widget.onClearError?.call(),
+                onChanged: (_) => _onDataChanged(),
               ),
             ),
             IconWidgets.visibilityIcon(
@@ -161,7 +165,7 @@ class _RegistrationStep1State extends State<RegistrationStep1> {
                   isDense: true,
                 ),
                 style: const TextStyle(fontSize: 16),
-                onChanged: (_) => widget.onClearError?.call(),
+                onChanged: (_) => _onDataChanged(),
               ),
             ),
             IconWidgets.visibilityIcon(

@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:neo_friend/features/reminders/presentation/pages/reminders_screen.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../shared/widgets/block/text_content_block.dart';
-import '../../../../shared/widgets/buttons/action_button.dart';
+import '../../../../shared/widgets/buttons/continue_button.dart';
 import '../view_models/reminder_detail_viewmodel.dart';
 import '../widgets/edit_reminder_form.dart';
 import '../widgets/error_view.dart';
@@ -51,7 +51,7 @@ class _ReminderDetailScreenState extends State<ReminderDetailScreen> {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('Напоминание выполнено!'),
-          backgroundColor: AppColors.primary,
+          backgroundColor: AppColors.brand_40,
         ),
       );
 
@@ -80,7 +80,7 @@ class _ReminderDetailScreenState extends State<ReminderDetailScreen> {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('Напоминание удалено'),
-          backgroundColor: AppColors.primary,
+          backgroundColor: AppColors.brand_40,
         ),
       );
       Navigator.pop(context, true);
@@ -153,17 +153,19 @@ class _ReminderDetailScreenState extends State<ReminderDetailScreen> {
             if (_viewModel.isLoading)
               const CircularProgressIndicator()
             else if (_viewModel.isEditing)
-              ActionButton(
+              ContinueButton(
+                isEnabled: true,
                 onPressed: _handleDelete,
                 backgroundColor: Colors.white,
                 borderColor: AppColors.error,
                 text: 'Удалить',
               )
             else if (!_viewModel.isCompleted)
-                ActionButton(
+                ContinueButton(
+                  isEnabled: true,
                   onPressed: _handleMarkAsCompleted,
                   backgroundColor: const Color(0xFFACF3E3),
-                  borderColor: AppColors.primary,
+                  borderColor: AppColors.brand_40,
                   text: 'Выполнено',
                 )
               else

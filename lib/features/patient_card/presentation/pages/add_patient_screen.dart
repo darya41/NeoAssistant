@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_strings.dart';
+import '../../../../shared/widgets/buttons/continue_button.dart';
 import '../../domain/entities/medical_parameter.dart';
 import '../view_models/add_patient_viewmodel.dart';
 import '../widgets/patient_form.dart';
-import '../../../../shared/widgets/buttons/save_button.dart';
 
 class AddPatientScreen extends StatefulWidget {
   const AddPatientScreen({super.key});
@@ -127,10 +127,11 @@ class _AddPatientScreenState extends State<AddPatientScreen> {
                 if (_viewModel.isSaving)
                   const Center(child: CircularProgressIndicator())
                 else
-                  SaveButton(
+                  ContinueButton(
                     onPressed: _handleSave,
-                    backgroundColor: _viewModel.isFormValid ? AppColors.primary : AppColors.background,
-                    borderColor: _viewModel.isFormValid ? AppColors.primary : AppColors.border,
+                    text: "Сохранить",
+                    backgroundColor: _viewModel.isFormValid ? AppColors.brand_40 : AppColors.background,
+                    borderColor: _viewModel.isFormValid ? AppColors.brand_40 : AppColors.border,
                     textColor: _viewModel.isFormValid ? Colors.white : Colors.black,
                     isEnabled: _viewModel.isFormValid,
                   ),
@@ -187,9 +188,9 @@ class _AddPatientScreenState extends State<AddPatientScreen> {
                 vertical: 10,
               ),
               decoration: BoxDecoration(
-                color: isSelected ? AppColors.primary : AppColors.background,
+                color: isSelected ? AppColors.brand_40 : AppColors.background,
                 border: Border.all(
-                  color: isSelected ? AppColors.primary : AppColors.border,
+                  color: isSelected ? AppColors.brand_40 : AppColors.border,
                   width: 1,
                 ),
                 borderRadius: BorderRadius.circular(20),

@@ -17,12 +17,12 @@ class MyApp extends StatelessWidget {
       title: 'Цифровой помощник врача-неонатолога',
       locale: const Locale('ru', 'RU'),
       theme: ThemeData(
-        primaryColor: AppColors.primary,
+        primaryColor: AppColors.brand_40,
           colorScheme: ColorScheme.fromSwatch(
           primarySwatch: Colors.blue,
         ),
         appBarTheme: const AppBarTheme(
-          backgroundColor: AppColors.primary,
+          backgroundColor: AppColors.brand_40,
         ),
       ),
       initialRoute: '/',

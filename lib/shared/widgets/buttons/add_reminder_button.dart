@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../../../features/reminders/presentation/pages/create_reminder_screen.dart';
+import '../../../features/reminders/presentation/pages/add_reminder_screen.dart';
 
 class AddReminderButton extends StatelessWidget {
   const AddReminderButton({super.key});
@@ -10,7 +10,7 @@ class AddReminderButton extends StatelessWidget {
         onTap: () {
           Navigator.push(
             context,
-            MaterialPageRoute(builder: (context) => CreateReminderScreen()),
+            MaterialPageRoute(builder: (context) => AddReminderScreen()),
           );
         },
       child: ConstrainedBox(

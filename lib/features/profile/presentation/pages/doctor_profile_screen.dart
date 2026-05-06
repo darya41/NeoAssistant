@@ -167,7 +167,7 @@ class _DoctorProfileScreenState extends State<DoctorProfileScreen> {
               ElevatedButton(
                 onPressed: () => _viewModel.retry(),
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: AppColors.primary,
+                  backgroundColor: AppColors.brand_40,
                   padding: const EdgeInsets.symmetric(
                     horizontal: 32,
                     vertical: 12,
@@ -211,7 +211,7 @@ class _DoctorProfileScreenState extends State<DoctorProfileScreen> {
             children: [
               const Icon(
                 Icons.favorite,
-                color: AppColors.primary,
+                color: AppColors.brand_40,
                 size: 24,
               ),
               const SizedBox(width: 8),
@@ -220,7 +220,7 @@ class _DoctorProfileScreenState extends State<DoctorProfileScreen> {
                 style: TextStyle(
                   fontSize: 20,
                   fontWeight: FontWeight.w500,
-                  color: AppColors.primary,
+                  color: AppColors.brand_40,
                 ),
               ),
             ],

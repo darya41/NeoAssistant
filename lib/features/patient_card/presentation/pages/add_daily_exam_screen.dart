@@ -2,9 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:neo_friend/core/constants/app_strings.dart';
 import 'package:neo_friend/features/patient_card/presentation/pages/daily_exam_view_screen.dart';
 import '../../../../core/constants/app_colors.dart';
+import '../../../../shared/widgets/buttons/continue_button.dart';
 import '../view_models/add_daily_exam_viewmodel.dart';
 import '../widgets/daily_exam_form.dart';
-import '../../../../shared/widgets/buttons/save_button.dart';
 
 class AddDailyExamScreen extends StatefulWidget {
   final int patientId;
@@ -45,7 +45,7 @@ class _AddDailyExamScreenState extends State<AddDailyExamScreen> {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
             content: Text('Ежедневный осмотр успешно добавлен!'),
-            backgroundColor: AppColors.primary,
+            backgroundColor: AppColors.brand_40,
           ),
         );
 
@@ -225,10 +225,11 @@ class _AddDailyExamScreenState extends State<AddDailyExamScreen> {
                 if (_viewModel.isSaving)
                   const Center(child: CircularProgressIndicator())
                 else
-                  SaveButton(
+                  ContinueButton(
                     onPressed: _handleSave,
-                    backgroundColor: _viewModel.isFormValid ? AppColors.primary : AppColors.background,
-                    borderColor: _viewModel.isFormValid ? AppColors.primary : AppColors.border,
+                    text: "Сохранить",
+                    backgroundColor: _viewModel.isFormValid ? AppColors.brand_40 : AppColors.background,
+                    borderColor: _viewModel.isFormValid ? AppColors.brand_40 : AppColors.border,
                     textColor: _viewModel.isFormValid ? AppColors.white : AppColors.black,
                     isEnabled: _viewModel.isFormValid,
                   ),

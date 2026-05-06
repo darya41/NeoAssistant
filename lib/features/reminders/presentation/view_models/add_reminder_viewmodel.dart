@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../data/repositories/reminder_repository.dart';
 
-class CreateReminderViewModel extends ChangeNotifier {
+class AddReminderViewModel extends ChangeNotifier {
   final ReminderRepository _repository = ReminderRepository();
 
   final TextEditingController titleController = TextEditingController();
@@ -28,7 +28,7 @@ class CreateReminderViewModel extends ChangeNotifier {
     return !_titleIsEmpty && !_descriptionIsEmpty && _selectedDate != null;
   }
 
-  CreateReminderViewModel() {
+  AddReminderViewModel() {
     titleController.addListener(_onTitleChanged);
     descriptionController.addListener(_onDescriptionChanged);
   }

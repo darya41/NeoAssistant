@@ -118,7 +118,7 @@ class AddMotherViewModel extends ChangeNotifier {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
             content: Text('Мать успешно добавлена!'),
-            backgroundColor: AppColors.primary,
+            backgroundColor: AppColors.brand_40,
           ),
         );
       }

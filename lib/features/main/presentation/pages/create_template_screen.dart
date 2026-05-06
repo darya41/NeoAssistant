@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../../../../shared/widgets/buttons/save_button.dart';
+import '../../../../shared/widgets/buttons/continue_button.dart';
 import '../../../reminders/presentation/widgets/reminder_form.dart';
 
 class CreateTemplateScreen extends StatefulWidget {
@@ -79,7 +79,7 @@ class _CreateTemplateScreenState extends State<CreateTemplateScreen> {
             ),
             SizedBox(height: 12),
 
-            SaveButton(
+            ContinueButton(
               onPressed: _handleSave,
               backgroundColor: _isFormValid ? _activeColor : _defaultBackgroundColor,
               borderColor: _isFormValid ? _activeColor : _borderColor,

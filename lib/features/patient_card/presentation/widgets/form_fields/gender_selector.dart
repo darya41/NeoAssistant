@@ -39,7 +39,7 @@ class GenderSelector extends StatelessWidget {
         Radio<String>(
           value: value,
           groupValue: selectedGender,
-          activeColor: AppColors.primary,
+          activeColor: AppColors.brand_40,
           onChanged: (selected) {
             if (selected != null) {
               onGenderSelected(selected);

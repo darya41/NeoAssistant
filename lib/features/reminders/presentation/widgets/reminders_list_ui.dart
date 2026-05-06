@@ -54,7 +54,7 @@ class RemindersListUI extends StatelessWidget {
                     date,
                     style: const TextStyle(
                       fontWeight: FontWeight.bold,
-                      color: AppColors.primary,
+                      color: AppColors.brand_40,
                       fontSize: 16,
                     ),
                   ),
@@ -93,7 +93,7 @@ class RemindersListUI extends StatelessWidget {
                         child: Checkbox(
                           value: reminder.isCompleted,
                           onChanged: (value) => onCheckboxChange(index, value ?? false),
-                          checkColor: AppColors.primary,
+                          checkColor: AppColors.brand_40,
                           fillColor: WidgetStateProperty.all(Colors.transparent),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.zero,
@@ -134,7 +134,7 @@ class RemindersListUI extends StatelessWidget {
                     : ElevatedButton(
                   onPressed: onLoadMore,
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: AppColors.primary,
+                    backgroundColor: AppColors.brand_40,
                     foregroundColor: Colors.white,
                     minimumSize: const Size(200, 48),
                     shape: RoundedRectangleBorder(

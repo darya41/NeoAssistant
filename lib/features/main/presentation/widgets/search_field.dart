@@ -29,7 +29,7 @@ class SearchField extends StatelessWidget {
     final protocolViewModel = context.watch<ProtocolSearchViewModel>();
 
     return Container(
-      color: AppColors.primary,
+      color: AppColors.brand_40,
       padding: const EdgeInsets.fromLTRB(24, 0, 24, 16),
       child: Row(
         children: [
@@ -94,7 +94,7 @@ class SearchField extends StatelessWidget {
     final hasActiveFilters = isCardioeka && (patientViewModel.hasActiveFilters);
 
     return Container(
-      color: AppColors.primary,
+      color: AppColors.brand_40,
       padding: const EdgeInsets.fromLTRB(24, 0, 24, 16),
       child: Row(
         children: [

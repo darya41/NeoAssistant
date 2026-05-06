@@ -11,7 +11,7 @@ class MotherSearchField extends StatefulWidget {
 
   static const _defaultBackgroundColor = AppColors.background;
   static const _borderColor = AppColors.border;
-  static const _activeColor = AppColors.primary;
+  static const _activeColor = AppColors.brand_40;
 
   const MotherSearchField({
     super.key,

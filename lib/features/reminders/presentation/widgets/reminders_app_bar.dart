@@ -34,7 +34,7 @@ class RemindersAppBar extends StatelessWidget implements PreferredSizeWidget {
           ),
         ],
       ),
-      backgroundColor: AppColors.primary,
+      backgroundColor: AppColors.brand_40,
     );
   }
 

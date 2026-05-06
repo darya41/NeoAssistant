@@ -55,7 +55,7 @@ abstract class BaseBottomNavigationBarState<T extends BaseBottomNavigationBar> e
     required int index,
   }) {
     final isActive = _selectedIndex == index;
-    final activeColor = AppColors.primary;
+    final activeColor = AppColors.brand_40;
 
     return InkWell(
       onTap: () => onItemTapped(index),

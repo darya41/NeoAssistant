@@ -1,23 +1,23 @@
 import 'package:flutter/material.dart';
 import '../../../../core/constants/app_colors.dart';
-import '../../../../shared/widgets/buttons/save_button.dart';
-import '../view_models/create_reminder_viewmodel.dart';
+import '../../../../shared/widgets/buttons/continue_button.dart';
+import '../view_models/add_reminder_viewmodel.dart';
 import '../widgets/reminder_form.dart';
 
-class CreateReminderScreen extends StatefulWidget {
-  const CreateReminderScreen({super.key});
+class AddReminderScreen extends StatefulWidget {
+  const AddReminderScreen({super.key});
 
   @override
-  State<CreateReminderScreen> createState() => _CreateReminderScreenState();
+  State<AddReminderScreen> createState() => _AddReminderScreenState();
 }
 
-class _CreateReminderScreenState extends State<CreateReminderScreen> {
-  late final CreateReminderViewModel _viewModel;
+class _AddReminderScreenState extends State<AddReminderScreen> {
+  late final AddReminderViewModel _viewModel;
 
   @override
   void initState() {
     super.initState();
-    _viewModel = CreateReminderViewModel();
+    _viewModel = AddReminderViewModel();
     _viewModel.addListener(_onViewModelChanged);
   }
 
@@ -34,7 +34,7 @@ class _CreateReminderScreenState extends State<CreateReminderScreen> {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('Напоминание создано!'),
-          backgroundColor: AppColors.primary,
+          backgroundColor: AppColors.brand_40,
         ),
       );
       Navigator.pop(context, true);
@@ -94,11 +94,9 @@ class _CreateReminderScreenState extends State<CreateReminderScreen> {
             if (_viewModel.isSaving)
               const Center(child: CircularProgressIndicator())
             else
-              SaveButton(
+              ContinueButton(
+                text: "Сохранить",
                 onPressed: _handleSave,
-                backgroundColor: _viewModel.isFormValid ? AppColors.primary : AppColors.background,
-                borderColor: _viewModel.isFormValid ? AppColors.primary : AppColors.border,
-                textColor: _viewModel.isFormValid ? Colors.white : Colors.black,
                 isEnabled: _viewModel.isFormValid,
               ),
           ],
