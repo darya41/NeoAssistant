@@ -8,6 +8,7 @@ router.use(authenticateToken);
 router.use(requireAuth);
 
 router.get('/stats', reminderController.getStats);
+router.get('/paginated', reminderController.getRemindersWithPagination);
 router.get('/', reminderController.getAll);
 router.get('/:id', reminderController.getOne);
 router.post('/', reminderController.create);

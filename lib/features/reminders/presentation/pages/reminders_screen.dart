@@ -1,15 +1,21 @@
 import 'package:flutter/material.dart';
 import '../../../../core/constants/app_colors.dart';
-import '../../../../shared/widgets/buttons/action_button.dart';
+import '../../../../shared/widgets/buttons/continue_button.dart';
 import '../view_models/reminders_viewmodel.dart';
 import '../widgets/error_view.dart';
 import '../widgets/reminders_app_bar.dart';
-import 'create_reminder_screen.dart';
+import 'add_reminder_screen.dart';
 import '../../../main/presentation/widgets/navigation/custom_bottom_navigation_bar.dart';
+import '../../../main/presentation/widgets/navigation/analytics_bottom_bar.dart';
 import '../widgets/reminders_list_ui.dart';
 
 class RemindersPageScreen extends StatefulWidget {
-  const RemindersPageScreen({super.key});
+  final bool useAnalyticsBottomBar;
+
+  const RemindersPageScreen({
+    super.key,
+    this.useAnalyticsBottomBar = false,
+  });
 
   @override
   State<RemindersPageScreen> createState() => _RemindersPageScreenState();
@@ -17,6 +23,7 @@ class RemindersPageScreen extends StatefulWidget {
 
 class _RemindersPageScreenState extends State<RemindersPageScreen> {
   late final RemindersViewModel _viewModel;
+  final int _currentIndex = 1;
 
   @override
   void initState() {
@@ -53,7 +60,7 @@ class _RemindersPageScreenState extends State<RemindersPageScreen> {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('Напоминание удалено'),
-          backgroundColor: AppColors.primary,
+          backgroundColor: AppColors.brand_40,
         ),
       );
     } else if (mounted) {
@@ -69,12 +76,16 @@ class _RemindersPageScreenState extends State<RemindersPageScreen> {
   Future<void> _handleAddReminder() async {
     final result = await Navigator.push(
       context,
-      MaterialPageRoute(builder: (context) => const CreateReminderScreen()),
+      MaterialPageRoute(builder: (context) => const AddReminderScreen()),
     );
 
     if (result == true) {
       _viewModel.refreshAfterCreate();
     }
+  }
+
+  Future<void> _handleLoadMore() async {
+    await _viewModel.loadMoreDays();
   }
 
   @override
@@ -93,19 +104,31 @@ class _RemindersPageScreenState extends State<RemindersPageScreen> {
         onToggleEditing: _viewModel.toggleEditing,
       ),
       body: _buildBody(),
-      bottomNavigationBar: const CustomBottomNavigationBar(
-        currentIndex: 1,
-      ),
+      bottomNavigationBar: _buildBottomNavigationBar(),
       floatingActionButton: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 30.0),
-        child: ActionButton(
+        child: ContinueButton(
+          isEnabled: true,
           onPressed: _handleAddReminder,
           backgroundColor: const Color(0xFFACF3E3),
-          borderColor: AppColors.primary,
+          borderColor: AppColors.brand_40,
           text: '+ Добавить напоминание',
         ),
       ),
     );
+  }
+
+  Widget _buildBottomNavigationBar() {
+    if (widget.useAnalyticsBottomBar) {
+      return AnalyticsBottomBar(
+        currentIndex: _currentIndex,
+        isGuest: false,
+      );
+    } else {
+      return CustomBottomNavigationBar(
+        currentIndex: _currentIndex,
+      );
+    }
   }
 
   Widget _buildBody() {
@@ -121,16 +144,44 @@ class _RemindersPageScreenState extends State<RemindersPageScreen> {
     }
 
     if (_viewModel.isEmpty) {
-      return const Center(
-        child: Text('Нет напоминаний'),
+      return Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const Icon(Icons.notifications_none, size: 64, color: Colors.grey),
+            const SizedBox(height: 16),
+            const Text(
+              'Нет напоминаний',
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.w500),
+            ),
+            const SizedBox(height: 8),
+            const Text(
+              'Добавьте первое напоминание',
+              style: TextStyle(fontSize: 14, color: Colors.grey),
+            ),
+            const SizedBox(height: 24),
+            ElevatedButton(
+              onPressed: _handleAddReminder,
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppColors.brand_40,
+                foregroundColor: Colors.white,
+              ),
+              child: const Text('Создать напоминание'),
+            ),
+          ],
+        ),
       );
     }
 
     return RemindersListUI(
-      reminders: _viewModel.sortedReminders,
+      reminders: _viewModel.reminders,
       onCheckboxChange: _handleCheckboxChange,
       onDelete: _handleDelete,
       isEditing: _viewModel.isEditing,
+      onRefresh: () => _viewModel.loadReminders(),
+      onLoadMore: _handleLoadMore,
+      hasMore: _viewModel.hasMore,
+      isLoadingMore: _viewModel.isLoadingMore,
     );
   }
 }

@@ -3,8 +3,23 @@ const PatientModel = require('../models/patient');
 class PatientController {
     async getAllPatients(req, res) {
         try {
-            const patients = await PatientModel.findAll();
-            res.json(patients);
+            const page = parseInt(req.query.page) || 1;
+            const limit = parseInt(req.query.limit) || 15;
+            const offset = (page - 1) * limit;
+
+            const { patients, total } = await PatientModel.findAllPaginated(limit, offset);
+
+            res.json({
+                success: true,
+                data: patients,
+                pagination: {
+                    currentPage: page,
+                    limit: limit,
+                    total: total,
+                    totalPages: Math.ceil(total / limit),
+                    hasNext: offset + limit < total
+                }
+            });
         } catch (error) {
             res.status(500).json({
                 success: false,
@@ -77,49 +92,74 @@ class PatientController {
         }
     };
 
-    async searchPatients(req, res) {
+   async searchPatients(req, res) {
+       try {
+           const {
+               query,
+               gender,
+               bloodGroup,
+               rhFactor,
+               dateFrom,
+               dateTo,
+               page = 1,
+               limit = 15
+           } = req.query;
 
-        try {
-            const { query, gender, bloodGroup, rhFactor,
-                dateFrom, dateTo
-            } = req.query;
+           const pageNum = parseInt(page);
+           const limitNum = parseInt(limit);
+           const offset = (pageNum - 1) * limitNum;
 
-            if ((!query || query.length < 2) &&
-                !gender && !bloodGroup && !rhFactor && !dateFrom && !dateTo) {
-                return res.json({
-                    success: true,
-                    data: [],
-                    meta: { query, count: 0 }
-                });
-            }
+           if ((!query || query.trim() === '') &&
+               !gender && !bloodGroup && !rhFactor && !dateFrom && !dateTo) {
+               const { patients, total } = await PatientModel.findAllPaginated(limitNum, offset);
+               return res.json({
+                   success: true,
+                   data: patients,
+                   pagination: {
+                       currentPage: pageNum,
+                       limit: limitNum,
+                       total: total,
+                       totalPages: Math.ceil(total / limitNum),
+                       hasNext: offset + limitNum < total
+                   }
+               });
+           }
 
-            const filters = {
-                gender: gender,
-                bloodGroup: bloodGroup,
-                rhFactor: rhFactor,
-                dateFrom: dateFrom,
-                dateTo: dateTo
-            };
+           const filters = {
+               gender: gender,
+               bloodGroup: bloodGroup,
+               rhFactor: rhFactor,
+               dateFrom: dateFrom,
+               dateTo: dateTo
+           };
 
-            const patients = await PatientModel.search(query, filters);
+           const { patients, total } = await PatientModel.searchWithPagination(
+               query,
+               filters,
+               limitNum,
+               offset
+           );
 
-            res.json({
-                success: true,
-                data: patients,
-                meta: {
-                    query: query,
-                    filters: filters,
-                    count: patients.length
-                }
-            });
+           res.json({
+               success: true,
+               data: patients,
+               pagination: {
+                   currentPage: pageNum,
+                   limit: limitNum,
+                   total: total,
+                   totalPages: Math.ceil(total / limitNum),
+                   hasNext: offset + limitNum < total
+               }
+           });
 
-        } catch (error) {
-            res.status(500).json({
-                success: false,
-                error: 'Ошибка поиска пациентов'
-            });
-        }
-    };
+       } catch (error) {
+           console.error('Search error:', error);
+           res.status(500).json({
+               success: false,
+               error: 'Ошибка поиска пациентов'
+           });
+       }
+   };
 };
 
 module.exports = new PatientController();

@@ -45,12 +45,26 @@ class _PatientDetailsScreenState extends State<PatientDetailsScreen> {
               ),
             ),
             actions: [
-              IconButton(
-                icon: Icon(
-                  _viewModel.isFavorite ? Icons.star : Icons.star_border,
-                  color: _viewModel.isFavorite ? Colors.amber : null,
-                ),
-                onPressed: () => _viewModel.toggleFavorite(),
+              Stack(
+                alignment: Alignment.center,
+                children: [
+                  IconButton(
+                    icon: Icon(
+                      _viewModel.isFavorite ? Icons.star : Icons.star_border,
+                      color: _viewModel.isFavorite ? Colors.white : Colors.white,
+                    ),
+                    onPressed: _viewModel.isToggling ? null : () => _viewModel.toggleFavorite(context),
+                  ),
+                  if (_viewModel.isToggling)
+                    const SizedBox(
+                      width: 20,
+                      height: 20,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2,
+                        color: Colors.white,
+                      ),
+                    ),
+                ],
               ),
             ],
             elevation: 4,

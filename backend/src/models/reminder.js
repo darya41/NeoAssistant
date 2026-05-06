@@ -20,10 +20,111 @@ class ReminderModel {
         );
 
         return {
-                    todayCount: todayRows[0]?.count ?? 0,
-                    tomorrowCount: tomorrowRows[0]?.count ?? 0,
-                    tomorrowDate: tomorrowStr
+            todayCount: todayRows[0]?.count ?? 0,
+            tomorrowCount: tomorrowRows[0]?.count ?? 0,
+            tomorrowDate: tomorrowStr
+        };
+    }
+
+    static async getRemindersByDays(doctorId, daysToShow = 0) {
+        try {
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+            const todayStr = today.toISOString().split('T')[0];
+
+            const [allReminders] = await db.query(
+                `SELECT
+                  reminder_id,
+                  title,
+                  description,
+                  DATE_FORMAT(reminder_date, '%Y-%m-%d') as reminder_date,
+                  is_completed,
+                  created_at
+               FROM reminders
+               WHERE doctor_id = ?
+               ORDER BY reminder_date DESC`,
+                [doctorId]
+            );
+
+            if (allReminders.length === 0) {
+                return {
+                    reminders: [],
+                    totalReminders: 0,
+                    currentDaysCount: 0,
+                    hasMorePastDays: false,
+                    totalPastDays: 0,
+                    shownDays: []
                 };
+            }
+
+            const grouped = {};
+            for (const r of allReminders) {
+                const date = r.reminder_date;
+                if (!grouped[date]) grouped[date] = [];
+                grouped[date].push(r);
+            }
+
+            let dates = Object.keys(grouped);
+            dates.sort().reverse();
+
+            const todayAndFutureDates = [];
+            const pastDates = [];
+
+            for (const date of dates) {
+                if (date >= todayStr) {
+                    todayAndFutureDates.push(date);
+                } else {
+                    pastDates.push(date);
+                }
+            }
+
+            let selectedDates = [];
+            let hasMore = false;
+
+            if (todayAndFutureDates.length > 0) {
+                selectedDates = [...todayAndFutureDates];
+
+                if (daysToShow > 0 && pastDates.length > 0) {
+                    const pastToAdd = pastDates.slice(0, daysToShow);
+                    selectedDates.push(...pastToAdd);
+                }
+
+                hasMore = pastDates.length > (daysToShow > 0 ? daysToShow : 0);
+            } else {
+                const showDays = daysToShow > 0 ? daysToShow : 3;
+                selectedDates = pastDates.slice(0, showDays);
+                hasMore = showDays < pastDates.length;
+            }
+
+            const reminders = [];
+            for (const date of selectedDates) {
+                const dayReminders = grouped[date];
+                if (dayReminders) {
+                    console.log(`   📅 ${date}: ${dayReminders.length} reminders`);
+                    reminders.push(...dayReminders);
+                }
+            }
+
+            const result = {
+                reminders: reminders,
+                totalReminders: allReminders.length,
+                currentDaysCount: todayAndFutureDates.length,
+                hasMorePastDays: hasMore,
+                totalPastDays: pastDates.length,
+                shownDays: selectedDates
+            };
+
+            console.log('📊 Result:', {
+                remindersCount: result.reminders.length,
+                shownDaysCount: result.shownDays.length,
+                hasMorePastDays: result.hasMorePastDays
+            });
+
+            return result;
+
+        } catch (error) {
+            throw error;
+        }
     }
 
     static async getAllByDoctorId(doctorId) {

@@ -231,7 +231,7 @@ final int examId = 1;
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
             content: Text('Пациент и осмотр успешно добавлены!'),
-            backgroundColor: AppColors.primary,
+            backgroundColor: AppColors.brand_40,
           ),
         );
       }

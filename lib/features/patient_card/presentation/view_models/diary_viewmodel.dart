@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../../../models/diary_entry.dart';
 import '../../data/repositories/patient_exam_repository.dart';
+import 'dart:developer';
 
 class DiaryViewModel extends ChangeNotifier {
   final PatientExamRepository _patientExamRepository = PatientExamRepository();
@@ -19,16 +20,18 @@ class DiaryViewModel extends ChangeNotifier {
   bool get hasEntries => _groupedEntries.isNotEmpty;
 
   DiaryViewModel({required this.patientId}) {
+    log('DiaryViewModel created: patientId=$patientId');
     loadDailyExams();
   }
 
   Future<void> loadDailyExams() async {
+    log('loadDailyExams STARTED for patientId=$patientId');
     _isLoading = true;
     _error = null;
     notifyListeners();
 
     try {
-      final exams = await _patientExamRepository.getPatientExamsByType(
+     final exams = await _patientExamRepository.getPatientExamsByType(
         patientId: patientId,
         examTypeId: 2,
       );
@@ -36,8 +39,9 @@ class DiaryViewModel extends ChangeNotifier {
       final Map<DateTime, List<DiaryEntry>> grouped = {};
 
       for (var exam in exams) {
-        final dateTime = DateTime.parse(exam['date_time']);
-        final date = DateTime(dateTime.year, dateTime.month, dateTime.day);
+        final utcDateTime = DateTime.parse(exam['date_time']);
+        final displayDateTime = utcDateTime.add(const Duration(hours: 3));
+        final date = DateTime(displayDateTime.year, displayDateTime.month, displayDateTime.day);
 
         if (!grouped.containsKey(date)) {
           grouped[date] = [];
@@ -45,15 +49,18 @@ class DiaryViewModel extends ChangeNotifier {
 
         grouped[date]!.add(DiaryEntry(
           text: 'Осмотр новорожденного',
-          time: TimeOfDay(hour: dateTime.hour, minute: dateTime.minute),
+         time: TimeOfDay(hour: displayDateTime.hour, minute: displayDateTime.minute),
           examId: exam['patients_exams_id'],
-          dateTime: dateTime,
+          dateTime: displayDateTime,
         ));
       }
 
       _groupedEntries = grouped;
       _error = null;
+     log('Loaded ${grouped.keys.length} days with exams');
+
     } catch (e) {
+      log('Error in loadDailyExams: $e');
       _error = e.toString();
       _groupedEntries = {};
     } finally {
@@ -76,7 +83,14 @@ class DiaryViewModel extends ChangeNotifier {
   }
 
   List<DiaryEntry> getEntriesForDate(DateTime date) {
-    return _groupedEntries[date] ?? [];
+    final entries = _groupedEntries[date] ?? [];
+    final sortedEntries = List<DiaryEntry>.from(entries);
+    sortedEntries.sort((a, b) {
+      final aTime = DateTime(0, 0, 0, a.time.hour, a.time.minute);
+      final bTime = DateTime(0, 0, 0, b.time.hour, b.time.minute);
+      return _isNewestFirst ? bTime.compareTo(aTime) : aTime.compareTo(bTime);
+    });
+    return sortedEntries;
   }
 
   void refresh() {

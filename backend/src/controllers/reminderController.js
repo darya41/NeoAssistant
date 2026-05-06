@@ -5,33 +5,44 @@ class ReminderController {
         try {
             const doctorId = req.user.id;
             const stats = await ReminderModel.getStats(doctorId);
-console.log('Stats from model:', stats);
-           res.json({
-                           todayCount: String(stats?.todayCount ?? 0),
-                           tomorrowCount: String(stats?.tomorrowCount ?? 0),
-                           tomorrowDate: stats?.tomorrowDate ?? ''
-                       });
-
-
+            res.json({
+                todayCount: String(stats?.todayCount ?? 0),
+                tomorrowCount: String(stats?.tomorrowCount ?? 0),
+                tomorrowDate: stats?.tomorrowDate ?? ''
+            });
         } catch (error) {
-           res.status(500).json({
-                           todayCount: '0',
-                           tomorrowCount: '0',
-                           tomorrowDate: ''
-                       });
+            res.status(500).json({
+                todayCount: '0',
+                tomorrowCount: '0',
+                tomorrowDate: ''
+            });
         }
     }
 
     async getAll(req, res) {
         try {
             const doctorId = req.user.id;
-            const reminders = await ReminderModel.getAllByDoctorId(doctorId);
+            const page = parseInt(req.query.page) || 1;
+            const limit = parseInt(req.query.limit) || 100;
+            const offset = (page - 1) * limit;
+
+            const { reminders, total } = await ReminderModel.getAllByDoctorIdWithPagination(
+                doctorId,
+                limit,
+                offset
+            );
 
             res.json({
                 success: true,
-                data: reminders
+                data: reminders,
+                pagination: {
+                    currentPage: page,
+                    limit: limit,
+                    total: total,
+                    totalPages: Math.ceil(total / limit),
+                    hasNext: offset + limit < total
+                }
             });
-
         } catch (error) {
             res.status(500).json({
                 success: false,
@@ -40,6 +51,36 @@ console.log('Stats from model:', stats);
         }
     }
 
+    async getRemindersWithPagination(req, res) {
+        try {
+            const doctorId = req.user.id;
+            const daysToShow = parseInt(req.query.daysToShow) || 0;
+
+            const result = await ReminderModel.getRemindersByDays(
+                doctorId,
+                daysToShow
+            );
+
+            const response = {
+                success: true,
+                data: result.reminders,
+                summary: {
+                    totalReminders: result.totalReminders,
+                    currentDaysCount: result.currentDaysCount,
+                    hasMorePastDays: result.hasMorePastDays,
+                    totalPastDays: result.totalPastDays,
+                    shownDays: result.shownDays || []
+                }
+            };
+
+            res.json(response);
+        } catch (error) {
+            res.status(500).json({
+                success: false,
+                error: 'Ошибка при получении напоминаний'
+            });
+        }
+    }
     async getOne(req, res) {
         try {
             const reminderId = req.params.id;
@@ -58,7 +99,6 @@ console.log('Stats from model:', stats);
                 success: true,
                 data: reminder
             });
-
         } catch (error) {
             res.status(500).json({
                 success: false,
@@ -92,7 +132,6 @@ console.log('Stats from model:', stats);
                 success: true,
                 data: newReminder
             });
-
         } catch (error) {
             res.status(500).json({
                 success: false,
@@ -115,6 +154,7 @@ console.log('Stats from model:', stats);
                     error: 'Напоминание не найдено'
                 });
             }
+
             const affectedRows = await ReminderModel.updateStatus(reminderId, doctorId, is_completed);
 
             if (affectedRows === 0) {
@@ -128,7 +168,6 @@ console.log('Stats from model:', stats);
                 success: true,
                 message: 'Напоминание обновлено'
             });
-
         } catch (error) {
             res.status(500).json({
                 success: false,
@@ -163,7 +202,6 @@ console.log('Stats from model:', stats);
                 success: true,
                 message: 'Напоминание удалено'
             });
-
         } catch (error) {
             res.status(500).json({
                 success: false,

@@ -22,7 +22,7 @@ class CheckboxGroupWidget extends StatelessWidget {
           children: [
             Checkbox(
               value: gestationalDiabetes,
-              activeColor: AppColors.primary,
+              activeColor: AppColors.brand_40,
               onChanged: (value) => onChanged(value ?? false, preeclampsia),
             ),
             const Text('Гестационный диабет'),
@@ -32,7 +32,7 @@ class CheckboxGroupWidget extends StatelessWidget {
           children: [
             Checkbox(
               value: preeclampsia,
-              activeColor: AppColors.primary,
+              activeColor: AppColors.brand_40,
               onChanged: (value) => onChanged(gestationalDiabetes, value ?? false),
             ),
             const Text('Преэклампсия'),

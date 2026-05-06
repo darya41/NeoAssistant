@@ -2,9 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:neo_friend/core/constants/app_strings.dart';
 import 'package:neo_friend/features/patient_card/presentation/pages/daily_exam_view_screen.dart';
 import '../../../../core/constants/app_colors.dart';
+import '../../../../shared/widgets/buttons/continue_button.dart';
 import '../view_models/add_daily_exam_viewmodel.dart';
 import '../widgets/daily_exam_form.dart';
-import '../../../../shared/widgets/buttons/save_button.dart';
 
 class AddDailyExamScreen extends StatefulWidget {
   final int patientId;
@@ -45,14 +45,14 @@ class _AddDailyExamScreenState extends State<AddDailyExamScreen> {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
             content: Text('Ежедневный осмотр успешно добавлен!'),
-            backgroundColor: AppColors.primary,
+            backgroundColor: AppColors.brand_40,
           ),
         );
 
         await Future.delayed(const Duration(seconds: 4));
 
         if (mounted) {
-          Navigator.push(
+          Navigator.pushReplacement(
             context,
             MaterialPageRoute(
               builder: (context) => DailyExamViewScreen(
@@ -119,12 +119,26 @@ class _AddDailyExamScreenState extends State<AddDailyExamScreen> {
               children: [
                 Expanded(
                   child: SingleChildScrollView(
+                    padding: const EdgeInsets.only(top: 8),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
+                        const Padding(
+                          padding: EdgeInsets.only(bottom: 12),
+                          child: Text(
+                            'Дата и время осмотра',
+                            style: TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ),
+
                         Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Expanded(
+                              flex: 5,
                               child: InkWell(
                                 onTap: () => _selectDate(context),
                                 child: InputDecorator(
@@ -132,17 +146,23 @@ class _AddDailyExamScreenState extends State<AddDailyExamScreen> {
                                     labelText: 'Дата',
                                     errorText: _viewModel.dateError,
                                     border: const OutlineInputBorder(),
+                                    contentPadding: const EdgeInsets.symmetric(
+                                      horizontal: 12,
+                                      vertical: 16,
+                                    ),
                                   ),
                                   child: Text(
                                     _viewModel.selectedDate != null
-                                        ? '${_viewModel.selectedDate!.day}/${_viewModel.selectedDate!.month}/${_viewModel.selectedDate!.year}'
+                                        ? '${_viewModel.selectedDate!.day.toString().padLeft(2, '0')}.${_viewModel.selectedDate!.month.toString().padLeft(2, '0')}.${_viewModel.selectedDate!.year}'
                                         : 'Выберите дату',
+                                    style: const TextStyle(fontSize: 14),
                                   ),
                                 ),
                               ),
                             ),
                             const SizedBox(width: 16),
                             Expanded(
+                              flex: 3,
                               child: InkWell(
                                 onTap: () => _selectTime(context),
                                 child: InputDecorator(
@@ -150,11 +170,16 @@ class _AddDailyExamScreenState extends State<AddDailyExamScreen> {
                                     labelText: 'Время',
                                     errorText: _viewModel.timeError,
                                     border: const OutlineInputBorder(),
+                                    contentPadding: const EdgeInsets.symmetric(
+                                      horizontal: 12,
+                                      vertical: 16,
+                                    ),
                                   ),
                                   child: Text(
                                     _viewModel.selectedTime != null
                                         ? _viewModel.selectedTime!.format(context)
                                         : 'Выберите время',
+                                    style: const TextStyle(fontSize: 14),
                                   ),
                                 ),
                               ),
@@ -188,14 +213,9 @@ class _AddDailyExamScreenState extends State<AddDailyExamScreen> {
                             )
                           else
                             DailyExamForm(
-                              selectedDate: _viewModel.selectedDate,
-                              selectedTime: _viewModel.selectedTime,
                               parameters: _viewModel.parameters,
                               parameterValues: _viewModel.parameterValues,
                               onParameterChanged: _viewModel.onParameterChanged,
-                              showValidationErrors: _viewModel.triedToSubmit,
-                              dateError: _viewModel.dateError,
-                              timeError: _viewModel.timeError,
                             ),
                       ],
                     ),
@@ -205,10 +225,11 @@ class _AddDailyExamScreenState extends State<AddDailyExamScreen> {
                 if (_viewModel.isSaving)
                   const Center(child: CircularProgressIndicator())
                 else
-                  SaveButton(
+                  ContinueButton(
                     onPressed: _handleSave,
-                    backgroundColor: _viewModel.isFormValid ? AppColors.primary : AppColors.background,
-                    borderColor: _viewModel.isFormValid ? AppColors.primary : AppColors.border,
+                    text: "Сохранить",
+                    backgroundColor: _viewModel.isFormValid ? AppColors.brand_40 : AppColors.background,
+                    borderColor: _viewModel.isFormValid ? AppColors.brand_40 : AppColors.border,
                     textColor: _viewModel.isFormValid ? AppColors.white : AppColors.black,
                     isEnabled: _viewModel.isFormValid,
                   ),

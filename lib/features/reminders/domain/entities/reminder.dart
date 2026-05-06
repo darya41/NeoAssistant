@@ -6,6 +6,8 @@ class Reminder {
   bool isCompleted;
   final DateTime createdAt;
 
+  static const Duration minskOffset = Duration(hours: 3);
+
   Reminder({
     required this.id,
     required this.title,
@@ -16,14 +18,27 @@ class Reminder {
   });
 
   String get task => title;
-  String get dateString => '${date.day} ${_getMonthName(date.month)} ${date.year}';
+
+  String get dateString {
+    final minskDate = date.add(minskOffset);
+    return '${minskDate.day} ${_getMonthName(minskDate.month)} ${minskDate.year}';
+  }
 
   factory Reminder.fromJson(Map<String, dynamic> json) {
+    DateTime parsedDate;
+    final dateStr = json['reminder_date'];
+
+    if (dateStr.length == 10) {
+      parsedDate = DateTime.parse('${dateStr}T00:00:00Z');
+    } else {
+      parsedDate = DateTime.parse(dateStr);
+    }
+
     return Reminder(
       id: json['reminder_id'],
       title: json['title'],
       description: json['description'],
-      date: DateTime.parse(json['reminder_date']),
+      date: parsedDate,
       isCompleted: json['is_completed'] == 1,
       createdAt: DateTime.parse(json['created_at']),
     );

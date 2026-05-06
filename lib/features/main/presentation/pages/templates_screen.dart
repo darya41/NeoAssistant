@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:neo_friend/features/reminders/presentation/pages/create_reminder_screen.dart';
-import '../../../../shared/widgets/buttons/action_button.dart';
+import 'package:neo_friend/features/reminders/presentation/pages/add_reminder_screen.dart';
+import '../../../../shared/widgets/buttons/continue_button.dart';
 import '../widgets/navigation/custom_bottom_navigation_bar.dart';
 import '../widgets/templates_list_ui.dart';
 
@@ -30,7 +30,7 @@ class _TemplatesScreenState extends State<TemplatesScreen> {
   void _handleCreateTemplate() {
     Navigator.push(
       context,
-      MaterialPageRoute(builder: (context) => const CreateReminderScreen()),
+      MaterialPageRoute(builder: (context) => const AddReminderScreen()),
     );
   }
 
@@ -68,7 +68,8 @@ class _TemplatesScreenState extends State<TemplatesScreen> {
           ),
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 30.0, vertical: 16.0),
-            child: ActionButton(
+            child: ContinueButton(
+              isEnabled: true,
               onPressed: _handleCreateTemplate,
               backgroundColor: const Color(0xFFACF3E3),
               borderColor: const Color(0xFF1DC9A1),

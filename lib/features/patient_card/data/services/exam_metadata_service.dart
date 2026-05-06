@@ -1,9 +1,24 @@
 import '../../../../core/network/api_client.dart';
 
 class ExamMetadataService {
-  Map<String, dynamic> _validateResponse(dynamic response) {
+  Map<String, dynamic> _validateResponse(dynamic response, {String methodName = 'unknown'}) {
+
     if (response is! Map<String, dynamic>) {
       throw Exception('Неверный формат ответа от сервера');
+    }
+
+    if (response.containsKey('success') && response['success'] != true) {
+      throw Exception(response['error'] ?? 'Ошибка сервера');
+    }
+
+    if (response.containsKey('data')) {
+      final data = response['data'];
+
+      if (data is Map<String, dynamic>) {
+        return data;
+      } else {
+        return {'result': data};
+      }
     }
     return response;
   }
@@ -12,23 +27,50 @@ class ExamMetadataService {
     required int patientId,
     required int examTypeId,
   }) async {
-    final response = await ApiClient.getAuth(
-        'parameters/primary-exam?patientId=$patientId&examTypeId=$examTypeId'
-    );
-    return _validateResponse(response);
+    const methodName = 'getPrimaryExamId';
+
+    try {
+      final url = 'exam-types/primary?patientId=$patientId&examTypeId=$examTypeId';
+
+      final response = await ApiClient.getAuth(url);
+
+      final validated = _validateResponse(response, methodName: methodName);
+
+      return validated;
+    } catch (e) {
+      rethrow;
+    }
   }
 
   Future<Map<String, dynamic>> getExamDateTime(int patientExamId) async {
-    final response = await ApiClient.getAuth(
-        'parameters/exam-datetime?patientExamId=$patientExamId'
-    );
-    return _validateResponse(response);
+    const methodName = 'getExamDateTime';
+
+    try {
+      final url = 'exam-types/datetime?patientExamId=$patientExamId';
+
+      final response = await ApiClient.getAuth(url);
+
+      final validated = _validateResponse(response, methodName: methodName);
+
+      return validated;
+    } catch (e) {
+      rethrow;
+    }
   }
 
   Future<Map<String, dynamic>> getExamTypeByExamId(int patientExamId) async {
-    final response = await ApiClient.getAuth(
-        'parameters/exam-type?patientExamId=$patientExamId'
-    );
-    return _validateResponse(response);
+    const methodName = 'getExamTypeByExamId';
+
+    try {
+      final url = 'exam-types/type?patientExamId=$patientExamId';
+
+      final response = await ApiClient.getAuth(url);
+
+      final validated = _validateResponse(response, methodName: methodName);
+
+      return validated;
+    } catch (e) {
+      rethrow;
+    }
   }
 }

@@ -50,7 +50,7 @@ class _PrimaryExamViewScreenState extends State<PrimaryExamViewScreen> {
         return Scaffold(
           appBar: AppBar(
             title: const Text('Первичный осмотр новорождённого'),
-            backgroundColor: AppColors.primary,
+            backgroundColor: AppColors.brand_40,
             actions: [
               if (_viewModel.hasError)
                 IconButton(
@@ -98,7 +98,7 @@ class _PrimaryExamViewScreenState extends State<PrimaryExamViewScreen> {
               icon: const Icon(Icons.refresh),
               label: const Text('Повторить попытку'),
               style: ElevatedButton.styleFrom(
-                backgroundColor: AppColors.primary,
+                backgroundColor: AppColors.brand_40,
                 foregroundColor: AppColors.white,
               ),
             ),
@@ -131,7 +131,7 @@ class _PrimaryExamViewScreenState extends State<PrimaryExamViewScreen> {
               icon: const Icon(Icons.refresh),
               label: const Text('Обновить'),
               style: ElevatedButton.styleFrom(
-                backgroundColor: AppColors.primary,
+                backgroundColor: AppColors.brand_40,
                 foregroundColor: AppColors.white,
               ),
             ),

@@ -19,7 +19,7 @@ class ReminderCard extends StatelessWidget {
     final countStyle = TextStyle(
       fontSize: 24,
       fontWeight: FontWeight.bold,
-      color: isToday ? AppColors.primary : Colors.black,
+      color: isToday ? AppColors.brand_40  : Colors.black,
     );
 
     return ConstrainedBox(
@@ -47,7 +47,7 @@ class ReminderCard extends StatelessWidget {
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                   decoration: BoxDecoration(
-                    color: AppColors.primary,
+                    color: AppColors.brand_40 ,
                     borderRadius: BorderRadius.circular(6),
                   ),
                   child: Text(

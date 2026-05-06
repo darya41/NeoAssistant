@@ -13,8 +13,13 @@ import '../view_models/home_viewmodel.dart';
 
 class HomeScreenUI extends StatefulWidget {
   final bool isGuest;
+  final String? initialTab;
 
-  const HomeScreenUI({super.key, this.isGuest = false});
+  const HomeScreenUI({
+    super.key,
+    this.isGuest = false,
+    this.initialTab,
+  });
 
   @override
   State<HomeScreenUI> createState() => _HomeScreenUIState();
@@ -38,7 +43,13 @@ class _HomeScreenUIState extends State<HomeScreenUI> {
 
     _homeViewModel = HomeViewModel();
 
-    if (widget.isGuest) {
+    if (widget.initialTab != null) {
+      if (widget.initialTab == 'Аналитика') {
+        _homeViewModel.switchToAnalytics();
+      } else if (widget.initialTab == 'Картотека') {
+        _homeViewModel.switchToCardioeka();
+      }
+    } else if (widget.isGuest) {
       _homeViewModel.switchToAnalytics();
     }
 
@@ -55,7 +66,6 @@ class _HomeScreenUIState extends State<HomeScreenUI> {
 
   @override
   void dispose() {
-
     _homeViewModel.dispose();
     if (!widget.isGuest) {
       if (_patientSearchViewModel != null) {
@@ -68,7 +78,6 @@ class _HomeScreenUIState extends State<HomeScreenUI> {
 
   @override
   Widget build(BuildContext context) {
-
     if (!_isInitialized) {
       return const Scaffold(
         body: Center(child: CircularProgressIndicator()),

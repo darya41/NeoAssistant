@@ -93,8 +93,6 @@ class _LoginScreenState extends State<LoginScreen> {
       errorMessage: _viewModel.errorMessage,
       isLoading: _viewModel.isLoading,
       isFormValid: _viewModel.isFormValid,
-      emailError: _viewModel.emailError,
-      passwordError: _viewModel.passwordError,
       onClearError: _viewModel.clearError,
     );
   }

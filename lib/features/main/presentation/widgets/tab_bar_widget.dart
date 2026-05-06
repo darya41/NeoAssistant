@@ -23,7 +23,7 @@ class _TabBarWidgetState extends State<TabBarWidget> {
     return Container(
       height: 50,
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-      color: AppColors.primary,
+      color: AppColors.brand_40,
       child: Row(
         children: [
           if (!widget.isGuest)
@@ -76,7 +76,7 @@ class _TabBarWidgetState extends State<TabBarWidget> {
             style: TextStyle(
               fontSize: 16,
               fontWeight: FontWeight.w500,
-              color: isActive ? Colors.black : AppColors.primary,
+              color: isActive ? Colors.black : AppColors.brand_40,
             ),
           ),
         ),

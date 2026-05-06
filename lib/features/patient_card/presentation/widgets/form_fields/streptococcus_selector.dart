@@ -35,7 +35,7 @@ class StreptococcusSelector extends StatelessWidget {
                 child: Container(
                   padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                   decoration: BoxDecoration(
-                    color: isSelected ? AppColors.primary : AppColors.background,
+                    color: isSelected ? AppColors.brand_40 : AppColors.background,
                     border: Border.all(color: AppColors.border),
                     borderRadius: BorderRadius.circular(20),
                   ),

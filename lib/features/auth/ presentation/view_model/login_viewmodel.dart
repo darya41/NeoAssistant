@@ -25,24 +25,16 @@ class LoginViewModel extends ChangeNotifier {
   }
 
   void _onFormChanged() {
+    _errorMessage = null;
     notifyListeners();
-  }
-
-  String? get emailError {
-    final email = emailController.text.trim();
-    if (email.isEmpty) return null;
-    return AuthValidator.getEmailError(email);
-  }
-
-  String? get passwordError {
-    final password = passwordController.text;
-    if (password.isEmpty) return null;
-    return AuthValidator.getPasswordError(password);
   }
 
   Future<bool> login(BuildContext context) async {
     final email = emailController.text.trim();
     final password = passwordController.text;
+
+    _errorMessage = null;
+    notifyListeners();
 
     if (!isFormValid) {
       _errorMessage = 'Заполните оба поля';
@@ -50,15 +42,19 @@ class LoginViewModel extends ChangeNotifier {
       return false;
     }
 
-    final validationError = AuthValidator.getLoginError(email, password);
-    if (validationError != null) {
-      _errorMessage = validationError;
+    if (!AuthValidator.isEmailValid(email)) {
+      _errorMessage = 'Некорректная почта';
+      notifyListeners();
+      return false;
+    }
+
+    if (!AuthValidator.isPasswordValid(password)) {
+      _errorMessage = 'Некорректный пароль';
       notifyListeners();
       return false;
     }
 
     _isLoading = true;
-    _errorMessage = null;
     notifyListeners();
 
     try {
@@ -70,12 +66,18 @@ class LoginViewModel extends ChangeNotifier {
       if (response['success'] && response['accessToken'] != null) {
         return true;
       } else {
-        _errorMessage = response['error'] ?? 'Ошибка входа';
+        _errorMessage = 'Неверный email или пароль';
         notifyListeners();
         return false;
       }
     } catch (e) {
-      _errorMessage = e.toString().replaceFirst('Exception: ', '');
+      String errorMsg = e.toString();
+      errorMsg = errorMsg.replaceFirst('Ошибка соединения: Exception: ', '');
+      if (errorMsg.contains('Неверный email') || errorMsg.contains('пароль')) {
+        _errorMessage = 'Неверный email или пароль';
+      } else {
+        _errorMessage = errorMsg;
+      }
       notifyListeners();
       return false;
     } finally {

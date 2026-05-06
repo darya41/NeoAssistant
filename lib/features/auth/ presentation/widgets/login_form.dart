@@ -10,8 +10,7 @@ class LoginForm extends StatefulWidget {
   final VoidCallback onLoginPressed;
   final bool isLoading;
   final bool isFormValid;
-  final String? emailError;
-  final String? passwordError;
+  final String? errorMessage;
   final VoidCallback? onClearError;
 
   const LoginForm({
@@ -21,8 +20,7 @@ class LoginForm extends StatefulWidget {
     required this.onLoginPressed,
     required this.isLoading,
     required this.isFormValid,
-    this.emailError,
-    this.passwordError,
+    this.errorMessage,
     this.onClearError,
   });
 
@@ -51,19 +49,10 @@ class _LoginFormState extends State<LoginForm> {
           ),
         ),
 
-        if (widget.emailError != null || widget.passwordError != null)
+        if (widget.errorMessage != null)
           Padding(
             padding: const EdgeInsets.only(top: 12),
-            child: Column(
-              children: [
-                if (widget.emailError != null)
-                  ErrorContainer(errorMessage: widget.emailError),
-                if (widget.passwordError != null)
-                  const SizedBox(height: 8),
-                if (widget.passwordError != null)
-                  ErrorContainer(errorMessage: widget.passwordError),
-              ],
-            ),
+            child: ErrorContainer(errorMessage: widget.errorMessage),
           ),
 
         const SizedBox(height: 40),
@@ -72,7 +61,7 @@ class _LoginFormState extends State<LoginForm> {
           const Center(child: CircularProgressIndicator())
         else
           ContinueButton(
-            onPressed: widget.isFormValid ? widget.onLoginPressed : null,
+            onPressed: widget.onLoginPressed,
             isEnabled: widget.isFormValid,
           ),
       ],
@@ -103,11 +92,7 @@ class _LoginFormState extends State<LoginForm> {
           ),
           style: const TextStyle(fontSize: 16),
           onChanged: (_) {
-            if (widget.onClearError != null) {
-              widget.onClearError!();
-            }
-            widget.emailController.addListener(() {});
-            widget.emailController.notifyListeners();
+            widget.onClearError?.call();
           },
         ),
       ),
@@ -141,11 +126,7 @@ class _LoginFormState extends State<LoginForm> {
                 ),
                 style: const TextStyle(fontSize: 16),
                 onChanged: (_) {
-                  if (widget.onClearError != null) {
-                    widget.onClearError!();
-                  }
-                  widget.passwordController.addListener(() {});
-                  widget.passwordController.notifyListeners();
+                  widget.onClearError?.call();
                 },
               ),
             ),

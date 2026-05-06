@@ -75,14 +75,16 @@ class ApiClient {
 
   static Future<bool> refreshToken() async {
     if (_isRefreshing) {
-      return false;
+      await Future.delayed(const Duration(milliseconds: 500));
+      return true;
     }
 
     _isRefreshing = true;
 
     try {
       final refreshToken = await TokenStorage.getRefreshToken();
-      if (refreshToken == null) {
+
+      if (refreshToken == null || refreshToken == 'guest_token') {
         return false;
       }
 
@@ -112,6 +114,7 @@ class ApiClient {
         return false;
       }
     } catch (e) {
+      await TokenStorage.clearAll();
       return false;
     } finally {
       _isRefreshing = false;
@@ -126,14 +129,16 @@ class ApiClient {
 
       if (response.statusCode == 200 || response.statusCode == 201) {
         final decoded = json.decode(response.body);
-       return decoded;
+        return decoded;
       }
 
-      if (response.statusCode == 401) {
+      if (response.statusCode == 401 || response.statusCode == 403) {
+
         final success = await refreshToken();
 
         if (success) {
           response = await request();
+
           if (response.statusCode == 200 || response.statusCode == 201) {
             final decoded = json.decode(response.body);
             return decoded;
@@ -149,6 +154,30 @@ class ApiClient {
     } catch (e) {
       if (e.toString().contains('Сессия истекла')) rethrow;
       throw Exception('Ошибка соединения: $e');
+    }
+  }
+
+  static Future<bool> isTokenValid() async {
+    try {
+      final token = await TokenStorage.getAccessToken();
+      if (token == null || token == 'guest_token') {
+        return false;
+      }
+
+      try {
+        await getAuth('doctors/profile');
+        return true;
+      } catch (e) {
+        final refreshed = await refreshToken();
+
+        if (refreshed) {
+          return true;
+        }
+
+        return false;
+      }
+    } catch (e) {
+      return false;
     }
   }
 

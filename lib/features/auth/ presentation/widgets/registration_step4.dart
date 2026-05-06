@@ -217,7 +217,7 @@ class _RegistrationStep4State extends State<RegistrationStep4> {
       onTap: () => _selectPredefinedPosition(specialization),
       child: Container(
         decoration: BoxDecoration(
-          color: isSelected ? AppColors.primary : Colors.grey[200],
+          color: isSelected ? AppColors.brand_40  : Colors.grey[200],
           borderRadius: BorderRadius.circular(12),
           border: isSelected ? null : Border.all(color: Colors.grey[300]!, width: 1),
         ),

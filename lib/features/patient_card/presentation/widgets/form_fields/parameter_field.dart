@@ -58,9 +58,9 @@ class ParameterField extends StatelessWidget {
                 vertical: 10,
               ),
               decoration: BoxDecoration(
-                color: isSelected ? AppColors.primary : AppColors.background,
+                color: isSelected ? AppColors.brand_40 : AppColors.background,
                 border: Border.all(
-                  color: isSelected ? AppColors.primary : AppColors.border,
+                  color: isSelected ? AppColors.brand_40 : AppColors.border,
                   width: 1,
                 ),
                 borderRadius: BorderRadius.circular(20),

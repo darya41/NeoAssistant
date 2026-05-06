@@ -127,6 +127,106 @@ class ParameterModel {
 
         return resultData;
     }
+
+    static async getParameterValuesByPatientExamId(patientExamId) {
+        try {
+            const [examInfo] = await db.query(`
+                SELECT exam_id FROM patientsexams
+                WHERE patients_exams_id = ?
+            `, [patientExamId]);
+
+            if (examInfo.length === 0) {
+                return [];
+            }
+
+            const examId = examInfo[0].exam_id;
+
+            const [medParamLinks] = await db.query(`
+                SELECT medical_parameter_id, med_param_exam_id
+                FROM MedParamInExams
+                WHERE exam_id = ?
+            `, [examId]);
+
+            if (medParamLinks.length === 0) {
+                return [];
+            }
+
+            const medParamExamIds = medParamLinks.map(row => row.med_param_exam_id);
+            const placeholders = medParamExamIds.map(() => '?').join(',');
+
+            const [values] = await db.query(`
+                SELECT med_param_exam_id, value
+                FROM MedParamInPatientExams
+                WHERE patients_exams_id = ? AND med_param_exam_id IN (${placeholders})
+            `, [patientExamId, ...medParamExamIds]);
+
+            const result = [];
+            for (const link of medParamLinks) {
+                const valueRecord = values.find(v => v.med_param_exam_id === link.med_param_exam_id);
+                result.push({
+                    medical_parameter_id: link.medical_parameter_id,
+                    med_param_exam_id: link.med_param_exam_id,
+                    value: valueRecord ? valueRecord.value : null
+                });
+            }
+
+            return result;
+        } catch (error) {
+            console.error('Error in getParameterValuesByPatientExamId:', error);
+            return [];
+        }
+    }
+
+    static async saveParameterValue(patientsExamsId, medicalParameterId, value) {
+        try {
+            const [examInfo] = await db.query(`
+                SELECT pe.exam_id
+                FROM patientsexams pe
+                WHERE pe.patients_exams_id = ?
+            `, [patientsExamsId]);
+
+            if (examInfo.length === 0) {
+                throw new Error('Patient exam not found');
+            }
+
+            const examId = examInfo[0].exam_id;
+
+            const [paramLink] = await db.query(`
+                SELECT med_param_exam_id
+                FROM MedParamInExams
+                WHERE exam_id = ? AND medical_parameter_id = ?
+            `, [examId, medicalParameterId]);
+
+            if (paramLink.length === 0) {
+                throw new Error('Parameter not found for this exam');
+            }
+
+            const medParamExamId = paramLink[0].med_param_exam_id;
+
+            const [existing] = await db.query(`
+                SELECT id FROM MedParamInPatientExams
+                WHERE patients_exams_id = ? AND med_param_exam_id = ?
+            `, [patientsExamsId, medParamExamId]);
+
+            if (existing.length > 0) {
+                await db.query(`
+                    UPDATE MedParamInPatientExams
+                    SET value = ?
+                    WHERE patients_exams_id = ? AND med_param_exam_id = ?
+                `, [value || null, patientsExamsId, medParamExamId]);
+            } else {
+                await db.query(`
+                    INSERT INTO MedParamInPatientExams (patients_exams_id, med_param_exam_id, value)
+                    VALUES (?, ?, ?)
+                `, [patientsExamsId, medParamExamId, value || null]);
+            }
+
+            return true;
+        } catch (error) {
+            console.error('Error in saveParameterValue:', error);
+            throw error;
+        }
+    }
 }
 
 module.exports = ParameterModel;

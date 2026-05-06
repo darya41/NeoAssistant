@@ -25,7 +25,7 @@ class _AnalyticsBottomBarState extends BaseBottomNavigationBarState<AnalyticsBot
       case 0:
         Navigator.pushReplacement(
           context,
-          MaterialPageRoute(builder: (context) => const HomeScreen(title: 'Главная')),
+          MaterialPageRoute(builder: (context) => const HomeScreen(title: 'Главная', initialTab: 'Аналитика',)),
         );
         break;
       case 1:
@@ -41,7 +41,7 @@ class _AnalyticsBottomBarState extends BaseBottomNavigationBarState<AnalyticsBot
         }
         Navigator.pushReplacement(
           context,
-          MaterialPageRoute(builder: (context) => const RemindersPageScreen()),
+          MaterialPageRoute(builder: (context) => const RemindersPageScreen(useAnalyticsBottomBar: true,)),
         );
         break;
       case 2:
@@ -51,19 +51,9 @@ class _AnalyticsBottomBarState extends BaseBottomNavigationBarState<AnalyticsBot
         );
         break;
       case 3:
-        if (widget.isGuest) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('Гостям доступна только аналитика'),
-              backgroundColor: Colors.orange,
-              duration: Duration(seconds: 2),
-            ),
-          );
-          return;
-        }
         Navigator.pushReplacement(
           context,
-          MaterialPageRoute(builder: (context) => DoctorProfileScreen()),
+          MaterialPageRoute(builder: (context) => DoctorProfileScreen(useAnalyticsBottomBar: true, isGuest: widget.isGuest,)),
         );
         break;
     }

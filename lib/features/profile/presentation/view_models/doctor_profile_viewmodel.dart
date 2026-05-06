@@ -1,11 +1,17 @@
 import 'package:flutter/material.dart';
+import 'package:neo_friend/features/main/data/repositories/patient_repository.dart';
+import 'package:neo_friend/features/patient_card/data/repositories/favorite_repository.dart';
 import '../../../../core/network/api_client.dart';
 import '../../../../core/storage/token_storage.dart';
+import '../../../../models/patient.dart';
+import '../../../patient_card/presentation/pages/patient_details_screen.dart';
 import '../../domain/entities/doctor.dart';
 import '../../data/repositories/profile_repository.dart';
 
 class DoctorProfileViewModel extends ChangeNotifier {
   final ProfileRepository _profileRepository = ProfileRepository();
+  final FavoriteRepository _favoriteRepository = FavoriteRepository();
+  final PatientRepository _patientRepository = PatientRepository();
 
   Doctor? _doctor;
   bool _isLoading = true;
@@ -101,5 +107,50 @@ class DoctorProfileViewModel extends ChangeNotifier {
     _errorMessage = null;
     _isLoading = false;
     notifyListeners();
+  }
+
+  Future<List<int>> getFavoritePatientIds() async {
+    try {
+      return await _favoriteRepository.getFavoritePatientIds();
+    } catch (e) {
+      return [];
+    }
+  }
+
+  Future<List<Patient>> getFavoritePatients() async {
+    try {
+      final favoriteIds = await _favoriteRepository.getFavoritePatientIds();
+
+      final List<Patient> patients = [];
+      for (final id in favoriteIds) {
+        try {
+          final patient = await _patientRepository.getPatientById(id);
+          patients.add(patient);
+        } catch (e) {
+          print('Error loading patient $id: $e');
+        }
+      }
+
+      return patients;
+    } catch (e) {
+      return [];
+    }
+  }
+
+  Future<Patient?> getPatientById(int patientId) async {
+    try {
+      return await _patientRepository.getPatientById(patientId);
+    } catch (e) {
+      return null;
+    }
+  }
+
+  void navigateToPatientDetails(BuildContext context, Patient patient) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => PatientDetailsScreen(patient: patient),
+      ),
+    );
   }
 }

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
+import '../../../../core/constants/app_colors.dart';
 import '../../../../shared/widgets/block/text_content_block.dart';
-import '../../../../shared/widgets/buttons/action_button.dart';
+import '../../../../shared/widgets/buttons/continue_button.dart';
 
 class TemplateDetailScreen extends StatefulWidget {
   final String title;
@@ -58,12 +59,13 @@ class _TemplateDetailScreenState extends State<TemplateDetailScreen> {
             ),
 
             if (isEditing)
-              ActionButton(
+              ContinueButton(
+                isEnabled: true,
                 onPressed: () {
                   // Логика удаления
                 },
                 backgroundColor: Colors.white,
-                borderColor: Colors.red,
+                borderColor: AppColors.error,
                 text: 'Удалить',
               ),
 

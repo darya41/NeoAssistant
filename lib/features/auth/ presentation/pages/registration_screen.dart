@@ -56,7 +56,7 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('Регистрация успешна! Теперь вы можете войти'),
-          backgroundColor: AppColors.primary,
+          backgroundColor: AppColors.brand_40 ,
           duration: Duration(seconds: 2),
         ),
       );
@@ -76,7 +76,7 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Регистрация'),
-        backgroundColor: AppColors.primary,
+        backgroundColor: AppColors.brand_40 ,
         leading: IconWidgets.backIcon(
           onTap: _handlePreviousStep,
           color: AppColors.white,

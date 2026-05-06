@@ -11,8 +11,6 @@ class LoginUI extends StatelessWidget {
   final String? errorMessage;
   final bool isLoading;
   final bool isFormValid;
-  final String? emailError;
-  final String? passwordError;
   final VoidCallback? onClearError;
   final VoidCallback onGuestLoginPressed;
 
@@ -26,8 +24,6 @@ class LoginUI extends StatelessWidget {
     this.errorMessage,
     required this.isLoading,
     required this.isFormValid,
-    this.emailError,
-    this.passwordError,
     this.onClearError,
   });
 
@@ -62,8 +58,6 @@ class LoginUI extends StatelessWidget {
                 onLoginPressed: onLoginPressed,
                 isLoading: isLoading,
                 isFormValid: isFormValid,
-                emailError: emailError,
-                passwordError: passwordError,
                 onClearError: onClearError,
               ),
 
@@ -72,8 +66,8 @@ class LoginUI extends StatelessWidget {
               OutlinedButton(
                 onPressed: onGuestLoginPressed,
                 style: OutlinedButton.styleFrom(
-                  foregroundColor: AppColors.primary,
-                  side: const BorderSide(color: AppColors.primary),
+                  foregroundColor: AppColors.brand_40 ,
+                  side: const BorderSide(color: AppColors.brand_40 ),
                   minimumSize: const Size(double.infinity, 50),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(12),
@@ -105,7 +99,7 @@ class LoginUI extends StatelessWidget {
                         style: TextStyle(
                           fontSize: 16,
                           fontWeight: FontWeight.w600,
-                          color: AppColors.primary,
+                          color: AppColors.brand_40 ,
                         ),
                       ),
                     ),

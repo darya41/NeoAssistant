@@ -24,7 +24,7 @@ class ErrorView extends StatelessWidget {
           ElevatedButton(
             onPressed: onRetry,
             style: ElevatedButton.styleFrom(
-              backgroundColor: AppColors.primary,
+              backgroundColor: AppColors.brand_40,
             ),
             child: const Text('Повторить'),
           ),
