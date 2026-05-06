@@ -5,6 +5,7 @@ import '../view_model/protocol_search_viewmodel.dart';
 import 'mkb_categories_list.dart';
 import 'medications_list.dart';
 import 'protocols_list.dart';
+import 'diagnostics_list.dart';
 
 class ProtocolsTabContainer extends StatelessWidget {
   const ProtocolsTabContainer({super.key});
@@ -26,11 +27,13 @@ class ProtocolsTabContainer extends StatelessWidget {
 
     return Container(
       margin: const EdgeInsets.only(top: 16, left: 24, right: 24),
+      padding: const EdgeInsets.all(4),
       decoration: BoxDecoration(
         color: Colors.grey[200],
         borderRadius: BorderRadius.circular(12),
       ),
       child: Row(
+        mainAxisSize: MainAxisSize.min,
         children: [
           _buildTab(
             context: context,
@@ -39,8 +42,13 @@ class ProtocolsTabContainer extends StatelessWidget {
           ),
           _buildTab(
             context: context,
-            label: 'Категории МКБ',
+            label: 'МКБ',
             isSelected: viewModel.isMkbTab,
+          ),
+          _buildTab(
+            context: context,
+            label: 'Диагностика',
+            isSelected: viewModel.isDiagnosticsTab,
           ),
           _buildTab(
             context: context,
@@ -57,20 +65,21 @@ class ProtocolsTabContainer extends StatelessWidget {
     required String label,
     required bool isSelected,
   }) {
-    return Expanded(
-      child: GestureDetector(
+    return GestureDetector(
         onTap: () {
           final viewModel = context.read<ProtocolSearchViewModel>();
           if (label == 'Список') {
             viewModel.switchToListTab();
-          } else if (label == 'Категории МКБ') {
+          } else if (label == 'МКБ') {
             viewModel.switchToMkbTab();
+          } else if (label == 'Диагностика') {
+            viewModel.switchToDiagnosticsTab();
           } else if (label == 'Препараты') {
             viewModel.switchToMedicationsTab();
           }
         },
         child: Container(
-          padding: const EdgeInsets.symmetric(vertical: 12),
+          padding: const EdgeInsets.symmetric(horizontal: 13, vertical: 10),
           decoration: BoxDecoration(
             color: isSelected ? AppColors.brand_40 : Colors.transparent,
             borderRadius: BorderRadius.circular(10),
@@ -86,7 +95,6 @@ class ProtocolsTabContainer extends StatelessWidget {
             ),
           ),
         ),
-      ),
     );
   }
 
@@ -96,8 +104,10 @@ class ProtocolsTabContainer extends StatelessWidget {
 
     if (activeTab == 'Список') {
       return const ProtocolsList();
-    } else if (activeTab == 'Категории МКБ') {
+    } else if (activeTab == 'МКБ') {
       return const MkbCategoriesList();
+    } else if (activeTab == 'Диагностика') {
+      return const DiagnosticsList();
     } else {
       return const MedicationsList();
     }

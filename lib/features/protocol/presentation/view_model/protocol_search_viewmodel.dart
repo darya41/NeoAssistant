@@ -30,8 +30,9 @@ class ProtocolSearchViewModel extends ChangeNotifier {
   String? get error => _error;
 
   bool get isListTab => _activeTab == 'Список';
-  bool get isMkbTab => _activeTab == 'Категории МКБ';
+  bool get isMkbTab => _activeTab == 'МКБ';
   bool get isMedicationsTab => _activeTab == 'Препараты';
+  bool get isDiagnosticsTab => _activeTab == 'Диагностика';
 
   void switchToListTab() {
     if (_activeTab != 'Список') {
@@ -42,8 +43,8 @@ class ProtocolSearchViewModel extends ChangeNotifier {
   }
 
   void switchToMkbTab() {
-    if (_activeTab != 'Категории МКБ') {
-      _activeTab = 'Категории МКБ';
+    if (_activeTab != 'МКБ') {
+      _activeTab = 'МКБ';
       notifyListeners();
     }
   }
@@ -51,6 +52,13 @@ class ProtocolSearchViewModel extends ChangeNotifier {
   void switchToMedicationsTab() {
     if (_activeTab != 'Препараты') {
       _activeTab = 'Препараты';
+      notifyListeners();
+    }
+  }
+
+  void switchToDiagnosticsTab() {
+    if (_activeTab != 'Диагностика') {
+      _activeTab = 'Диагностика';
       notifyListeners();
     }
   }
