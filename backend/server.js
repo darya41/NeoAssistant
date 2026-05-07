@@ -22,6 +22,7 @@ const favoriteRoutes = require('./src/routes/favoriteRoutes');
 const mkbRoutes = require('./src/routes/mkbRoutes');
 const diagnosticRoutes = require('./src/routes/diagnosticRoutes');
 const medicationRoutes = require('./src/routes/medicationRoutes');
+const techLevelRoutes = require('./src/routes/techLevelRoutes');
 
 const app = express();
 
@@ -60,6 +61,7 @@ app.use('/api/favorites', favoriteRoutes);
 app.use('/api/diagnostics', diagnosticRoutes);
 app.use('/api/mkb', mkbRoutes);
 app.use('/api/medications', medicationRoutes);
+app.use('/api/tech-level', techLevelRoutes);
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
