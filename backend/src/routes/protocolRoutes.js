@@ -9,5 +9,6 @@ router.use(requireAuth);
 
 router.get('/documents', protocolController.getAllProtocolDocuments);
 router.get('/:id/hierarchy', protocolController.getProtocolHierarchy);
+router.get('/:id', protocolController.getProtocolDocumentById);
 
 module.exports = router;

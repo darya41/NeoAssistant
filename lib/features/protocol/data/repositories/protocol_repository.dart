@@ -100,4 +100,23 @@ class ProtocolRepository {
       rethrow;
     }
   }
+
+  Future<ProtocolDocument?> getProtocolDocumentById(int protocolDocumentId) async {
+    try {
+      final response = await _service.getProtocolDocumentById(protocolDocumentId);
+
+      if (response['success'] != true) {
+        throw Exception(response['error'] ?? 'Ошибка получения документа протокола');
+      }
+
+      final data = response['data'];
+      if (data == null) {
+        return null;
+      }
+
+      return ProtocolDocument.fromJson(data);
+    } catch (e) {
+      rethrow;
+    }
+  }
 }

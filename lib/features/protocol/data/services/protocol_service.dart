@@ -17,4 +17,9 @@ class ProtocolService {
     final response = await ApiClient.getAuth('protocols/$protocolDocumentId/hierarchy');
     return _validateResponse(response);
   }
+
+  Future<Map<String, dynamic>> getProtocolDocumentById(int protocolDocumentId) async {
+    final response = await ApiClient.getAuth('protocols/$protocolDocumentId');
+    return _validateResponse(response);
+  }
 }

@@ -54,6 +54,34 @@ class ProtocolController {
             });
         }
     }
+
+    async getProtocolDocumentById(req, res) {
+            console.log('[getProtocolDocumentById] START for id:', req.params.id);
+
+            try {
+                const { id } = req.params;
+                const protocol = await ProtocolModel.getProtocolDocumentById(id);
+
+                if (!protocol) {
+                    return res.status(404).json({
+                        success: false,
+                        error: 'Protocol not found'
+                    });
+                }
+
+                res.status(200).json({
+                    success: true,
+                    data: protocol
+                });
+                console.log('[getProtocolDocumentById] SUCCESS');
+            } catch (error) {
+                console.error('[getProtocolDocumentById] ERROR:', error.message);
+                res.status(500).json({
+                    success: false,
+                    error: 'Error fetching protocol: ' + error.message
+                });
+            }
+        }
 }
 
 module.exports = new ProtocolController();

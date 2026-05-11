@@ -16,6 +16,14 @@ class ProtocolModel {
         );
         return rows;
     }
+
+    static async getProtocolDocumentById(protocolDocumentId) {
+            const [rows] = await db.query(
+                'SELECT * FROM protocol_document WHERE id = ?',
+                [protocolDocumentId]
+            );
+            return rows[0];
+        }
 }
 
 module.exports = ProtocolModel;
