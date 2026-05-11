@@ -72,6 +72,7 @@ class ProtocolCard extends StatelessWidget {
       MaterialPageRoute(
         builder: (context) => ProtocolDetailScreen(
           protocolDocumentId: item.protocolDocumentId,
+          selectedHierarchyId: item.hierarchyId,
         ),
       ),
     );

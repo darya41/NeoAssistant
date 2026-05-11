@@ -22,4 +22,9 @@ class ProtocolService {
     final response = await ApiClient.getAuth('protocols/$protocolDocumentId');
     return _validateResponse(response);
   }
+
+  Future<Map<String, dynamic>> getFullBranch(int hierarchyId) async {
+    final response = await ApiClient.getAuth('protocols/hierarchy/$hierarchyId/branch');
+    return _validateResponse(response);
+  }
 }

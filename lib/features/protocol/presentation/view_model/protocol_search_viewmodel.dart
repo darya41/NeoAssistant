@@ -1,21 +1,18 @@
 import 'package:flutter/material.dart';
 
-import '../../data/repositories/protocol_repository.dart';
 import '../../domain/entities/medication.dart';
 import '../../domain/entities/mkb.dart';
 import '../../domain/entities/protocol.dart';
 
 class ProtocolSearchViewModel extends ChangeNotifier {
-  final ProtocolRepository _repository = ProtocolRepository();
 
   String _activeTab = 'Список';
 
-  List<Protocol> _allProtocols = [];
+  final List<Protocol> _allProtocols = [];
   List<Protocol> _filteredProtocols = [];
   String _searchQuery = '';
 
   final List<MkbCategory> _mkbCategories = [];
-
   final List<Medication> _medications = [];
 
   bool _isLoading = false;
@@ -73,33 +70,6 @@ class ProtocolSearchViewModel extends ChangeNotifier {
     }
   }
 
-  ProtocolSearchViewModel() {
-    _loadAllData();
-  }
-
-  Future<void> _loadAllData() async {
-    _isLoading = true;
-    _error = null;
-    notifyListeners();
-
-    try {
-      await Future.wait([
-        _loadProtocols(),
-      ]);
-      _isLoading = false;
-      notifyListeners();
-    } catch (e) {
-      _error = e.toString();
-      _isLoading = false;
-      notifyListeners();
-    }
-  }
-
-  Future<void> _loadProtocols() async {
-    _allProtocols = await _repository.getAllProtocols();
-    _filteredProtocols = _allProtocols;
-  }
-
   Future<void> searchProtocols(String query) async {
     _searchQuery = query;
 
@@ -115,7 +85,7 @@ class ProtocolSearchViewModel extends ChangeNotifier {
       if (query.isEmpty) {
         _filteredProtocols = _allProtocols;
       } else {
-        _filteredProtocols = await _repository.searchProtocols(query);
+        //_filteredProtocols = await _repository.searchProtocols(query);
       }
       _isLoading = false;
       notifyListeners();
@@ -132,14 +102,7 @@ class ProtocolSearchViewModel extends ChangeNotifier {
     notifyListeners();
   }
 
-  Future<void> filterByMkbCode(String code) async {
-  }
-
-  Future<void> filterByMedication(int medicationId) async {
-  }
-
   Future<void> refresh() async {
-    await _loadAllData();
     _searchQuery = '';
     notifyListeners();
   }

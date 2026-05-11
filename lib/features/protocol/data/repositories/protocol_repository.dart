@@ -119,4 +119,98 @@ class ProtocolRepository {
       rethrow;
     }
   }
+
+  Future<ProtocolHierarchy> getFullBranch(int hierarchyId) async {
+    try {
+      final response = await _service.getFullBranch(hierarchyId);
+
+      if (response['success'] != true) {
+        throw Exception(response['error'] ?? 'Ошибка получения ветки иерархии');
+      }
+
+      final data = response['data'];
+      if (data == null) {
+        throw Exception('Данные не найдены');
+      }
+
+      List<dynamic> itemsList;
+
+      if (data is List) {
+        itemsList = data;
+      } else if (data is Map && data['data'] is List) {
+        itemsList = data['data'];
+      } else {
+        final item = ProtocolHierarchy.fromJson(data);
+        if (data['children'] != null && data['children'] is List) {
+          final parsedChildren = _parseChildrenFromJson(data['children']);
+          return item.copyWith(children: parsedChildren);
+        }
+        return item;
+      }
+
+      final List<ProtocolHierarchy> allItems = [];
+      for (var itemJson in itemsList) {
+        final item = ProtocolHierarchy.fromJson(itemJson);
+        allItems.add(item);
+      }
+
+      final trees = TreeBuilder.buildTree(allItems);
+
+      ProtocolHierarchy? result;
+      for (var tree in trees) {
+        if (tree.id == hierarchyId) {
+          result = tree;
+          break;
+        }
+      }
+
+      if (result == null) {
+        for (var tree in trees) {
+          result = _findItemInTree(tree, hierarchyId);
+          if (result != null) {
+            break;
+          }
+        }
+      }
+
+      if (result == null) {
+        throw Exception('Не удалось найти элемент с id=$hierarchyId');
+      }
+
+      return result;
+
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  ProtocolHierarchy? _findItemInTree(ProtocolHierarchy item, int targetId) {
+    if (item.id == targetId) {
+      return item;
+    }
+    for (var child in item.children) {
+      final found = _findItemInTree(child, targetId);
+      if (found != null) {
+        return found;
+      }
+    }
+    return null;
+  }
+
+  List<ProtocolHierarchy> _parseChildrenFromJson(List<dynamic> childrenJson) {
+    final List<ProtocolHierarchy> children = [];
+
+    for (var childJson in childrenJson) {
+      final child = ProtocolHierarchy.fromJson(childJson);
+      if (childJson['children'] != null && childJson['children'] is List) {
+        children.add(child.copyWith(
+          children: _parseChildrenFromJson(childJson['children']),
+        ));
+      } else {
+        children.add(child);
+      }
+    }
+
+    return children;
+  }
 }
