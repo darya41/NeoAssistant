@@ -1,77 +1,103 @@
-import '../../domain/entities/detail_protocol.dart';
-import '../../domain/entities/protocol.dart';
+import '../../domain/entities/protocol_document.dart';
+import '../../domain/entities/protocol_hierarchy.dart';
+import '../../domain/entities/protocol_list_item.dart';
+import '../../domain/utils/title_cleaner.dart';
+import '../../domain/utils/tree_builder.dart';
 import '../services/protocol_service.dart';
 
 class ProtocolRepository {
-  final ProtocolService _protocolService = ProtocolService();
+  final ProtocolService _service = ProtocolService();
 
-  Future<List<Protocol>> getAllProtocols() async {
+  Future<List<ProtocolDocument>> getAllProtocolDocuments() async {
     try {
-      final response = await _protocolService.getAllProtocols();
+      final response = await _service.getAllProtocolDocuments();
 
       if (response['success'] != true) {
-        throw Exception(
-            response['error'] ?? 'Ошибка получения списка протоколов');
+        throw Exception(response['error'] ?? 'Ошибка получения списка протоколов');
       }
 
       final data = response['data'];
-
       if (data is! List) {
-        throw Exception('Неверный формат данных: ожидался список');
-      }
-
-      return data.map((item) => Protocol.fromJson(item)).toList();
-    } catch (e) {
-      rethrow;
-    }
-  }
-
-  Future<DetailProtocol> getByProtocolId(int protocolId) async {
-    try {
-      final response = await _protocolService.getDetailByProtocolId(protocolId);
-
-      if (response['success'] != true) {
-        throw Exception(response['error'] ?? 'Ошибка получения деталей протокола');
-      }
-
-      final data = response['data'];
-
-      if (data == null) {
-        throw Exception('Детали протокола для protocol_id $protocolId не найдены');
-      }
-
-      final detailJson = _extractDetailData(data);
-      return DetailProtocol.fromJson(detailJson);
-    } catch (e) {
-      rethrow;
-    }
-  }
-
-  Map<String, dynamic> _extractDetailData(dynamic data) {
-    if (data is List) {
-      if (data.isEmpty) {
-        throw Exception('Сервер вернул пустой список');
-      }
-      if (data[0] is! Map<String, dynamic>) {
         throw Exception('Неверный формат данных');
       }
-      return data[0];
-    } else if (data is Map<String, dynamic>) {
-      return data;
-    } else {
-      throw Exception('Неверный тип data: ${data.runtimeType}');
+
+      return data.map((json) => ProtocolDocument.fromJson(json)).toList();
+    } catch (e) {
+      rethrow;
     }
   }
 
-  Future<List<Protocol>> searchProtocols(String query) async {
-    if (query.isEmpty) {
-      return getAllProtocols();
+  Future<List<ProtocolListItem>> getProtocolFlatList() async {
+    try {
+      final documents = await getAllProtocolDocuments();
+      final List<ProtocolListItem> items = [];
+
+      for (final doc in documents) {
+        final hierarchy = await getProtocolHierarchy(doc.id);
+        final flatItems = _flattenHierarchy(doc, hierarchy);
+        items.addAll(flatItems);
+      }
+
+      return items;
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  List<ProtocolListItem> _flattenHierarchy(
+      ProtocolDocument doc,
+      List<ProtocolHierarchy> hierarchy,
+      ) {
+    final List<ProtocolListItem> result = [];
+
+    void traverse(List<ProtocolHierarchy> items) {
+      for (final item in items) {
+        final hasDirectChildren = item.children.isNotEmpty;
+        final hasGrandChildren = TreeBuilder.hasGrandchildren(item);
+        final isExcluded = TitleCleaner.isExcludedChapter(item.title, item.level);
+
+        final shouldAdd = hasDirectChildren && !hasGrandChildren && !isExcluded;
+        final cleanedTitle = TitleCleaner.clean(item.title);
+
+        if (shouldAdd) {
+          result.add(ProtocolListItem(
+            protocolDocumentId: doc.id,
+            protocolTitle: doc.title,
+            hierarchyId: item.id,
+            hierarchyTitle: cleanedTitle,
+            level: item.level,
+            parentId: item.parentId,
+            content: item.content,
+          ));
+        }
+
+        if (item.children.isNotEmpty) {
+          traverse(item.children);
+        }
+      }
     }
 
+    traverse(hierarchy);
+    return result;
+  }
+
+  Future<List<ProtocolHierarchy>> getProtocolHierarchy(int protocolDocumentId) async {
     try {
-      return await _protocolService.searchProtocols(query);
+      final response = await _service.getProtocolHierarchy(protocolDocumentId);
+
+      if (response['success'] != true) {
+        throw Exception(response['error'] ?? 'Ошибка получения иерархии протокола');
+      }
+
+      final data = response['data'];
+      if (data is! List) {
+        throw Exception('Неверный формат данных');
+      }
+
+      final items = data.map((json) => ProtocolHierarchy.fromJson(json)).toList();
+      return TreeBuilder.buildTree(items);
     } catch (e) {
-      throw Exception('Ошибка поиска протоколов: $e');
+      rethrow;
     }
   }
 }
