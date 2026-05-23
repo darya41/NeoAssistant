@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../../../core/constants/app_colors.dart';
+import '../../domain/entities/diagnostic_test.dart';
 import '../view_model/diagnostics_viewmodel.dart';
 import 'diagnostic_card.dart';
 
@@ -24,22 +25,20 @@ class _DiagnosticsListContent extends StatelessWidget {
     final viewModel = context.watch<DiagnosticsViewModel>();
     final diagnostics = viewModel.diagnostics;
     final isLoading = viewModel.isLoading;
-    final error = viewModel.error;
+    final isLoadingMore = viewModel.isLoadingMore;
     final hasMore = viewModel.hasMore;
-    final isSearching = viewModel.isSearching;
+    final error = viewModel.error;
 
     return Column(
       children: [
-
         Expanded(
           child: _buildContent(
-            context,
             viewModel,
             diagnostics,
             isLoading,
-            error,
+            isLoadingMore,
             hasMore,
-            isSearching,
+            error,
           ),
         ),
       ],
@@ -47,20 +46,42 @@ class _DiagnosticsListContent extends StatelessWidget {
   }
 
   Widget _buildContent(
-      BuildContext context,
       DiagnosticsViewModel viewModel,
-      List<dynamic> diagnostics,
+      List<DiagnosticTest> diagnostics,
       bool isLoading,
-      String? error,
+      bool isLoadingMore,
       bool hasMore,
-      bool isSearching,
+      String? error,
       ) {
     if (isLoading && diagnostics.isEmpty) {
-      return const Center(child: CircularProgressIndicator());
+      return const Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            CircularProgressIndicator(),
+            SizedBox(height: 16),
+            Text('Загрузка...'),
+          ],
+        ),
+      );
     }
 
     if (error != null && diagnostics.isEmpty) {
-      return _buildErrorWidget(error, viewModel);
+      return Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const Icon(Icons.error_outline, size: 48, color: AppColors.error),
+            const SizedBox(height: 16),
+            Text('Ошибка: $error'),
+            const SizedBox(height: 16),
+            ElevatedButton(
+              onPressed: () => viewModel.refresh(),
+              child: const Text('Повторить'),
+            ),
+          ],
+        ),
+      );
     }
 
     if (diagnostics.isEmpty) {
@@ -71,64 +92,41 @@ class _DiagnosticsListContent extends StatelessWidget {
             Icon(Icons.medical_information, size: 64, color: Colors.grey[400]),
             const SizedBox(height: 16),
             Text(
-              isSearching ? 'Ничего не найдено' : 'Нет диагностических исследований',
+              'Нет диагностических исследований',
               style: TextStyle(fontSize: 16, color: Colors.grey[600]),
             ),
-            if (isSearching) ...[
-              const SizedBox(height: 16),
-              ElevatedButton(
-                onPressed: () => viewModel.clearSearch(),
-                child: const Text('Очистить поиск'),
-              ),
-            ],
           ],
         ),
       );
     }
 
-    return NotificationListener<ScrollNotification>(
-      onNotification: (scrollInfo) {
-        if (!isLoading && hasMore && !isSearching) {
-          final maxScroll = scrollInfo.metrics.pixels;
-          final maxExtent = scrollInfo.metrics.maxScrollExtent;
-          if (maxScroll >= maxExtent - 200) {
-            viewModel.loadNextPage();
+    return RefreshIndicator(
+      onRefresh: () => viewModel.refresh(),
+      child: NotificationListener<ScrollNotification>(
+        onNotification: (scrollInfo) {
+          if (!isLoadingMore && hasMore && !isLoading) {
+            final maxScroll = scrollInfo.metrics.pixels;
+            final maxExtent = scrollInfo.metrics.maxScrollExtent;
+            if (maxScroll >= maxExtent - 200) {
+              viewModel.loadNextPage();
+            }
           }
-        }
-        return false;
-      },
-      child: ListView.separated(
-        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
-        itemCount: diagnostics.length + (hasMore && !isSearching ? 1 : 0),
-        separatorBuilder: (context, index) => const SizedBox(height: 12),
-        itemBuilder: (context, index) {
-          if (index == diagnostics.length) {
-            return const Padding(
-              padding: EdgeInsets.symmetric(vertical: 16),
-              child: Center(child: CircularProgressIndicator()),
-            );
-          }
-          final diagnostic = diagnostics[index];
-          return DiagnosticCard(diagnostic: diagnostic);
+          return false;
         },
-      ),
-    );
-  }
-
-  Widget _buildErrorWidget(String error, DiagnosticsViewModel viewModel) {
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          const Icon(Icons.error_outline, size: 48, color: AppColors.error),
-          const SizedBox(height: 16),
-          Text('Ошибка: $error'),
-          const SizedBox(height: 16),
-          ElevatedButton(
-            onPressed: () => viewModel.refresh(),
-            child: const Text('Повторить'),
-          ),
-        ],
+        child: ListView.builder(
+          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+          itemCount: diagnostics.length + (hasMore ? 1 : 0),
+          itemBuilder: (context, index) {
+            if (index == diagnostics.length) {
+              return const Padding(
+                padding: EdgeInsets.symmetric(vertical: 16),
+                child: Center(child: CircularProgressIndicator()),
+              );
+            }
+            final diagnostic = diagnostics[index];
+            return DiagnosticCard(diagnostic: diagnostic);
+          },
+        ),
       ),
     );
   }

@@ -16,13 +16,12 @@ class MedicationService {
     return _validateResponse(response);
   }
 
-  Future<Map<String, dynamic>> searchMedications(String query) async {
-    final response = await ApiClient.getAuth('medications/search?q=$query');
-    return _validateResponse(response);
-  }
-
-  Future<Map<String, dynamic>> getMedicationsByDrugClass(String drugClass) async {
-    final response = await ApiClient.getAuth('medications/class/$drugClass');
+  Future<Map<String, dynamic>> getMedicationsByDrugClass({
+    required String drugClass,
+    int page = 1,
+    int limit = 20,
+  }) async {
+    final response = await ApiClient.getAuth('medications/class/$drugClass?page=$page&limit=$limit');
     return _validateResponse(response);
   }
 }

@@ -8,78 +8,47 @@ import '../services/protocol_service.dart';
 class ProtocolRepository {
   final ProtocolService _service = ProtocolService();
 
-  Future<List<ProtocolDocument>> getAllProtocolDocuments() async {
+  Future<Map<String, dynamic>> getProtocolListPaginated({int page = 1, int limit = 20, }) async {
     try {
-      final response = await _service.getAllProtocolDocuments();
+      final response = await _service.getProtocolFlatListPaginated(
+        page: page,
+        limit: limit,
+      );
 
       if (response['success'] != true) {
         throw Exception(response['error'] ?? 'Ошибка получения списка протоколов');
       }
 
       final data = response['data'];
-      if (data is! List) {
-        throw Exception('Неверный формат данных');
-      }
+      final pagination = response['pagination'] ?? {};
 
-      return data.map((json) => ProtocolDocument.fromJson(json)).toList();
+      final List<ProtocolListItem> items = (data as List)
+          .map((json) {
+        final item = ProtocolListItem.fromJson(json);
+        final cleanedTitle = TitleCleaner.clean(item.hierarchyTitle);
+        return ProtocolListItem(
+          protocolDocumentId: item.protocolDocumentId,
+          protocolTitle: item.protocolTitle,
+          hierarchyId: item.hierarchyId,
+          hierarchyTitle: cleanedTitle,
+          level: item.level,
+          parentId: item.parentId,
+          content: item.content,
+        );
+      })
+          .toList();
+
+      return {
+        'items': items,
+        'hasNext': pagination['hasNext'] ?? false,
+        'currentPage': pagination['currentPage'] ?? page,
+        'total': pagination['total'] ?? 0,
+      };
     } catch (e) {
       rethrow;
     }
   }
 
-  Future<List<ProtocolListItem>> getProtocolFlatList() async {
-    try {
-      final documents = await getAllProtocolDocuments();
-      final List<ProtocolListItem> items = [];
-
-      for (final doc in documents) {
-        final hierarchy = await getProtocolHierarchy(doc.id);
-        final flatItems = _flattenHierarchy(doc, hierarchy);
-        items.addAll(flatItems);
-      }
-
-      return items;
-    } catch (e) {
-      rethrow;
-    }
-  }
-
-  List<ProtocolListItem> _flattenHierarchy(
-      ProtocolDocument doc,
-      List<ProtocolHierarchy> hierarchy,
-      ) {
-    final List<ProtocolListItem> result = [];
-
-    void traverse(List<ProtocolHierarchy> items) {
-      for (final item in items) {
-        final hasDirectChildren = item.children.isNotEmpty;
-        final hasGrandChildren = TreeBuilder.hasGrandchildren(item);
-        final isExcluded = TitleCleaner.isExcludedChapter(item.title, item.level);
-
-        final shouldAdd = hasDirectChildren && !hasGrandChildren && !isExcluded;
-        final cleanedTitle = TitleCleaner.clean(item.title);
-
-        if (shouldAdd) {
-          result.add(ProtocolListItem(
-            protocolDocumentId: doc.id,
-            protocolTitle: doc.title,
-            hierarchyId: item.id,
-            hierarchyTitle: cleanedTitle,
-            level: item.level,
-            parentId: item.parentId,
-            content: item.content,
-          ));
-        }
-
-        if (item.children.isNotEmpty) {
-          traverse(item.children);
-        }
-      }
-    }
-
-    traverse(hierarchy);
-    return result;
-  }
 
   Future<List<ProtocolHierarchy>> getProtocolHierarchy(int protocolDocumentId) async {
     try {

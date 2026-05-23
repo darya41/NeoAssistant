@@ -7,6 +7,55 @@ class ProtocolModel {
         return rows;
     }
 
+   static async getProtocolListPaginated(limit, offset) {
+
+       const query = `
+           SELECT
+               ph.id as hierarchy_id,
+               ph.protocol_document_id,
+               ph.title as hierarchy_title,
+               ph.level,
+               ph.parent_id,
+               ph.content,
+               pd.title as protocol_title,
+               pd.adoption_date
+           FROM protocol_hierarchy ph
+           JOIN protocol_document pd ON ph.protocol_document_id = pd.id
+           WHERE EXISTS (
+                 SELECT 1
+                 FROM protocol_hierarchy child
+                 WHERE child.parent_id = ph.id
+                   AND child.content IS NOT NULL
+                   AND child.content != ''
+             )
+           ORDER BY pd.adoption_date DESC, ph.sort_order
+           LIMIT ? OFFSET ?
+       `;
+
+       const [rows] = await db.query(query, [limit, offset]);
+
+       return rows;
+   }
+
+   static async getProtocolListCount() {
+      const query = `
+           SELECT COUNT(*) as total
+           FROM protocol_hierarchy ph
+           WHERE ph.level = 2
+             AND EXISTS (
+                 SELECT 1
+                 FROM protocol_hierarchy child
+                 WHERE child.parent_id = ph.id
+                   AND child.content IS NOT NULL
+                   AND child.content != ''
+             )
+       `;
+
+       const [rows] = await db.query(query);
+
+       return rows[0].total;
+   }
+
     static async getProtocolHierarchy(protocolDocumentId) {
         const [rows] = await db.query(
             `SELECT * FROM protocol_hierarchy

@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-
 import '../../data/repositories/medication_repository.dart';
 import '../../domain/entities/medication.dart';
 
@@ -8,62 +7,71 @@ class MedicationsViewModel extends ChangeNotifier {
 
   final List<Medication> _medications = [];
   bool _isLoading = false;
+  bool _isLoadingMore = false;
+  bool _hasMore = true;
+  int _currentPage = 1;
   String? _error;
 
-  int _currentPage = 1;
-  bool _hasMore = true;
   static const int _pageSize = 20;
 
   List<Medication> get medications => _medications;
   bool get isLoading => _isLoading;
-  String? get error => _error;
-  int get currentPage => _currentPage;
+  bool get isLoadingMore => _isLoadingMore;
   bool get hasMore => _hasMore;
+  String? get error => _error;
 
   MedicationsViewModel() {
-    _loadMedications();
+    loadMedications();
   }
 
-  Future<void> _loadMedications({bool refresh = false}) async {
+  Future<void> loadMedications({bool refresh = false}) async {
     if (refresh) {
       _currentPage = 1;
       _medications.clear();
       _hasMore = true;
     }
 
-    if (!_hasMore && !refresh) return;
+    if (_currentPage == 1) {
+      _isLoading = true;
+    } else {
+      _isLoadingMore = true;
+    }
 
-    _isLoading = true;
     _error = null;
     notifyListeners();
 
     try {
-      final items = await _repository.getAllMedications(
+      final result = await _repository.getMedicationsPaginated(
         page: _currentPage,
         limit: _pageSize,
       );
 
-      if (items.isEmpty || items.length < _pageSize) {
-        _hasMore = false;
+      final newItems = result['items'] as List<Medication>;
+      _medications.addAll(newItems);
+      _hasMore = result['hasNext'] ?? false;
+
+      if (newItems.isNotEmpty && _hasMore) {
+        _currentPage++;
       }
 
-      _medications.addAll(items);
       _isLoading = false;
+      _isLoadingMore = false;
       notifyListeners();
     } catch (e) {
       _error = e.toString();
       _isLoading = false;
+      _isLoadingMore = false;
       notifyListeners();
     }
   }
 
-  Future<void> loadNextPage() async {
-    if (_isLoading || !_hasMore) return;
-    _currentPage++;
-    await _loadMedications();
+  Future<void> refresh() async {
+    await loadMedications(refresh: true);
   }
 
-  Future<void> refresh() async {
-    await _loadMedications(refresh: true);
+  Future<void> loadNextPage() async {
+    if (!_isLoadingMore && _hasMore && !_isLoading) {
+      await loadMedications();
+    }
   }
 }

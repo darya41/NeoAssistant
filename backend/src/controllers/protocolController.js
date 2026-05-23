@@ -2,27 +2,15 @@ const ProtocolModel = require('../models/protocol');
 
 class ProtocolController {
     async getAllProtocolDocuments(req, res) {
-        console.log('[getAllProtocolDocuments] START');
-        console.log('[getAllProtocolDocuments] User ID:', req.user?.id || req.user?.doctor_id);
 
         try {
             const rows = await ProtocolModel.getAllProtocolDocuments();
-
-            console.log('[getAllProtocolDocuments] Rows count:', rows.length);
-            console.log('[getAllProtocolDocuments] First row (if exists):', rows[0] ? {
-                id: rows[0].id,
-                number: rows[0].number,
-                title: rows[0].title?.substring(0, 50)
-            } : 'No rows');
 
             res.status(200).json({
                 success: true,
                 data: rows
             });
-            console.log('[getAllProtocolDocuments] SUCCESS');
         } catch (error) {
-            console.error('[getAllProtocolDocuments] ERROR:', error.message);
-            console.error('[getAllProtocolDocuments] Stack:', error.stack);
             res.status(500).json({
                 success: false,
                 error: 'Error fetching protocols: ' + error.message
@@ -30,24 +18,48 @@ class ProtocolController {
         }
     }
 
+    async getProtocolListPaginated(req, res) {
+        try {
+            const page = parseInt(req.query.page) || 1;
+            const limit = parseInt(req.query.limit) || 20;
+            const offset = (page - 1) * limit;
+
+            const rows = await ProtocolModel.getProtocolListPaginated(limit, offset);
+            const total = await ProtocolModel.getProtocolListCount();
+
+            const hasNext = offset + limit < total;
+
+            res.status(200).json({
+                success: true,
+                data: rows,
+                pagination: {
+                    currentPage: page,
+                    limit: limit,
+                    total: total,
+                    hasNext: hasNext
+                }
+            });
+        } catch (error) {
+            res.status(500).json({
+                success: false,
+                error: 'Error fetching paginated protocols: ' + error.message
+            });
+        }
+    }
+
     async getProtocolHierarchy(req, res) {
-        console.log('[getProtocolHierarchy] START for protocol:', req.params.id);
 
         try {
             const { id } = req.params;
             const rows = await ProtocolModel.getProtocolHierarchy(id);
 
             const level3Count = rows.filter(r => r.level === 3).length;
-            console.log('Found rows:', rows.length);
-            console.log('Rows with level 3:', level3Count);
 
             res.status(200).json({
                 success: true,
                 data: rows
             });
-            console.log('[getProtocolHierarchy] SUCCESS');
         } catch (error) {
-            console.error('[getProtocolHierarchy] ERROR:', error.message);
             res.status(500).json({
                 success: false,
                 error: 'Error fetching hierarchy: ' + error.message
@@ -56,7 +68,6 @@ class ProtocolController {
     }
 
     async getProtocolDocumentById(req, res) {
-        console.log('[getProtocolDocumentById] START for id:', req.params.id);
 
         try {
             const { id } = req.params;
@@ -73,7 +84,6 @@ class ProtocolController {
                 success: true,
                 data: protocol
             });
-            console.log('[getProtocolDocumentById] SUCCESS');
         } catch (error) {
             console.error('[getProtocolDocumentById] ERROR:', error.message);
             res.status(500).json({
@@ -84,8 +94,6 @@ class ProtocolController {
     }
 
     async getFullBranch(req, res) {
-        console.log('[getFullBranch] START for item id:', req.params.id);
-
         try {
             const { id } = req.params;
 
@@ -98,15 +106,7 @@ class ProtocolController {
                 });
             }
 
-            console.log('Main item found:', {
-                id: mainItem.id,
-                title: mainItem.title,
-                hasContent: !!mainItem.content,
-                contentLength: mainItem.content?.length || 0
-            });
-
             const descendants = await ProtocolModel.getDescendants(id);
-            console.log('Descendants found:', descendants.length);
 
             const itemMap = {};
 
@@ -124,13 +124,6 @@ class ProtocolController {
                     parent.children.push(child);
                 }
             }
-
-            console.log('Result item:', {
-                id: mainItem.id,
-                title: mainItem.title,
-                contentLength: mainItem.content?.length || 0,
-                childrenCount: mainItem.children.length
-            });
 
             res.status(200).json({
                 success: true,

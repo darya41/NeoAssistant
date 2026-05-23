@@ -8,9 +8,9 @@ class ProtocolService {
     return response;
   }
 
-  Future<Map<String, dynamic>> getAllProtocolDocuments() async {
-    final response = await ApiClient.getAuth('protocols/documents');
-    return _validateResponse(response);
+  Future<Map<String, dynamic>> getProtocolFlatListPaginated({ int page = 1, int limit = 20,}) async {
+    final response = await ApiClient.getAuth( 'protocols/list?page=$page&limit=$limit');
+    return response;
   }
 
   Future<Map<String, dynamic>> getProtocolHierarchy(int protocolDocumentId) async {

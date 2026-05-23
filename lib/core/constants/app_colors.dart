@@ -20,7 +20,7 @@ class AppColors {
   static const Color brand_75 =  Color(0xFF106F59);
   static const Color brand_65 =  Color(0xFF169C7E);
   static const Color brand_55 =  Color(0xFF1DC9A1);
-  static const Color brand_40 =  Color(0xFF44E4BF);//
+  static const Color brand_40 =  Color(0xFF44E4BF);
   static const Color brand_20 =  Color(0xFFACF3E3);
   static const Color brand_5 =  Color(0xFFE5FFF9);
 

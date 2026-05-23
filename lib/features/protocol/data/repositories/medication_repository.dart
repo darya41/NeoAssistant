@@ -4,7 +4,7 @@ import '../services/medication_service.dart';
 class MedicationRepository {
   final MedicationService _medicationService = MedicationService();
 
-  Future<List<Medication>> getAllMedications({
+  Future<Map<String, dynamic>> getMedicationsPaginated({
     int page = 1,
     int limit = 20,
   }) async {
@@ -16,38 +16,59 @@ class MedicationRepository {
       }
 
       final data = response['data'];
+      final pagination = response['pagination'] ?? {};
 
       if (data is! List) {
         throw Exception('Неверный формат данных: ожидался список');
       }
 
-      return data.map((item) => Medication.fromJson(item)).toList();
+      final items = data.map((item) => Medication.fromJson(item)).toList();
+
+      return {
+        'items': items,
+        'hasNext': pagination['hasNext'] ?? false,
+        'currentPage': pagination['currentPage'] ?? page,
+        'total': pagination['total'] ?? 0,
+      };
     } catch (e) {
       rethrow;
     }
   }
 
-  Future<List<Medication>> searchMedications(String query) async {
-    if (query.isEmpty) {
-      return getAllMedications();
-    }
-
+  Future<Map<String, dynamic>> getMedicationsByDrugClassPaginated({
+    required String drugClass,
+    int page = 1,
+    int limit = 20,
+  }) async {
     try {
-      final response = await _medicationService.searchMedications(query);
+      final response = await _medicationService.getMedicationsByDrugClass(
+        drugClass: drugClass,
+        page: page,
+        limit: limit,
+      );
 
       if (response['success'] != true) {
-        throw Exception(response['error'] ?? 'Ошибка поиска препаратов');
+        throw Exception(response['error'] ?? 'Ошибка получения препаратов по классу');
       }
 
       final data = response['data'];
+      final pagination = response['pagination'] ?? {};
 
       if (data is! List) {
         throw Exception('Неверный формат данных: ожидался список');
       }
 
-      return data.map((item) => Medication.fromJson(item)).toList();
+      final items = data.map((item) => Medication.fromJson(item)).toList();
+
+      return {
+        'items': items,
+        'hasNext': pagination['hasNext'] ?? false,
+        'currentPage': pagination['currentPage'] ?? page,
+        'total': pagination['total'] ?? 0,
+        'drugClass': drugClass,
+      };
     } catch (e) {
-      throw Exception('Ошибка поиска: $e');
+      rethrow;
     }
   }
 }
