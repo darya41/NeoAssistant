@@ -2,59 +2,6 @@ const MkbModel = require('../models/mkb');
 
 class MkbController {
 
-    async getMkbById(req, res) {
-        try {
-            const { id } = req.params;
-
-            const mkb = await MkbModel.findById(id);
-
-            if (!mkb) {
-                return res.status(404).json({
-                    success: false,
-                    error: 'MKB record not found'
-                });
-            }
-
-            res.status(200).json({
-                success: true,
-                data: mkb
-            });
-        } catch (error) {
-            res.status(500).json({
-                success: false,
-                error: 'Error fetching MKB record: ' + error.message
-            });
-        }
-    }
-
-    async getMkbByCode(req, res) {
-        try {
-            const { code } = req.params;
-
-            const mkb = await MkbModel.findByCode(code);
-
-            if (!mkb) {
-                return res.status(404).json({
-                    success: false,
-                    error: 'MKB record not found'
-                });
-            }
-
-            const path = await MkbModel.getPath(code);
-
-            res.status(200).json({
-                success: true,
-                data: mkb,
-                path: path
-            });
-        } catch (error) {
-            res.status(500).json({
-                success: false,
-                error: 'Error fetching MKB record: ' + error.message
-            });
-        }
-    }
-
     async getMkbByLevel(req, res) {
         try {
             const { level } = req.params;
@@ -143,74 +90,35 @@ class MkbController {
         try {
             const { q } = req.query;
 
-            if (!q || q.trim().length < 2) {
-                return res.status(400).json({
-                    success: false,
-                    error: 'Search query must be at least 2 characters'
+            if (!q || q.trim().length < 1) {
+                return res.status(200).json({
+                    success: true,
+                    data: [],
+                    pagination: { page: 1, limit: 20, total: 0, totalPages: 0 }
                 });
             }
 
-            const results = await MkbModel.search(q);
+            const page = parseInt(req.query.page) || 1;
+            const limit = parseInt(req.query.limit) || 20;
+
+            const results = await MkbModel.search(q, page, limit);
 
             res.status(200).json({
                 success: true,
-                data: results,
-                count: results.length,
+                data: results.data,
+                pagination: {
+                    page: results.page,
+                    limit: results.limit,
+                    total: results.total,
+                    totalPages: results.totalPages
+                },
                 query: q
             });
         } catch (error) {
+            console.error('Search MKB error:', error);
             res.status(500).json({
                 success: false,
                 error: 'Error searching MKB: ' + error.message
-            });
-        }
-    }
-
-    async getRootLevel(req, res) {
-        try {
-            const rootLevel = await MkbModel.getRootLevel();
-
-            res.status(200).json({
-                success: true,
-                data: rootLevel,
-                count: rootLevel.length
-            });
-        } catch (error) {
-            res.status(500).json({
-                success: false,
-                error: 'Error fetching root level: ' + error.message
-            });
-        }
-    }
-
-    async getTree(req, res) {
-        try {
-            const tree = await MkbModel.getTree();
-
-            res.status(200).json({
-                success: true,
-                data: tree
-            });
-        } catch (error) {
-            res.status(500).json({
-                success: false,
-                error: 'Error fetching tree: ' + error.message
-            });
-        }
-    }
-
-    async getStats(req, res) {
-        try {
-            const stats = await MkbModel.getStats();
-
-            res.status(200).json({
-                success: true,
-                data: stats
-            });
-        } catch (error) {
-            res.status(500).json({
-                success: false,
-                error: 'Error fetching stats: ' + error.message
             });
         }
     }

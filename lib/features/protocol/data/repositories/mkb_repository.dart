@@ -44,34 +44,6 @@ class MkbRepository {
     }
   }
 
-  Future<MkbCategory?> getMkbByCode(String code) async {
-    try {
-      final response = await _mkbService.getMkbByCode(code);
-
-      if (response['success'] != true) {
-        throw Exception(response['error'] ?? 'Ошибка получения категории МКБ');
-      }
-
-      final data = response['data'];
-
-      if (data == null) {
-        return null;
-      }
-
-      if (data is List && data.isNotEmpty) {
-        return MkbCategory.fromJson(data[0]);
-      }
-
-      if (data is Map<String, dynamic>) {
-        return MkbCategory.fromJson(data);
-      }
-
-      return null;
-    } catch (e) {
-      rethrow;
-    }
-  }
-
   Future<List<MkbCategory>> getAllMkb({
     int page = 1,
     int limit = 100,

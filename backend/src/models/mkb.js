@@ -1,15 +1,6 @@
 const db = require('../config/database');
 
 class MkbModel {
-
-    static async findById(id) {
-        const [rows] = await db.query(
-            'SELECT * FROM mkb10 WHERE id = ?',
-            [id]
-        );
-        return rows[0];
-    }
-
     static async findByCode(code) {
         const [rows] = await db.query(
             'SELECT * FROM mkb10 WHERE code = ?',
@@ -80,61 +71,47 @@ class MkbModel {
         return path;
     }
 
-    static async search(query) {
-        const [rows] = await db.query(
-            `SELECT * FROM mkb10
-            (code LIKE ? OR title LIKE ?)
-             ORDER BY code
-             LIMIT 50`,
-            [`%${query}%`, `%${query}%`]
-        );
-        return rows;
-    }
+   static async search(query, page = 1, limit = 20) {
+       const offset = (page - 1) * limit;
+       const searchQuery = `%${query}%`;
 
-    static async getRootLevel() {
-        const [rows] = await db.query(
-            `SELECT * FROM mkb10
-             WHERE level = 1
-             ORDER BY code`
-        );
-        return rows;
-    }
+       const [rows] = await db.query(
+           `SELECT * FROM mkb10
+            WHERE code LIKE ? OR title LIKE ?
+            ORDER BY
+              CASE
+                WHEN code LIKE ? THEN 1
+                WHEN title LIKE ? THEN 2
+                ELSE 3
+              END
+            LIMIT ? OFFSET ?`,
+           [searchQuery, searchQuery, `%${query}%`, `%${query}%`, limit, offset]
+       );
 
-    static async getTree(parentCode = null) {
-        let query = `
-            SELECT * FROM mkb10
-        `;
-        const params = [];
+       const [countResult] = await db.query(
+           `SELECT COUNT(*) as total FROM mkb10
+            WHERE code LIKE ? OR title LIKE ? `,
+           [searchQuery, searchQuery]
+       );
 
-        if (parentCode === null) {
-            query += ` AND parent_code IS NULL AND level = 1`;
-        } else {
-            query += ` AND parent_code = ?`;
-            params.push(parentCode);
-        }
+       const dataWithPath = await Promise.all(
+           rows.map(async (row) => {
+               const path = await MkbModel.getCategoryPath(row.code);
+               return {
+                   ...row,
+                   path: path.map(p => ({ code: p.code, title: p.title }))
+               };
+           })
+       );
 
-        query += ` ORDER BY code`;
-
-        const [rows] = await db.query(query, params);
-
-        for (const row of rows) {
-            row.children = await this.getTree(row.code);
-        }
-
-        return rows;
-    }
-
-    static async getStats() {
-        const [rows] = await db.query(
-            `SELECT
-                level,
-                COUNT(*) as count
-             FROM mkb10
-             GROUP BY level
-             ORDER BY level`
-        );
-        return rows;
-    }
+       return {
+           data: dataWithPath,
+           total: countResult[0].total,
+           page,
+           limit,
+           totalPages: Math.ceil(countResult[0].total / limit)
+       };
+   }
 }
 
 module.exports = MkbModel;

@@ -18,14 +18,8 @@ class MkbService {
     return _validateResponse(response);
   }
 
-  Future<Map<String, dynamic>> getMkbByCode(String code) async {
-    final response = await ApiClient.getAuth('mkb/code/$code');
-    return _validateResponse(response);
-  }
-
   Future<Map<String, dynamic>> getAllMkb({
-    int page = 1,
-    int limit = 100,
+    int page = 1,int limit = 100,
   }) async {
     final response = await ApiClient.getAuth('mkb?page=$page&limit=$limit');
     return _validateResponse(response);
