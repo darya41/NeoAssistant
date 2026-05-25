@@ -57,46 +57,41 @@ class MedicationModel {
         };
     }
 
-    static async search(query, page = 1, limit = 20) {
-        const offset = (page - 1) * limit;
-        const searchQuery = `%${query}%`;
+   static async search(query, page = 1, limit = 20) {
+       const offset = (page - 1) * limit;
+       const searchQuery = `%${query}%`;
 
-        const [rows] = await db.query(
-            `SELECT * FROM medication
-             WHERE inn LIKE ?
-                OR brand_name LIKE ?
-                OR drug_class LIKE ?
-                OR dosage_form LIKE ?
-             ORDER BY inn ASC
-             LIMIT ? OFFSET ?`,
-            [searchQuery, searchQuery, searchQuery, searchQuery, limit, offset]
-        );
+       const [rows] = await db.query(
+           `SELECT * FROM medication
+            WHERE inn LIKE ?
+               OR brand_name LIKE ?
+               OR drug_class LIKE ?
+               OR dosage_form LIKE ?
+            ORDER BY inn ASC
+            LIMIT ? OFFSET ?`,
+           [searchQuery, searchQuery, searchQuery, searchQuery, limit, offset]
+       );
 
-        const [countResult] = await db.query(
-            `SELECT COUNT(*) as total FROM medication
-             WHERE inn LIKE ?
-                OR brand_name LIKE ?
-                OR drug_class LIKE ?
-                OR dosage_form LIKE ?`,
-            [searchQuery, searchQuery, searchQuery, searchQuery]
-        );
+       const [countResult] = await db.query(
+           `SELECT COUNT(*) as total FROM medication
+            WHERE inn LIKE ?
+               OR brand_name LIKE ?
+               OR drug_class LIKE ?
+               OR dosage_form LIKE ?`,
+           [searchQuery, searchQuery, searchQuery, searchQuery]
+       );
 
-        return {
-            data: rows,
-            total: countResult[0].total,
-            page,
-            limit,
-            totalPages: Math.ceil(countResult[0].total / limit)
-        };
-    }
+       const total = countResult[0].total;
+       const totalPages = Math.ceil(total / limit);
 
-
-    static async getDrugClasses() {
-        const [rows] = await db.query(
-            'SELECT DISTINCT drug_class, COUNT(*) as count FROM medication WHERE drug_class IS NOT NULL GROUP BY drug_class ORDER BY drug_class'
-        );
-        return rows;
-    }
+       return {
+           data: rows,
+           total: total,
+           page: page,
+           limit: limit,
+           totalPages: totalPages
+       };
+   }
 }
 
 module.exports = MedicationModel;

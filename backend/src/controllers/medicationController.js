@@ -27,23 +27,6 @@ class MedicationController {
         }
     }
 
-    async getAllMedicationsNoPagination(req, res) {
-        try {
-            const medications = await MedicationModel.getAll();
-
-            res.status(200).json({
-                success: true,
-                data: medications,
-                count: medications.length
-            });
-        } catch (error) {
-            res.status(500).json({
-                success: false,
-                error: 'Error fetching medications: ' + error.message
-            });
-        }
-    }
-
     async getMedicationsByDrugClass(req, res) {
         try {
             const { drugClass } = req.params;
@@ -71,55 +54,41 @@ class MedicationController {
     }
 
     async searchMedications(req, res) {
-        try {
-            const { q } = req.query;
+            try {
+                const { q, page = 1, limit = 20 } = req.query;
 
-            if (!q || q.trim().length < 2) {
-                return res.status(400).json({
+                if (!q || q.trim().length < 1) {
+                    return res.status(400).json({
+                        success: false,
+                        error: 'Search query must be at least 1 characters'
+                    });
+                }
+
+                const parsedPage = parseInt(page) || 1;
+                const parsedLimit = parseInt(limit) || 20;
+
+                const results = await MedicationModel.search(q, parsedPage, parsedLimit);
+
+                res.status(200).json({
+                    success: true,
+                    data: results.data,
+                    pagination: {
+                        currentPage: results.page,
+                        limit: results.limit,
+                        total: results.total,
+                        totalPages: results.totalPages,
+                        hasNext: results.page < results.totalPages
+                    },
+                    query: q
+                });
+            } catch (error) {
+                console.error('[searchMedications] ERROR:', error.message);
+                res.status(500).json({
                     success: false,
-                    error: 'Search query must be at least 2 characters'
+                    error: 'Error searching medications: ' + error.message
                 });
             }
-
-            const page = parseInt(req.query.page) || 1;
-            const limit = parseInt(req.query.limit) || 20;
-
-            const results = await MedicationModel.search(q, page, limit);
-
-            res.status(200).json({
-                success: true,
-                data: results.data,
-                pagination: {
-                    page: results.page,
-                    limit: results.limit,
-                    total: results.total,
-                    totalPages: results.totalPages
-                },
-                query: q
-            });
-        } catch (error) {
-            res.status(500).json({
-                success: false,
-                error: 'Error searching medications: ' + error.message
-            });
         }
-    }
-
-    async getDrugClasses(req, res) {
-        try {
-            const drugClasses = await MedicationModel.getDrugClasses();
-
-            res.status(200).json({
-                success: true,
-                data: drugClasses
-            });
-        } catch (error) {
-            res.status(500).json({
-                success: false,
-                error: 'Error fetching drug classes: ' + error.message
-            });
-        }
-    }
 }
 
 module.exports = new MedicationController();

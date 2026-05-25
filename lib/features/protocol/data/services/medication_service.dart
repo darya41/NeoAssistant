@@ -8,20 +8,22 @@ class MedicationService {
     return response;
   }
 
-  Future<Map<String, dynamic>> getAllMedications({
-    int page = 1,
-    int limit = 20,
-  }) async {
+  Future<Map<String, dynamic>> getAllMedications({ int page = 1, int limit = 20,}) async {
     final response = await ApiClient.getAuth('medications?page=$page&limit=$limit');
     return _validateResponse(response);
   }
 
   Future<Map<String, dynamic>> getMedicationsByDrugClass({
-    required String drugClass,
-    int page = 1,
-    int limit = 20,
+    required String drugClass, int page = 1, int limit = 20,
   }) async {
     final response = await ApiClient.getAuth('medications/class/$drugClass?page=$page&limit=$limit');
+    return _validateResponse(response);
+  }
+
+  Future<Map<String, dynamic>> searchMedications({
+    required String query, int page = 1, int limit = 20,
+  }) async {
+    final response = await ApiClient.getAuth('medications/search?q=$query&page=$page&limit=$limit');
     return _validateResponse(response);
   }
 }

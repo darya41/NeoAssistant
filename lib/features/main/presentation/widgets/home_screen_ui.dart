@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import '../../../protocol/presentation/view_model/protocol_search_viewmodel.dart';
+import '../view_models/protocol_search_viewmodel.dart';
 import 'reminders_stats.dart';
 import 'tab_bar_widget.dart';
 import 'search_field.dart';
@@ -31,6 +31,8 @@ class _HomeScreenUIState extends State<HomeScreenUI> {
   late final ProtocolSearchViewModel _protocolSearchViewModel;
   bool _isInitialized = false;
 
+  final GlobalKey<SearchFieldState> _searchFieldKey = GlobalKey<SearchFieldState>();
+
   @override
   void initState() {
     super.initState();
@@ -43,6 +45,12 @@ class _HomeScreenUIState extends State<HomeScreenUI> {
 
     _homeViewModel = HomeViewModel();
 
+    _protocolSearchViewModel = ProtocolSearchViewModel();
+
+    _protocolSearchViewModel.onSearchCleared = () {
+      _searchFieldKey.currentState?.clearTextField();
+    };
+
     if (widget.initialTab != null) {
       if (widget.initialTab == 'Аналитика') {
         _homeViewModel.switchToAnalytics();
@@ -53,25 +61,16 @@ class _HomeScreenUIState extends State<HomeScreenUI> {
       _homeViewModel.switchToAnalytics();
     }
 
-    if (!widget.isGuest) {
-      _patientSearchViewModel = PatientSearchViewModel();
-    }
+    if (!widget.isGuest) _patientSearchViewModel = PatientSearchViewModel();
 
-    _protocolSearchViewModel = ProtocolSearchViewModel();
-
-    if (mounted) {
-      setState(() {});
-    }
+    if (mounted) setState(() {});
   }
 
   @override
   void dispose() {
     _homeViewModel.dispose();
-    if (!widget.isGuest) {
-      if (_patientSearchViewModel != null) {
-        _patientSearchViewModel!.dispose();
-      }
-    }
+    if (!widget.isGuest) _patientSearchViewModel?.dispose();
+
     _protocolSearchViewModel.dispose();
     super.dispose();
   }
@@ -96,8 +95,7 @@ class _HomeScreenUIState extends State<HomeScreenUI> {
         body: SafeArea(
           child: Column(
             children: [
-              if (!widget.isGuest)
-                const RemindersStats(),
+              if (!widget.isGuest) const RemindersStats(),
 
               TabBarWidget(
                 activeTab: _homeViewModel.activeTab,
@@ -105,13 +103,19 @@ class _HomeScreenUIState extends State<HomeScreenUI> {
                 isGuest: widget.isGuest,
               ),
 
-              SearchField(isGuest: widget.isGuest),
+              SearchField(
+                key: _searchFieldKey,
+                isGuest: widget.isGuest,
+                protocolSearchViewModel: _protocolSearchViewModel,
+              ),
 
               Expanded(
                 child: Consumer<HomeViewModel>(
                   builder: (context, viewModel, child) {
                     if (widget.isGuest || !viewModel.isCardioeka) {
-                      return const ProtocolsTabContainer();
+                      return ProtocolsTabContainer(
+                        protocolSearchViewModel: _protocolSearchViewModel,
+                      );
                     }
                     return const PatientCards();
                   },

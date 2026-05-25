@@ -9,10 +9,19 @@ class DiagnosticService {
   }
 
   Future<Map<String, dynamic>> getAllDiagnostics({
-    int page = 1,
-    int limit = 20,
+    int page = 1, int limit = 20,
   }) async {
     final response = await ApiClient.getAuth('diagnostics?page=$page&limit=$limit');
+    return _validateResponse(response);
+  }
+
+  Future<Map<String, dynamic>> searchDiagnostics({
+    required String query,
+    int page = 1, int limit = 20,
+  }) async {
+    final response = await ApiClient.getAuth(
+        'diagnostics/search?q=$query&page=$page&limit=$limit'
+    );
     return _validateResponse(response);
   }
 }

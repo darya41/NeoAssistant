@@ -5,30 +5,75 @@ import '../../domain/entities/medication.dart';
 class MedicationsViewModel extends ChangeNotifier {
   final MedicationRepository _repository = MedicationRepository();
 
-  final List<Medication> _medications = [];
+  String _searchQuery;
+  String? _selectedDrugClass;
+
+  List<Medication> _items = [];
   bool _isLoading = false;
   bool _isLoadingMore = false;
-  bool _hasMore = true;
+  bool _hasNext = true;
   int _currentPage = 1;
   String? _error;
 
+  bool _isDisposed = false;
+
   static const int _pageSize = 20;
 
-  List<Medication> get medications => _medications;
+  List<Medication> get items => _items;
   bool get isLoading => _isLoading;
   bool get isLoadingMore => _isLoadingMore;
-  bool get hasMore => _hasMore;
+  bool get hasNext => _hasNext;
   String? get error => _error;
+  String get currentSearchQuery => _searchQuery;
+  String? get selectedDrugClass => _selectedDrugClass;
 
-  MedicationsViewModel() {
-    loadMedications();
+  MedicationsViewModel({
+    required String searchQuery,
+    String? drugClass,
+  }) : _searchQuery = searchQuery {
+    _selectedDrugClass = drugClass;
+    _loadInitialData();
   }
 
-  Future<void> loadMedications({bool refresh = false}) async {
+  void _loadInitialData() {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!_isDisposed) {
+        loadItems();
+      }
+    });
+  }
+
+  void updateSearchQuery(String newQuery) {
+    if (_isDisposed) return;
+    if (_searchQuery != newQuery) {
+      _searchQuery = newQuery;
+      _resetAndReload();
+    }
+  }
+
+  void updateDrugClass(String? newDrugClass) {
+    if (_isDisposed) return;
+    if (_selectedDrugClass != newDrugClass) {
+      _selectedDrugClass = newDrugClass;
+      _resetAndReload();
+    }
+  }
+
+  void _resetAndReload() {
+    _currentPage = 1;
+    _items.clear();
+    _hasNext = true;
+    _error = null;
+    loadItems(refresh: true);
+  }
+
+  Future<void> loadItems({bool refresh = false}) async {
+    if (_isDisposed) return;
+
     if (refresh) {
       _currentPage = 1;
-      _medications.clear();
-      _hasMore = true;
+      _items.clear();
+      _hasNext = true;
     }
 
     if (_currentPage == 1) {
@@ -38,19 +83,46 @@ class MedicationsViewModel extends ChangeNotifier {
     }
 
     _error = null;
-    notifyListeners();
+
+    if (!_isDisposed) {
+      notifyListeners();
+    }
 
     try {
-      final result = await _repository.getMedicationsPaginated(
-        page: _currentPage,
-        limit: _pageSize,
-      );
+      Map<String, dynamic> result;
+
+      if (_searchQuery.isNotEmpty) {
+        result = await _repository.searchMedicationsPaginated(
+          query: _searchQuery,
+          page: _currentPage,
+          limit: _pageSize,
+        );
+      } else if (_selectedDrugClass != null && _selectedDrugClass!.isNotEmpty) {
+        result = await _repository.getMedicationsByDrugClassPaginated(
+          drugClass: _selectedDrugClass!,
+          page: _currentPage,
+          limit: _pageSize,
+        );
+      } else {
+        result = await _repository.getMedicationsPaginated(
+          page: _currentPage,
+          limit: _pageSize,
+        );
+      }
+
+      if (_isDisposed) return;
 
       final newItems = result['items'] as List<Medication>;
-      _medications.addAll(newItems);
-      _hasMore = result['hasNext'] ?? false;
 
-      if (newItems.isNotEmpty && _hasMore) {
+      if (refresh || _currentPage == 1) {
+        _items = newItems;
+      } else {
+        _items.addAll(newItems);
+      }
+
+      _hasNext = result['hasNext'] ?? false;
+
+      if (newItems.isNotEmpty && _hasNext) {
         _currentPage++;
       }
 
@@ -58,6 +130,7 @@ class MedicationsViewModel extends ChangeNotifier {
       _isLoadingMore = false;
       notifyListeners();
     } catch (e) {
+      if (_isDisposed) return;
       _error = e.toString();
       _isLoading = false;
       _isLoadingMore = false;
@@ -66,12 +139,26 @@ class MedicationsViewModel extends ChangeNotifier {
   }
 
   Future<void> refresh() async {
-    await loadMedications(refresh: true);
+    if (_isDisposed) return;
+    await loadItems(refresh: true);
   }
 
   Future<void> loadNextPage() async {
-    if (!_isLoadingMore && _hasMore && !_isLoading) {
-      await loadMedications();
+    if (_isDisposed) return;
+    if (!_isLoadingMore && _hasNext && !_isLoading) {
+      await loadItems();
     }
+  }
+
+  void filterByDrugClass(String? drugClass) {
+    if (_isDisposed) return;
+    updateDrugClass(drugClass);
+  }
+
+  @override
+  void dispose() {
+    _isDisposed = true;
+    _items.clear();
+    super.dispose();
   }
 }
