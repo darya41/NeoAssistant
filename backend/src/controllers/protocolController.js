@@ -138,6 +138,46 @@ class ProtocolController {
             });
         }
     }
+
+    async searchProtocols(req, res) {
+        try {
+            const { q } = req.query;
+
+            if (!q || q.trim().length < 1) {
+                return res.status(400).json({
+                    success: false,
+                    error: 'Search query must be at least 1 characters'
+                });
+            }
+
+            const page = parseInt(req.query.page) || 1;
+            const limit = parseInt(req.query.limit) || 20;
+            const offset = (page - 1) * limit;
+
+            const rows = await ProtocolModel.searchProtocols(q, limit, offset);
+            const total = await ProtocolModel.searchProtocolsCount(q);
+
+            const hasNext = offset + limit < total;
+
+            res.status(200).json({
+                success: true,
+                data: rows,
+                pagination: {
+                    currentPage: page,
+                    limit: limit,
+                    total: total,
+                    hasNext: hasNext
+                },
+                query: q
+            });
+        } catch (error) {
+            console.error('[searchProtocols] ERROR:', error.message);
+            res.status(500).json({
+                success: false,
+                error: 'Error searching protocols: ' + error.message
+            });
+        }
+    }
 }
 
 module.exports = new ProtocolController();

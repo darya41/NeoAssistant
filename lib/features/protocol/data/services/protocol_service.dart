@@ -27,4 +27,13 @@ class ProtocolService {
     final response = await ApiClient.getAuth('protocols/hierarchy/$hierarchyId/branch');
     return _validateResponse(response);
   }
+
+  Future<Map<String, dynamic>> searchProtocols({
+    required String query, int page = 1, int limit = 20,
+  }) async {
+    final response = await ApiClient.getAuth(
+        'protocols/search?q=$query&page=$page&limit=$limit'
+    );
+    return _validateResponse(response);
+  }
 }

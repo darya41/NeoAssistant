@@ -8,7 +8,6 @@ class ProtocolModel {
     }
 
    static async getProtocolListPaginated(limit, offset) {
-
        const query = `
            SELECT
                ph.id as hierarchy_id,
@@ -33,7 +32,6 @@ class ProtocolModel {
        `;
 
        const [rows] = await db.query(query, [limit, offset]);
-
        return rows;
    }
 
@@ -52,18 +50,17 @@ class ProtocolModel {
        `;
 
        const [rows] = await db.query(query);
-
        return rows[0].total;
    }
 
     static async getProtocolHierarchy(protocolDocumentId) {
-        const [rows] = await db.query(
+       const [rows] = await db.query(
             `SELECT * FROM protocol_hierarchy
              WHERE protocol_document_id = ?
              ORDER BY sort_order, id`,
             [protocolDocumentId]
         );
-        return rows;
+       return rows;
     }
 
     static async getProtocolDocumentById(protocolDocumentId) {
@@ -138,6 +135,7 @@ class ProtocolModel {
         const [rows] = await db.query(query, [itemId, itemId]);
         return rows;
     }
+
     static async getHierarchyItem(itemId) {
         const [rows] = await db.query(
             'SELECT * FROM protocol_hierarchy WHERE id = ?',
@@ -145,6 +143,99 @@ class ProtocolModel {
         );
         return rows[0];
     }
+
+   static async searchProtocols(query, limit, offset) {
+
+       const searchQuery = `%${query}%`;
+
+       const sqlQuery = `
+           SELECT
+               ph.id as hierarchy_id,
+               ph.protocol_document_id,
+               ph.title as hierarchy_title,
+               ph.level,
+               ph.parent_id,
+               ph.content,
+               ph.sort_order,
+               pd.title as protocol_title,
+               pd.adoption_date
+           FROM protocol_hierarchy ph
+           JOIN protocol_document pd ON ph.protocol_document_id = pd.id
+           WHERE EXISTS (
+                 SELECT 1
+                 FROM protocol_hierarchy child
+                 WHERE child.parent_id = ph.id
+                   AND child.content IS NOT NULL
+                   AND child.content != ''
+             )
+             AND (
+                 ph.title LIKE ?
+                 OR pd.title LIKE ?
+                 OR EXISTS (
+                     SELECT 1
+                     FROM protocol_hierarchy child
+                     WHERE child.parent_id = ph.id
+                       AND child.title LIKE ?
+                 )
+                 OR EXISTS (
+                     SELECT 1
+                     FROM protocol_hierarchy child
+                     WHERE child.parent_id = ph.id
+                       AND child.content LIKE ?
+                 )
+             )
+           GROUP BY ph.id
+           ORDER BY pd.adoption_date DESC, ph.sort_order
+           LIMIT ? OFFSET ?
+       `;
+
+       const [rows] = await db.query(sqlQuery, [
+           searchQuery,
+           searchQuery,
+           searchQuery,
+           searchQuery,
+           limit,
+           offset
+       ]);
+       return rows;
+   }
+
+   static async searchProtocolsCount(query) {
+       const searchQuery = `%${query}%`;
+
+       const sqlQuery = `
+           SELECT COUNT(DISTINCT ph.id) as total
+           FROM protocol_hierarchy ph
+           JOIN protocol_document pd ON ph.protocol_document_id = pd.id
+           WHERE EXISTS (
+                 SELECT 1
+                 FROM protocol_hierarchy child
+                 WHERE child.parent_id = ph.id
+                   AND child.content IS NOT NULL
+                   AND child.content != ''
+             )
+             AND (
+                 ph.title LIKE ?
+                 OR pd.title LIKE ?
+                 OR EXISTS (
+                     SELECT 1
+                     FROM protocol_hierarchy child
+                     WHERE child.parent_id = ph.id
+                       AND child.title LIKE ?
+                 )
+                 OR EXISTS (
+                     SELECT 1
+                     FROM protocol_hierarchy child
+                     WHERE child.parent_id = ph.id
+                       AND child.content LIKE ?
+                 )
+             )
+       `;
+
+       const [result] = await db.query(sqlQuery, [searchQuery, searchQuery, searchQuery, searchQuery]);
+
+       return result[0].total;
+   }
 }
 
 module.exports = ProtocolModel;

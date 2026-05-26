@@ -166,6 +166,49 @@ class ProtocolRepository {
     return null;
   }
 
+
+  Future<Map<String, dynamic>> searchProtocolsPaginated({
+    required String query, int page = 1, int limit = 20,
+  }) async {
+    try {
+      final response = await _service.searchProtocols(
+        query: query, page: page, limit: limit,
+      );
+
+      if (response['success'] != true) {
+        throw Exception(response['error'] ?? 'Ошибка поиска протоколов');
+      }
+
+      final data = response['data'];
+      final pagination = response['pagination'] ?? {};
+
+      final List<ProtocolListItem> items = (data as List)
+          .map((json) {
+        final item = ProtocolListItem.fromJson(json);
+        final cleanedTitle = TitleCleaner.clean(item.hierarchyTitle);
+        return ProtocolListItem(
+          protocolDocumentId: item.protocolDocumentId,
+          protocolTitle: item.protocolTitle,
+          hierarchyId: item.hierarchyId,
+          hierarchyTitle: cleanedTitle,
+          level: item.level,
+          parentId: item.parentId,
+          content: item.content,
+        );
+      })
+          .toList();
+
+      return {
+        'items': items,
+        'hasNext': pagination['hasNext'] ?? false,
+        'currentPage': pagination['currentPage'] ?? page,
+        'total': pagination['total'] ?? 0,
+      };
+    } catch (e) {
+      rethrow;
+    }
+  }
+
   List<ProtocolHierarchy> _parseChildrenFromJson(List<dynamic> childrenJson) {
     final List<ProtocolHierarchy> children = [];
 
@@ -182,4 +225,5 @@ class ProtocolRepository {
 
     return children;
   }
+
 }

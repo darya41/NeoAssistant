@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import '../../data/repositories/protocol_repository.dart';
 import '../../domain/entities/protocol_list_item.dart';
@@ -11,8 +13,11 @@ class ProtocolListViewModel extends ChangeNotifier {
   bool _hasNext = true;
   int _currentPage = 1;
   String? _error;
+  String _searchQuery = '';
+  Timer? _debounceTimer;
 
   static const int _pageSize = 20;
+  static const _debounceDuration = Duration(milliseconds: 500);
 
   List<ProtocolListItem> get items => _items;
   bool get isLoading => _isLoading;
@@ -20,9 +25,28 @@ class ProtocolListViewModel extends ChangeNotifier {
   bool get hasNext => _hasNext;
   String? get error => _error;
   bool get hasItems => _items.isNotEmpty;
+  String get currentSearchQuery => _searchQuery;
+  bool get isSearching => _searchQuery.isNotEmpty;
 
   ProtocolListViewModel() {
     loadItems();
+  }
+
+  void updateSearchQuery(String newQuery) {
+    if (_searchQuery == newQuery) return;
+
+    _searchQuery = newQuery;
+    _debounceTimer?.cancel();
+    _debounceTimer = Timer(_debounceDuration, () {
+      _resetAndSearch();
+    });
+  }
+
+  void _resetAndSearch() {
+    _currentPage = 1;
+    _items.clear();
+    _hasNext = true;
+    loadItems(refresh: true);
   }
 
   Future<void> loadItems({bool refresh = false}) async {
@@ -42,15 +66,25 @@ class ProtocolListViewModel extends ChangeNotifier {
     notifyListeners();
 
     try {
-      final result = await _repository.getProtocolListPaginated(
-        page: _currentPage,
-        limit: _pageSize,
-      );
+      Map<String, dynamic> result;
+
+      if (_searchQuery.isNotEmpty) {
+        result = await _repository.searchProtocolsPaginated(
+          query: _searchQuery,
+          page: _currentPage,
+          limit: _pageSize,
+        );
+      } else {
+        result = await _repository.getProtocolListPaginated(
+          page: _currentPage,
+          limit: _pageSize,
+        );
+      }
 
       _items.addAll(result['items']);
       _hasNext = result['hasNext'] ?? false;
 
-      if (result['items'].isNotEmpty) {
+      if (result['items'].isNotEmpty && _hasNext) {
         _currentPage++;
       }
 
@@ -64,10 +98,7 @@ class ProtocolListViewModel extends ChangeNotifier {
       notifyListeners();
     }
   }
-
-  Future<void> refresh() async {
-    await loadItems(refresh: true);
-  }
+  Future<void> refresh() => loadItems(refresh: true);
 
   Future<void> loadNextPage() async {
     if (!_isLoadingMore && _hasNext && !_isLoading) {
@@ -81,5 +112,11 @@ class ProtocolListViewModel extends ChangeNotifier {
     } catch (e) {
       return null;
     }
+  }
+
+  @override
+  void dispose() {
+    _debounceTimer?.cancel();
+    super.dispose();
   }
 }
