@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../main/presentation/view_models/protocol_search_viewmodel.dart';
+import '../../../protocol/presentation/page/protocols_sort_list_screen.dart';
 import '../../domain/entities/mkb.dart';
 import 'mkb_category_card.dart';
 import 'mkb_breadcrumb.dart';
@@ -88,10 +89,37 @@ class _MkbCategoriesListContent extends StatelessWidget {
         final category = viewModel.mkbCategories[index];
         return MkbCategoryCard(
           category: category,
-          onTap: () => _onCategoryTap(viewModel, category),
+          onTap: () => _onCategoryTap(context, viewModel, category),
         );
       },
     );
+  }
+
+  void _onCategoryTap(
+      BuildContext context,
+      MkbCategoriesViewModel viewModel,
+      MkbCategory category,
+      ) {
+
+    if (category.level < 4) {
+      if (viewModel.isSearching) {
+        viewModel.updateSearchQuery('');
+      }
+      viewModel.loadChildren(category);
+    }
+    else {
+
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => ProtocolsSortListScreen(
+            sourceId: category.id,
+            sourceName: '${category.code} ${category.title}',
+            sourceType: ProtocolsSourceType.mkb,
+          ),
+        ),
+      );
+    }
   }
 
   Widget _buildEmptyWidget(MkbCategoriesViewModel viewModel) {
@@ -149,16 +177,5 @@ class _MkbCategoriesListContent extends StatelessWidget {
         ],
       ),
     );
-  }
-
-  void _onCategoryTap(
-      MkbCategoriesViewModel viewModel,MkbCategory category
-      ) {
-    if (viewModel.isSearching) {
-      viewModel.updateSearchQuery('');
-      viewModel.loadChildren(category);
-    } else if (category.level < 4) {
-      viewModel.loadChildren(category);
-    }
   }
 }

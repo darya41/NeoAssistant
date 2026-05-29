@@ -256,4 +256,64 @@ class ProtocolRepository {
     }
   }
 
+  Future<Map<String, dynamic>> getProtocolsByDiagnosticPaginated({
+    required int diagnosticId, int page = 1, int limit = 20,
+  }) async {
+    try {
+      final response = await _service.getProtocolsByDiagnostic(
+        diagnosticId: diagnosticId, page: page, limit: limit,
+      );
+
+      if (response['success'] != true) {
+        throw Exception(response['error'] ?? 'Ошибка получения протоколов по диагностике');
+      }
+
+      final data = response['data'];
+      final pagination = response['pagination'] ?? {};
+
+      final List<ProtocolListItem> items = (data as List)
+          .map((json) => ProtocolListItem.fromJson(json))
+          .toList();
+
+      return {
+        'items': items,
+        'hasNext': pagination['hasNext'] ?? false,
+        'currentPage': pagination['currentPage'] ?? page,
+        'total': pagination['total'] ?? 0,
+      };
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  Future<Map<String, dynamic>> getProtocolsByMkbPaginated({
+    required int mkbId, int page = 1, int limit = 20,
+  }) async {
+    try {
+      final response = await _service.getProtocolsByMkb(
+        mkbId: mkbId, page: page, limit: limit,
+      );
+
+      if (response['success'] != true) {
+        throw Exception(response['error'] ?? 'Ошибка получения протоколов по МКБ');
+      }
+
+      final data = response['data'];
+      final pagination = response['pagination'] ?? {};
+
+      final List<ProtocolListItem> items = (data as List)
+          .map((json) => ProtocolListItem.fromJson(json))
+          .toList();
+
+      return {
+        'items': items,
+        'hasNext': pagination['hasNext'] ?? false,
+        'currentPage': pagination['currentPage'] ?? page,
+        'total': pagination['total'] ?? 0,
+      };
+    } catch (e) {
+      rethrow;
+    }
+  }
+
 }

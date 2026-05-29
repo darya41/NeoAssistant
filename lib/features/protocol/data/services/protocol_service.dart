@@ -41,4 +41,18 @@ class ProtocolService {
     final response = await ApiClient.getAuth('protocols/medication/$medicationId?page=$page&limit=$limit');
     return _validateResponse(response);
   }
+
+  Future<Map<String, dynamic>> getProtocolsByDiagnostic({
+    required int diagnosticId, int page = 1, int limit = 20,
+  }) async {
+    final response = await ApiClient.getAuth('protocols/diagnostic/$diagnosticId?page=$page&limit=$limit');
+    return _validateResponse(response);
+  }
+
+  Future<Map<String, dynamic>> getProtocolsByMkb({
+    required int mkbId, int page = 1, int limit = 20,
+  }) async {
+    final response = await ApiClient.getAuth('protocols/mkb/$mkbId?page=$page&limit=$limit');
+    return _validateResponse(response);
+  }
 }

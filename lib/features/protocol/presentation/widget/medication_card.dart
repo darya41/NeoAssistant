@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:neo_friend/features/protocol/presentation/page/protocols_sort_list_screen.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../domain/entities/medication.dart';
-import '../page/medication_protocols_screen.dart';
 
 class MedicationCard extends StatelessWidget {
   final Medication medication;
@@ -20,9 +20,10 @@ class MedicationCard extends StatelessWidget {
         Navigator.push(
           context,
           MaterialPageRoute(
-            builder: (context) => MedicationProtocolsScreen(
-              medicationId: medication.id,
-              medicationName: medication.inn,
+            builder: (context) => ProtocolsSortListScreen(
+              sourceId: medication.id,
+              sourceName: medication.inn,
+              sourceType: ProtocolsSourceType.medication,
             ),
           ),
         );

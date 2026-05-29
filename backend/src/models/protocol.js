@@ -224,6 +224,87 @@ class ProtocolModel {
        const [result] = await db.query(query, [medicationId]);
        return result[0].total;
    }
+
+   static async getProtocolsByDiagnosticId(diagnosticId, limit, offset) {
+       const query = `
+           SELECT
+               ph.id as hierarchy_id,
+               ph.protocol_document_id,
+               ph.title as hierarchy_title,
+               ph.level,
+               ph.parent_id,
+               ph.content,
+               ph.sort_order,
+               pd.title as protocol_title,
+               pd.adoption_date,
+               pd.id as protocol_document_id,
+               pfd.id as diagnostic_link_id,
+               pfd.requirement,
+               pfd.frequency,
+               pfd.special_conditions
+           FROM protocol_diagnostic pfd
+           JOIN protocol_hierarchy ph ON ph.id = pfd.protocol_hierarchy_id
+           JOIN protocol_document pd ON pd.id = ph.protocol_document_id
+           WHERE pfd.diagnostic_test_id = ?
+           ORDER BY pd.adoption_date DESC, ph.sort_order
+           LIMIT ? OFFSET ?
+       `;
+
+       const [rows] = await db.query(query, [diagnosticId, limit, offset]);
+
+       return rows;
+   }
+
+   static async getProtocolsByDiagnosticIdCount(diagnosticId) {
+       const query = `
+           SELECT COUNT(DISTINCT ph.id) as total
+           FROM protocol_diagnostic pfd
+           JOIN protocol_hierarchy ph ON ph.id = pfd.protocol_hierarchy_id
+           WHERE pfd.diagnostic_test_id = ?
+       `;
+
+       const [result] = await db.query(query, [diagnosticId]);
+       return result[0].total;
+   }
+
+   static async getProtocolsByMkbId(mkbId, limit, offset) {
+
+       const query = `
+           SELECT
+               ph.id as hierarchy_id,
+               ph.protocol_document_id,
+               ph.title as hierarchy_title,
+               ph.level,
+               ph.parent_id,
+               ph.content,
+               ph.sort_order,
+               pd.title as protocol_title,
+               pd.adoption_date,
+               pml.id as mkb_link_id
+           FROM protocol_mkb_link pml
+           JOIN protocol_hierarchy ph ON ph.id = pml.protocol_hierarchy_id
+           JOIN protocol_document pd ON pd.id = ph.protocol_document_id
+           WHERE pml.mkb10_id = ?
+           ORDER BY pd.adoption_date DESC, ph.sort_order
+           LIMIT ? OFFSET ?
+       `;
+
+       const [rows] = await db.query(query, [mkbId, limit, offset]);
+
+       return rows;
+   }
+
+   static async getProtocolsByMkbIdCount(mkbId) {
+       const query = `
+           SELECT COUNT(DISTINCT ph.id) as total
+           FROM protocol_mkb_link pml
+           JOIN protocol_hierarchy ph ON ph.id = pml.protocol_hierarchy_id
+           WHERE pml.mkb10_id = ?
+       `;
+
+       const [result] = await db.query(query, [mkbId]);
+       return result[0].total;
+   }
 }
 
 module.exports = ProtocolModel;

@@ -193,6 +193,69 @@ class ProtocolController {
             });
         }
     }
+
+    async getProtocolsByDiagnosticId(req, res) {
+        try {
+            const { diagnosticId } = req.params;
+            const page = parseInt(req.query.page) || 1;
+            const limit = parseInt(req.query.limit) || 20;
+            const offset = (page - 1) * limit;
+
+            const rows = await ProtocolModel.getProtocolsByDiagnosticId(diagnosticId, limit, offset);
+            const total = await ProtocolModel.getProtocolsByDiagnosticIdCount(diagnosticId);
+
+            const hasNext = offset + limit < total;
+
+            res.status(200).json({
+                success: true,
+                data: rows,
+                pagination: {
+                    currentPage: page,
+                    limit: limit,
+                    total: total,
+                    hasNext: hasNext
+                },
+                diagnosticId: diagnosticId
+            });
+        } catch (error) {
+            res.status(500).json({
+                success: false,
+                error: 'Error fetching protocols by diagnostic: ' + error.message
+            });
+        }
+    }
+
+    async getProtocolsByMkbId(req, res) {
+
+        try {
+            const { mkbId } = req.params;
+            const page = parseInt(req.query.page) || 1;
+            const limit = parseInt(req.query.limit) || 20;
+            const offset = (page - 1) * limit;
+
+            const rows = await ProtocolModel.getProtocolsByMkbId(mkbId, limit, offset);
+            const total = await ProtocolModel.getProtocolsByMkbIdCount(mkbId);
+
+            const hasNext = offset + limit < total;
+
+            res.status(200).json({
+                success: true,
+                data: rows,
+                pagination: {
+                    currentPage: page,
+                    limit: limit,
+                    total: total,
+                    hasNext: hasNext
+                },
+                mkbId: mkbId
+            });
+        } catch (error) {
+            res.status(500).json({
+                success: false,
+                error: 'Error fetching protocols by MKB: ' + error.message
+            });
+        }
+    }
 }
 
 module.exports = new ProtocolController();

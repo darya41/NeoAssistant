@@ -24,7 +24,6 @@ class _ProtocolsListState extends State<ProtocolsList> {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-
     final searchViewModel = context.watch<ProtocolSearchViewModel>();
     final currentQuery = searchViewModel.protocolSearchQuery;
 
@@ -49,9 +48,7 @@ class _ProtocolsListContent extends StatelessWidget {
   Widget build(BuildContext context) {
     final viewModel = context.watch<ProtocolListViewModel>();
 
-    return Expanded(
-      child: _buildContent(viewModel),
-    );
+    return _buildContent(viewModel);
   }
 
   Widget _buildContent(ProtocolListViewModel viewModel) {
@@ -75,7 +72,7 @@ class _ProtocolsListContent extends StatelessWidget {
           children: [
             const Icon(Icons.error_outline, size: 48, color: AppColors.error),
             const SizedBox(height: 16),
-            Text('Ошибка: $viewModel.error'),
+            Text('Ошибка: ${viewModel.error}'),
             const SizedBox(height: 16),
             ElevatedButton(
               onPressed: () => viewModel.refresh(),
@@ -92,11 +89,11 @@ class _ProtocolsListContent extends StatelessWidget {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Icon(Icons.search_off, size: 64, color: Colors.grey[400]),
+              Icon(Icons.search_off, size: 64, color: AppColors.neutral_25),
               const SizedBox(height: 16),
               Text(
-                'Ничего не найдено по запросу "$viewModel.searchQuery"',
-                style: TextStyle(fontSize: 16, color: Colors.grey[600]),
+                'Ничего не найдено по запросу "${viewModel.currentSearchQuery}"',
+                style: TextStyle(fontSize: 16, color: AppColors.neutral_50),
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: 16),
@@ -113,7 +110,7 @@ class _ProtocolsListContent extends StatelessWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(Icons.folder_open, size: 48, color: Colors.grey),
+            Icon(Icons.folder_open, size: 48, color: AppColors.neutral_60),
             SizedBox(height: 16),
             Text('Нет данных'),
           ],

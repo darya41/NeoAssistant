@@ -11,6 +11,8 @@ router.get('/:id/hierarchy', protocolController.getProtocolHierarchy);
 router.get('/:id', protocolController.getProtocolDocumentById);
 router.get('/hierarchy/:id/branch', protocolController.getFullBranch);
 router.get('/medication/:medicationId', protocolController.getProtocolsByMedicationId);
+router.get('/diagnostic/:diagnosticId', protocolController.getProtocolsByDiagnosticId);
+router.get('/mkb/:mkbId', protocolController.getProtocolsByMkbId);
 
 
 module.exports = router;
