@@ -8,9 +8,9 @@ class AppColors {
   static const Color black = Colors.black;
   static const Color green = Colors.green;
 
-  static const Color blue = Color(0xFF0168D0);
+  static const Color blueColor = Color(0xFF0168D0);
   static const Color error = Color(0xFFCC002D);
-  static const Color yellow = Color(0xFFF3BD25);
+  static const Color yellowColor = Color(0xFFF3BD25);
   static const Color neutral_90 =  Color(0xFF1A1A1A);
   static const Color neutral_60 =  Color(0xFF666666);
   static const Color neutral_50 =  Color(0xFF808080);

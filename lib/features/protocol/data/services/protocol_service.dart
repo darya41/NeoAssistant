@@ -31,9 +31,14 @@ class ProtocolService {
   Future<Map<String, dynamic>> searchProtocols({
     required String query, int page = 1, int limit = 20,
   }) async {
-    final response = await ApiClient.getAuth(
-        'protocols/search?q=$query&page=$page&limit=$limit'
-    );
+    final response = await ApiClient.getAuth('protocols/search?q=$query&page=$page&limit=$limit');
+    return _validateResponse(response);
+  }
+
+  Future<Map<String, dynamic>> getProtocolsByMedication({
+    required int medicationId, int page = 1, int limit = 20,
+  }) async {
+    final response = await ApiClient.getAuth('protocols/medication/$medicationId?page=$page&limit=$limit');
     return _validateResponse(response);
   }
 }

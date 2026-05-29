@@ -226,4 +226,34 @@ class ProtocolRepository {
     return children;
   }
 
+  Future<Map<String, dynamic>> getProtocolsByMedicationPaginated({
+    required int medicationId, int page = 1, int limit = 20,
+  }) async {
+    try {
+      final response = await _service.getProtocolsByMedication(
+        medicationId: medicationId, page: page, limit: limit,
+      );
+
+      if (response['success'] != true) {
+        throw Exception(response['error'] ?? 'Ошибка получения протоколов по препарату');
+      }
+
+      final data = response['data'];
+      final pagination = response['pagination'] ?? {};
+
+      final List<ProtocolListItem> items = (data as List)
+          .map((json) => ProtocolListItem.fromJson(json))
+          .toList();
+
+      return {
+        'items': items,
+        'hasNext': pagination['hasNext'] ?? false,
+        'currentPage': pagination['currentPage'] ?? page,
+        'total': pagination['total'] ?? 0,
+      };
+    } catch (e) {
+      rethrow;
+    }
+  }
+
 }

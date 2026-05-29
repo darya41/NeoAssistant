@@ -1,23 +1,6 @@
 const ProtocolModel = require('../models/protocol');
 
 class ProtocolController {
-    async getAllProtocolDocuments(req, res) {
-
-        try {
-            const rows = await ProtocolModel.getAllProtocolDocuments();
-
-            res.status(200).json({
-                success: true,
-                data: rows
-            });
-        } catch (error) {
-            res.status(500).json({
-                success: false,
-                error: 'Error fetching protocols: ' + error.message
-            });
-        }
-    }
-
     async getProtocolListPaginated(req, res) {
         try {
             const page = parseInt(req.query.page) || 1;
@@ -175,6 +158,38 @@ class ProtocolController {
             res.status(500).json({
                 success: false,
                 error: 'Error searching protocols: ' + error.message
+            });
+        }
+    }
+
+    async getProtocolsByMedicationId(req, res) {
+        try {
+            const { medicationId } = req.params;
+            const page = parseInt(req.query.page) || 1;
+            const limit = parseInt(req.query.limit) || 20;
+            const offset = (page - 1) * limit;
+
+            const rows = await ProtocolModel.getProtocolsByMedicationId(medicationId, limit, offset);
+            const total = await ProtocolModel.getProtocolsByMedicationIdCount(medicationId);
+
+            const hasNext = offset + limit < total;
+
+            res.status(200).json({
+                success: true,
+                data: rows,
+                pagination: {
+                    currentPage: page,
+                    limit: limit,
+                    total: total,
+                    hasNext: hasNext
+                },
+                medicationId: medicationId
+            });
+        } catch (error) {
+            console.error('[getProtocolsByMedicationId] ERROR:', error.message);
+            res.status(500).json({
+                success: false,
+                error: 'Error fetching protocols by medication: ' + error.message
             });
         }
     }
