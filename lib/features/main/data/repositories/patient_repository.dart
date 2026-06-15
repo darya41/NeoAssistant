@@ -1,5 +1,5 @@
 import 'dart:convert';
-import '../../../../models/patient.dart';
+import '../../../patient_card/domain/entities/patient.dart';
 import '../services/patient_service.dart';
 
 class PatientRepository {

@@ -49,7 +49,7 @@ class CustomTextField extends StatelessWidget {
                   labelText,
                   style: const TextStyle(
                     fontSize: 12,
-                    color: AppColors.grey,
+                    color: AppColors.neutral_50,
                   ),
                 ),
               ),
@@ -104,7 +104,7 @@ class CustomTextField extends StatelessWidget {
                       onTap: onVisibilityPressed,
                       child: Icon(
                         obscureText ? Icons.visibility_off : Icons.visibility,
-                        color: AppColors.grey,
+                        color: AppColors.neutral_50,
                         size: 20,
                       ),
                     ),

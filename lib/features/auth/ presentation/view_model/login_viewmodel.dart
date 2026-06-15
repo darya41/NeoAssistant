@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../../core/storage/token_storage.dart';
 import '../../data/repositories/auth_repository.dart';
 import '../../domain/validators/auth_validator.dart';
 
@@ -63,10 +64,30 @@ class LoginViewModel extends ChangeNotifier {
         password: password,
       );
 
-      if (response['success'] && response['accessToken'] != null) {
+
+      if (response['success'] == true && response['accessToken'] != null) {
+        int? techLevelId;
+
+        if (response['user'] != null) {
+          techLevelId = response['user']['tech_level_id'];
+        } else if (response['data'] != null) {
+          techLevelId = response['data']['tech_level_id'];
+        } else if (response['doctor'] != null) {
+          techLevelId = response['doctor']['tech_level_id'];
+        }
+
+        if (techLevelId != null) {
+          await TokenStorage.saveTechLevelId(techLevelId);
+          await TokenStorage.getTechLevelId();
+        }
+
+        if (response['user'] != null) {
+          await TokenStorage.saveDoctorData(response['user']);
+        }
+
         return true;
       } else {
-        _errorMessage = 'Неверный email или пароль';
+        _errorMessage = response['error'] ?? 'Неверный email или пароль';
         notifyListeners();
         return false;
       }

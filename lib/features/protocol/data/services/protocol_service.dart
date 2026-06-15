@@ -1,8 +1,6 @@
 import '../../../../core/network/api_client.dart';
-import '../../domain/entities/protocol.dart';
 
 class ProtocolService {
-
   Map<String, dynamic> _validateResponse(dynamic response) {
     if (response is! Map<String, dynamic>) {
       throw Exception('Неверный формат ответа от сервера');
@@ -10,28 +8,77 @@ class ProtocolService {
     return response;
   }
 
-  Future<Map<String, dynamic>> getAllProtocols() async {
-    final response = await ApiClient.getAuth('protocols');
+  Future<Map<String, dynamic>> getProtocolFlatListPaginated({
+    int page = 1, int limit = 20, int? techLevelId,
+  }) async {
+    String url = 'protocols/list?page=$page&limit=$limit';
+    if (techLevelId != null) {
+      url += '&techLevelId=$techLevelId';
+    }
+    final response = await ApiClient.getAuth(url);
+    return response;
+  }
+
+  Future<Map<String, dynamic>> getProtocolHierarchy(int protocolDocumentId) async {
+    final response = await ApiClient.getAuth('protocols/$protocolDocumentId/hierarchy');
     return _validateResponse(response);
   }
 
-  Future<Map<String, dynamic>> getDetailByProtocolId(int protocolId) async {
-    final response = await ApiClient.getAuth('protocols/$protocolId');
+  Future<Map<String, dynamic>> getProtocolDocumentById(int protocolDocumentId) async {
+    final response = await ApiClient.getAuth('protocols/$protocolDocumentId');
     return _validateResponse(response);
   }
 
-  Future<List<Protocol>> searchProtocols(String query) async {
-    final response = await ApiClient.getAuth('protocols/search?q=$query');
+  Future<Map<String, dynamic>> getFullBranch(int hierarchyId) async {
+    final response = await ApiClient.getAuth('protocols/hierarchy/$hierarchyId/branch');
+    return _validateResponse(response);
+  }
 
-    if (response['success'] != true) {
-      throw Exception(response['error'] ?? 'Ошибка поиска протоколов');
+  Future<Map<String, dynamic>> searchProtocols({
+    required String query,
+    int page = 1, int limit = 20, int? techLevelId,
+  }) async {
+    String url = 'protocols/search?q=$query&page=$page&limit=$limit';
+    if (techLevelId != null) {
+      url += '&techLevelId=$techLevelId';
     }
+    final response = await ApiClient.getAuth(url);
+    return _validateResponse(response);
+  }
 
-    final data = response['data'];
-    if (data is! List) {
-      throw Exception('Неверный формат данных');
+  Future<Map<String, dynamic>> getProtocolsByMedication({
+    required int medicationId,
+    int page = 1, int limit = 20, int? techLevelId,
+  }) async {
+    String url = 'protocols/medication/$medicationId?page=$page&limit=$limit';
+    if (techLevelId != null) {
+      url += '&techLevelId=$techLevelId';
     }
+    final response = await ApiClient.getAuth(url);
+    return _validateResponse(response);
+  }
 
-    return data.map((json) => Protocol.fromJson(json)).toList();
+  Future<Map<String, dynamic>> getProtocolsByDiagnostic({
+    required int diagnosticId,
+    int page = 1, int limit = 20, int? techLevelId,
+  }) async {
+    String url = 'protocols/diagnostic/$diagnosticId?page=$page&limit=$limit';
+    if (techLevelId != null) {
+      url += '&techLevelId=$techLevelId';
+    }
+    final response = await ApiClient.getAuth(url);
+    return _validateResponse(response);
+  }
+
+  Future<Map<String, dynamic>> getProtocolsByMkb({
+    required int mkbId,
+    int page = 1, int limit = 20, int? techLevelId,
+  }) async {
+    String url = 'protocols/mkb/$mkbId?page=$page&limit=$limit';
+    if (techLevelId != null) {
+      url += '&techLevelId=$techLevelId';
+    }
+    final response = await ApiClient.getAuth(url);
+    return _validateResponse(response);
   }
 }

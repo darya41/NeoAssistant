@@ -47,7 +47,7 @@ class _AddMotherScreenState extends State<AddMotherScreen> {
           icon: const Icon(Icons.arrow_back),
           onPressed: () => Navigator.pop(context),
         ),
-        backgroundColor: AppColors.white,
+        backgroundColor: AppColors.neutral_0,
         elevation: 0,
       ),
       body: ListenableBuilder(
@@ -77,9 +77,9 @@ class _AddMotherScreenState extends State<AddMotherScreen> {
                   ContinueButton(
                     text: "Сохранить",
                     onPressed: _handleSave,
-                    backgroundColor: _viewModel.isFormValid ? AppColors.brand_40 : AppColors.background,
-                    borderColor: _viewModel.isFormValid ? AppColors.brand_40 : AppColors.border,
-                    textColor: _viewModel.isFormValid ? AppColors.white : AppColors.black,
+                    backgroundColor: _viewModel.isFormValid ? AppColors.brand_40 : AppColors.neutral_5,
+                    borderColor: _viewModel.isFormValid ? AppColors.brand_40 : AppColors.neutral_25,
+                    textColor: _viewModel.isFormValid ? AppColors.neutral_0 : AppColors.neutral_90,
                     isEnabled: _viewModel.isFormValid,
                   ),
               ],

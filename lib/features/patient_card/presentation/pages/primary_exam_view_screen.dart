@@ -99,7 +99,7 @@ class _PrimaryExamViewScreenState extends State<PrimaryExamViewScreen> {
               label: const Text('Повторить попытку'),
               style: ElevatedButton.styleFrom(
                 backgroundColor: AppColors.brand_40,
-                foregroundColor: AppColors.white,
+                foregroundColor: AppColors.neutral_0,
               ),
             ),
           ],
@@ -115,14 +115,14 @@ class _PrimaryExamViewScreenState extends State<PrimaryExamViewScreen> {
             const Icon(
               Icons.medical_information,
               size: 64,
-              color: AppColors.grey,
+              color: AppColors.neutral_50,
             ),
             const SizedBox(height: 16),
             const Text(
               'Нет данных для отображения',
               style: TextStyle(
                 fontSize: 16,
-                color: AppColors.grey,
+                color: AppColors.neutral_50,
               ),
             ),
             const SizedBox(height: 24),
@@ -132,7 +132,7 @@ class _PrimaryExamViewScreenState extends State<PrimaryExamViewScreen> {
               label: const Text('Обновить'),
               style: ElevatedButton.styleFrom(
                 backgroundColor: AppColors.brand_40,
-                foregroundColor: AppColors.white,
+                foregroundColor: AppColors.neutral_0,
               ),
             ),
           ],

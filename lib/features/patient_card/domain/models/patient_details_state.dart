@@ -1,5 +1,5 @@
-import '../../../../models/mother.dart';
-import '../../../../models/patient.dart';
+import '../entities/mother.dart';
+import '../entities/patient.dart';
 
 class PatientDetailsState {
   final Patient patient;

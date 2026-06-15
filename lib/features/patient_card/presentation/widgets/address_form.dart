@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:neo_friend/core/constants/app_strings.dart';
-import '../../../../models/address.dart';
+import '../../domain/entities/address.dart';
 import 'form_fields/dropdown_with_text_field.dart';
 import '../../../../shared/widgets/fields/text_input_field.dart';
 

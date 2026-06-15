@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../../features/patient_card/presentation/pages/patient_details_screen.dart';
-import '../../../models/patient.dart';
+import '../../../features/patient_card/domain/entities/patient.dart';
 
 class PatientCard extends StatelessWidget {
   final Patient patient;

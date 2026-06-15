@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../../../../models/patient.dart';
+import '../../../patient_card/domain/entities/patient.dart';
 import '../../data/repositories/patient_repository.dart';
 
 class PatientSearchViewModel extends ChangeNotifier {

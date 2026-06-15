@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:neo_friend/features/profile/presentation/pages/about_screen.dart';
+import 'package:neo_friend/features/profile/presentation/pages/tech_level_screen.dart';
+import 'about_screen.dart';
 
 import '../view_models/settings_viewmodel.dart';
 
@@ -77,6 +78,16 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 MaterialPageRoute(builder: (context) => const AboutScreen()),
               );
             }),
+
+            const SizedBox(height: 12),
+
+            _buildSettingItem('Технологический уровень', () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => const TechLevelScreen()),
+              );
+            }),
+
             const SizedBox(height: 200),
             _buildLogoutButton(),
             const SizedBox(height: 30),

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import '../../../../core/storage/token_storage.dart';
 import '../view_models/protocol_search_viewmodel.dart';
 import 'reminders_stats.dart';
 import 'tab_bar_widget.dart';
@@ -7,7 +8,7 @@ import 'search_field.dart';
 import 'navigation/custom_bottom_navigation_bar.dart';
 import 'navigation/analytics_bottom_bar.dart';
 import 'patient_cards.dart';
-import 'protocols_list.dart';
+import '../../../protocol/presentation/widget/protocols_tab_container.dart';
 import '../view_models/patient_search_viewmodel.dart';
 import '../view_models/home_viewmodel.dart';
 
@@ -27,9 +28,12 @@ class HomeScreenUI extends StatefulWidget {
 
 class _HomeScreenUIState extends State<HomeScreenUI> {
   late final HomeViewModel _homeViewModel;
-  PatientSearchViewModel? _patientSearchViewModel;
+  late final PatientSearchViewModel _patientSearchViewModel;
   late final ProtocolSearchViewModel _protocolSearchViewModel;
   bool _isInitialized = false;
+  int? _currentUserTechLevelId;
+
+  final GlobalKey<SearchFieldState> _searchFieldKey = GlobalKey<SearchFieldState>();
 
   @override
   void initState() {
@@ -42,6 +46,12 @@ class _HomeScreenUIState extends State<HomeScreenUI> {
     _isInitialized = true;
 
     _homeViewModel = HomeViewModel();
+    _protocolSearchViewModel = ProtocolSearchViewModel();
+    _patientSearchViewModel = PatientSearchViewModel();
+
+    _protocolSearchViewModel.onSearchCleared = () {
+      _searchFieldKey.currentState?.clearTextField();
+    };
 
     if (widget.initialTab != null) {
       if (widget.initialTab == 'Аналитика') {
@@ -54,24 +64,16 @@ class _HomeScreenUIState extends State<HomeScreenUI> {
     }
 
     if (!widget.isGuest) {
-      _patientSearchViewModel = PatientSearchViewModel();
+      _currentUserTechLevelId = await TokenStorage.getTechLevelId();
     }
 
-    _protocolSearchViewModel = ProtocolSearchViewModel();
-
-    if (mounted) {
-      setState(() {});
-    }
+    if (mounted) setState(() {});
   }
 
   @override
   void dispose() {
     _homeViewModel.dispose();
-    if (!widget.isGuest) {
-      if (_patientSearchViewModel != null) {
-        _patientSearchViewModel!.dispose();
-      }
-    }
+    _patientSearchViewModel.dispose();
     _protocolSearchViewModel.dispose();
     super.dispose();
   }
@@ -87,37 +89,47 @@ class _HomeScreenUIState extends State<HomeScreenUI> {
     return MultiProvider(
       providers: [
         ChangeNotifierProvider.value(value: _homeViewModel),
-        if (_patientSearchViewModel != null)
-          ChangeNotifierProvider.value(value: _patientSearchViewModel!),
+        ChangeNotifierProvider.value(value: _patientSearchViewModel),
         ChangeNotifierProvider.value(value: _protocolSearchViewModel),
       ],
       child: Scaffold(
         backgroundColor: Colors.white,
         body: SafeArea(
-          child: Column(
-            children: [
-              if (!widget.isGuest)
-                const RemindersStats(),
-
-              TabBarWidget(
-                activeTab: _homeViewModel.activeTab,
-                onTabChanged: _homeViewModel.onTabChanged,
-                isGuest: widget.isGuest,
-              ),
-
-              SearchField(isGuest: widget.isGuest),
-
-              Expanded(
-                child: Consumer<HomeViewModel>(
-                  builder: (context, viewModel, child) {
-                    if (widget.isGuest || !viewModel.isCardioeka) {
-                      return const ProtocolsList();
-                    }
-                    return const PatientCards();
-                  },
+          child: SingleChildScrollView(
+            physics: const AlwaysScrollableScrollPhysics(),
+            child: Column(
+              children: [
+                if (!widget.isGuest)
+                  const SizedBox(
+                    height: 125,
+                    child: RemindersStats(),
+                  ),
+                TabBarWidget(
+                  activeTab: _homeViewModel.activeTab,
+                  onTabChanged: _homeViewModel.onTabChanged,
+                  isGuest: widget.isGuest,
                 ),
-              ),
-            ],
+                SearchField(
+                  key: _searchFieldKey,
+                  isGuest: widget.isGuest,
+                  protocolSearchViewModel: _protocolSearchViewModel,
+                ),
+                SizedBox(
+                  height: 600,
+                  child: Consumer<HomeViewModel>(
+                    builder: (context, viewModel, child) {
+                      if (widget.isGuest || !viewModel.isCardioeka) {
+                        return ProtocolsTabContainer(
+                          protocolSearchViewModel: _protocolSearchViewModel,
+                          techLevelId: _currentUserTechLevelId,
+                        );
+                      }
+                      return const PatientCards();
+                    },
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
         bottomNavigationBar: Consumer<HomeViewModel>(

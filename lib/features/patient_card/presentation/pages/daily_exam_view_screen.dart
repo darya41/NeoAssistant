@@ -100,14 +100,14 @@ class _DailyExamViewScreenState extends State<DailyExamViewScreen> {
             Icon(
               Icons.medical_information,
               size: 64,
-              color: AppColors.grey,
+              color: AppColors.neutral_50,
             ),
             SizedBox(height: 16),
             Text(
               'Нет данных для отображения',
               style: TextStyle(
                 fontSize: 16,
-                color: AppColors.grey,
+                color: AppColors.neutral_50,
               ),
             ),
           ],
@@ -128,7 +128,7 @@ class _DailyExamViewScreenState extends State<DailyExamViewScreen> {
                   : 'Дата не указана',
               style: const TextStyle(
                 fontSize: 14,
-                color: AppColors.grey,
+                color: AppColors.neutral_50,
                 fontWeight: FontWeight.w500,
               ),
             ),

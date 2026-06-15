@@ -35,14 +35,14 @@ class TextInputField extends StatelessWidget {
   Widget build(BuildContext context) {
     final borderColor = showError && errorText != null
         ? AppColors.error
-        : AppColors.border;
+        : AppColors.neutral_25;
 
     return GestureDetector(
       onTap: onTap,
       child: Container(
         padding: EdgeInsets.symmetric(horizontal: 16, vertical: maxLines > 1 ? 12 : 4),
         decoration: BoxDecoration(
-          color: AppColors.background,
+          color: AppColors.neutral_5,
           border: Border.all(color: borderColor),
           borderRadius: BorderRadius.circular(8),
         ),

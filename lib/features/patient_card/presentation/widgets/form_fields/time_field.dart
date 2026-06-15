@@ -24,8 +24,8 @@ class TimeField extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
         decoration: BoxDecoration(
-          color: AppColors.background,
-          border: Border.all(color: AppColors.border),
+          color: AppColors.neutral_5,
+          border: Border.all(color: AppColors.neutral_25),
           borderRadius: BorderRadius.circular(8),
         ),
         child: Row(
@@ -35,7 +35,7 @@ class TimeField extends StatelessWidget {
             Text(
               displayText,
               style: TextStyle(
-                color: timeDisplay.isEmpty ? AppColors.grey : AppColors.black,
+                color: timeDisplay.isEmpty ? AppColors.neutral_50 : AppColors.neutral_90,
               ),
             ),
           ],

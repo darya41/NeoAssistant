@@ -4,53 +4,53 @@ const AuthModel = require('../models/auth');
 
 const AuthController = {
     async register(req, res) {
-            try {
-                const {
-                    email, password,
-                    last_name, first_name, middle_name,
-                    personal_phone, specialization_id
-                } = req.body;
+        try {
+            const {
+                email, password,
+                last_name, first_name, middle_name,
+                personal_phone, specialization_id
+            } = req.body;
 
-                if (!email || !password || !last_name || !first_name || !specialization_id) {
-                    return res.status(400).json({
-                        success: false,
-                        error: 'Заполните все обязательные поля'
-                    });
-                }
-
-                const emailExists = await AuthModel.emailExists(email);
-
-                if (emailExists) {
-                    return res.status(400).json({
-                        success: false,
-                        error: 'Пользователь с таким email уже существует'
-                    });
-                }
-
-                const hashedPassword = await bcrypt.hash(password, 10);
-
-                await AuthModel.createDoctor({
-                    email,
-                    hashedPassword,
-                    last_name,
-                    first_name,
-                    middle_name,
-                    personal_phone,
-                    specialization_id
-                });
-
-                res.status(201).json({
-                    success: true,
-                    message: 'Регистрация успешна'
-                });
-
-            } catch (error) {
-                res.status(500).json({
+            if (!email || !password || !last_name || !first_name || !specialization_id) {
+                return res.status(400).json({
                     success: false,
-                    error: 'Ошибка при регистрации: ' + error.message
+                    error: 'Заполните все обязательные поля'
                 });
             }
-        },
+
+            const emailExists = await AuthModel.emailExists(email);
+
+            if (emailExists) {
+                return res.status(400).json({
+                    success: false,
+                    error: 'Пользователь с таким email уже существует'
+                });
+            }
+
+            const hashedPassword = await bcrypt.hash(password, 10);
+
+            await AuthModel.createDoctor({
+                email,
+                hashedPassword,
+                last_name,
+                first_name,
+                middle_name,
+                personal_phone,
+                specialization_id
+            });
+
+            res.status(201).json({
+                success: true,
+                message: 'Регистрация успешна'
+            });
+
+        } catch (error) {
+            res.status(500).json({
+                success: false,
+                error: 'Ошибка при регистрации: ' + error.message
+            });
+        }
+    },
 
     async login(req, res) {
         try {
@@ -102,7 +102,8 @@ const AuthController = {
                     lastName: doctor.last_name,
                     patronymic: doctor.patronymic,
                     phone: doctor.work_phone,
-                    specialization: doctor.specialization_name
+                    specialization: doctor.specialization_name,
+                    tech_level_id: doctor.tech_level_id,
                 }
             });
 

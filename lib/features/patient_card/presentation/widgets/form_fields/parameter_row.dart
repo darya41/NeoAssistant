@@ -36,7 +36,7 @@ class ParameterRow extends StatelessWidget {
               text: displayValue,
               style: TextStyle(
                 fontWeight: FontWeight.normal,
-                color: hasValue ? Colors.black87 : AppColors.grey,
+                color: hasValue ? Colors.black87 : AppColors.neutral_50,
               ),
             ),
           ],

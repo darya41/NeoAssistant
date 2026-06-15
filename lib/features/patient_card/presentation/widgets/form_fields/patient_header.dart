@@ -22,7 +22,7 @@ class PatientHeader extends StatelessWidget {
           numberHistory,
           style: const TextStyle(
             fontSize: 18,
-            color: AppColors.grey,
+            color: AppColors.neutral_50,
           ),
         ),
         const SizedBox(height: 5),

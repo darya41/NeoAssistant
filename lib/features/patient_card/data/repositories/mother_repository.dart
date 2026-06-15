@@ -1,6 +1,6 @@
 // data/repositories/mother_repository.dart
 import 'dart:developer';
-import '../../../../models/mother.dart';
+import '../../domain/entities/mother.dart';
 import '../services/mother_service.dart';
 
 class MotherRepository {

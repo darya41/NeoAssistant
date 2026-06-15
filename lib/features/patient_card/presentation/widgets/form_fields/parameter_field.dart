@@ -58,9 +58,9 @@ class ParameterField extends StatelessWidget {
                 vertical: 10,
               ),
               decoration: BoxDecoration(
-                color: isSelected ? AppColors.brand_40 : AppColors.background,
+                color: isSelected ? AppColors.brand_40 : AppColors.neutral_5,
                 border: Border.all(
-                  color: isSelected ? AppColors.brand_40 : AppColors.border,
+                  color: isSelected ? AppColors.brand_40 : AppColors.neutral_25,
                   width: 1,
                 ),
                 borderRadius: BorderRadius.circular(20),
@@ -68,7 +68,7 @@ class ParameterField extends StatelessWidget {
               child: Text(
                 option,
                 style: TextStyle(
-                  color: isSelected ? AppColors.white : AppColors.black,
+                  color: isSelected ? AppColors.neutral_0 : AppColors.neutral_90,
                   fontSize: 14,
                 ),
               ),
@@ -81,8 +81,8 @@ class ParameterField extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16),
       decoration: BoxDecoration(
-        color: AppColors.background,
-        border: Border.all(color: AppColors.border),
+        color: AppColors.neutral_5,
+        border: Border.all(color: AppColors.neutral_25),
         borderRadius: BorderRadius.circular(8),
       ),
       child: DropdownButton<String>(
@@ -105,8 +105,8 @@ class ParameterField extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
       decoration: BoxDecoration(
-        color: AppColors.background,
-        border: Border.all(color: AppColors.border),
+        color: AppColors.neutral_5,
+        border: Border.all(color: AppColors.neutral_25),
         borderRadius: BorderRadius.circular(8),
       ),
       child: TextField(

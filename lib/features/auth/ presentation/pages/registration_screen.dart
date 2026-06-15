@@ -79,7 +79,7 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
         backgroundColor: AppColors.brand_40 ,
         leading: IconWidgets.backIcon(
           onTap: _handlePreviousStep,
-          color: AppColors.white,
+          color: AppColors.neutral_0,
         ),
       ),
       body: _viewModel.isLoading

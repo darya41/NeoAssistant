@@ -8,6 +8,7 @@ class TokenStorage {
   static const _refreshTokenKey = 'refresh_token';
   static const _doctorDataKey = 'doctor_data';
   static const _isGuestKey = 'is_guest_mode';
+  static const String _keyTechLevelId = 'tech_level_id';
 
   static Future<void> saveTokens({
     required String accessToken,
@@ -18,6 +19,10 @@ class TokenStorage {
     await _storage.write(key: _refreshTokenKey, value: refreshToken);
     await _storage.write(key: _doctorDataKey, value: json.encode(doctorData));
     await _storage.write(key: _isGuestKey, value: 'false');
+
+    if (doctorData['tech_level_id'] != null) {
+      await saveTechLevelId(doctorData['tech_level_id']);
+    }
   }
 
   static Future<void> saveGuestMode() async {
@@ -58,13 +63,37 @@ class TokenStorage {
     return token != null && token.isNotEmpty && !isGuest;
   }
 
-  static Future<void> clearAll() async {
-    await _storage.deleteAll();
-  }
-
   static Future<void> saveDoctorData(Map<String, dynamic> doctorData) async {
     final currentData = await getDoctorData() ?? {};
     final updatedData = {...currentData, ...doctorData};
     await _storage.write(key: _doctorDataKey, value: json.encode(updatedData));
+
+    if (doctorData['tech_level_id'] != null) {
+      await saveTechLevelId(doctorData['tech_level_id']);
+    }
+  }
+
+  static Future<void> saveTechLevelId(int techLevelId) async {
+    await _storage.write(key: _keyTechLevelId, value: techLevelId.toString());
+  }
+
+  static Future<int?> getTechLevelId() async {
+    final value = await _storage.read(key: _keyTechLevelId);
+    if (value != null && value.isNotEmpty) {
+      return int.tryParse(value);
+    }
+    return null;
+  }
+
+  static Future<void> clearAll() async {
+    await _storage.delete(key: _accessTokenKey);
+    await _storage.delete(key: _refreshTokenKey);
+    await _storage.delete(key: _doctorDataKey);
+    await _storage.delete(key: _isGuestKey);
+    await _storage.delete(key: _keyTechLevelId);
+  }
+
+  static Future<void> clearTechLevelId() async {
+    await _storage.delete(key: _keyTechLevelId);
   }
 }

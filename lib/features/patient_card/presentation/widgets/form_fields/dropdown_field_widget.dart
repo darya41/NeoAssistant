@@ -26,8 +26,8 @@ class DropdownFieldWidget<T> extends StatelessWidget {
       width: width,
       padding: const EdgeInsets.symmetric(horizontal: 8),
       decoration: BoxDecoration(
-        color: AppColors.background,
-        border: Border.all(color: AppColors.border),
+        color: AppColors.neutral_5,
+        border: Border.all(color: AppColors.neutral_25),
         borderRadius: BorderRadius.circular(8),
       ),
       child: DropdownButton<T>(

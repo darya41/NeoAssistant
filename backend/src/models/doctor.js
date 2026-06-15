@@ -72,7 +72,31 @@ class DoctorModel {
                 [doctorId]
             );
             return rows[0];
-        }
+    }
+
+    static async getDoctorTechLevel(doctorId) {
+            const [rows] = await db.query(
+                `SELECT d.doctor_id, d.first_name, d.last_name, d.patronymic,
+                        tl.id as tech_level_id,
+                        tl.name as tech_level_name,
+                        tl.priority
+                 FROM doctors d
+                 LEFT JOIN technological_level tl ON d.tech_level_id = tl.id
+                 WHERE d.doctor_id = ?`,
+                [doctorId]
+            );
+            return rows[0];
+    }
+
+    static async updateDoctorTechLevel(doctorId, techLevelId) {
+            const [result] = await db.query(
+                'UPDATE doctors SET tech_level_id = ? WHERE doctor_id = ?',
+                [techLevelId, doctorId]
+            );
+            return result.affectedRows > 0;
+    }
+
+
 }
 
 module.exports = DoctorModel;

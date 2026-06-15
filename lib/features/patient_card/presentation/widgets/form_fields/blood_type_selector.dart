@@ -68,11 +68,11 @@ class BloodTypeSelector extends StatelessWidget {
                   Container(
                     padding: const EdgeInsets.symmetric(horizontal: 16),
                     decoration: BoxDecoration(
-                      color: AppColors.background,
+                      color: AppColors.neutral_5,
                       border: Border.all(
                         color: (showValidationErrors && bloodGroupError != null)
                             ? AppColors.error
-                            : AppColors.border,
+                            : AppColors.neutral_25,
                       ),
                       borderRadius: BorderRadius.circular(8),
                     ),
@@ -121,11 +121,11 @@ class BloodTypeSelector extends StatelessWidget {
                   Container(
                     padding: const EdgeInsets.symmetric(horizontal: 16),
                     decoration: BoxDecoration(
-                      color: AppColors.background,
+                      color: AppColors.neutral_5,
                       border: Border.all(
                         color: (showValidationErrors && rhFactorError != null)
                             ? AppColors.error
-                            : AppColors.border,
+                            : AppColors.neutral_25,
                       ),
                       borderRadius: BorderRadius.circular(8),
                     ),

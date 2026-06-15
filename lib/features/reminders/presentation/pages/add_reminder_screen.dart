@@ -83,7 +83,7 @@ class _AddReminderScreenState extends State<AddReminderScreen> {
                   onTitleChanged: (text) {},
                   onDateTap: _handleDateTap,
                   onDescriptionChanged: (text) {},
-                  backgroundColor: AppColors.background,
+                  backgroundColor: AppColors.neutral_5,
                   titleController: _viewModel.titleController,
                   descriptionController: _viewModel.descriptionController,
                 ),
