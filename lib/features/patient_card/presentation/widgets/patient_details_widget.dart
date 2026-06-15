@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../../../core/constants/app_colors.dart';
-import '../../../../models/patient.dart';
+import '../../domain/entities/patient.dart';
 import '../../../../shared/widgets/buttons/continue_button.dart';
 import '../../data/repositories/mother_repository.dart';
 import '../../domain/models/patient_details_state.dart';
@@ -149,8 +149,8 @@ class _PatientDetailsWidgetState extends State<PatientDetailsWidget> {
           isEnabled: true,
           onPressed: widget.onPrimaryExamTap,
           text: 'Первичный осмотр',
-          backgroundColor: AppColors.white,
-          borderColor: AppColors.grey,
+          backgroundColor: AppColors.neutral_0,
+          borderColor: AppColors.neutral_50,
         ),
         const SizedBox(height: 8),
 
@@ -158,8 +158,8 @@ class _PatientDetailsWidgetState extends State<PatientDetailsWidget> {
           isEnabled: true,
           onPressed: widget.onGenerateEpicrisisTap,
           text: 'Сгенерировать эпикриз',
-          backgroundColor: AppColors.white,
-          borderColor: AppColors.grey,
+          backgroundColor: AppColors.neutral_0,
+          borderColor: AppColors.neutral_50,
         ),
       ],
     );
@@ -194,12 +194,12 @@ class _PatientDetailsWidgetState extends State<PatientDetailsWidget> {
                     Icon(
                       Icons.show_chart,
                       size: 48,
-                      color: AppColors.grey,
+                      color: AppColors.neutral_50,
                     ),
                     SizedBox(height: 8),
                     Text(
                       'График веса будет отображаться здесь',
-                      style: TextStyle(color: AppColors.grey),
+                      style: TextStyle(color: AppColors.neutral_50),
                     ),
                   ],
                 ),

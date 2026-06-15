@@ -199,7 +199,7 @@ class SearchFieldState extends State<SearchField> {
       width: 38,
       height: 40,
       decoration: BoxDecoration(
-        color: AppColors.white,
+        color: AppColors.neutral_0,
         borderRadius: BorderRadius.circular(10),
       ),
       child: IconWidgets.addIcon(

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:neo_friend/features/profile/presentation/pages/settings_screen.dart';
 import '../../../../core/constants/app_colors.dart';
-import '../../../../models/patient.dart';
+import '../../../patient_card/domain/entities/patient.dart';
 import '../../../../shared/widgets/block/patient_card.dart';
 import '../../../auth/ presentation/pages/login_screen.dart';
 import '../../../main/presentation/pages/home_screen.dart';

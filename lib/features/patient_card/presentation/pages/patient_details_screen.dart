@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../../../../models/patient.dart';
+import '../../domain/entities/patient.dart';
 import '../view_models/patient_details_viewmodel.dart';
 import '../widgets/patient_details_widget.dart';
 

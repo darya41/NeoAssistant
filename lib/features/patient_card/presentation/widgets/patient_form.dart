@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../../../../models/mother.dart';
+import '../../domain/entities/mother.dart';
 import 'form_fields/blood_type_selector.dart';
 import 'form_fields/date_field.dart';
 import 'form_fields/gender_selector.dart';

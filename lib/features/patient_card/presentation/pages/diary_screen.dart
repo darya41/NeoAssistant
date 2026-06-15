@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_strings.dart';
-import '../../../../models/diary_entry.dart';
+import '../../domain/entities/diary_entry.dart';
 import '../../../../core/utils/date_formatter.dart';
 import '../view_models/diary_viewmodel.dart';
 import 'add_daily_exam_screen.dart';
@@ -71,9 +71,9 @@ class _DiaryScreenState extends State<DiaryScreen> {
               icon: const Icon(Icons.arrow_back),
               onPressed: _goBack,
             ),
-            backgroundColor: AppColors.white,
+            backgroundColor: AppColors.neutral_0,
             elevation: 0,
-            foregroundColor: AppColors.black,
+            foregroundColor: AppColors.neutral_90,
             actions: [
               PopupMenuButton<String>(
                 onSelected: (value) {
@@ -156,14 +156,14 @@ class _DiaryScreenState extends State<DiaryScreen> {
                   Icon(
                     Icons.medical_information,
                     size: 64,
-                    color: AppColors.grey,
+                    color: AppColors.neutral_50,
                   ),
                   SizedBox(height: 16),
                   Text(
                     'Нет записей',
                     style: TextStyle(
                       fontSize: 16,
-                      color: AppColors.grey,
+                      color: AppColors.neutral_50,
                     ),
                   ),
                   SizedBox(height: 16),
@@ -179,7 +179,7 @@ class _DiaryScreenState extends State<DiaryScreen> {
                 onPressed: _addObservation,
                 style: ElevatedButton.styleFrom(
                   backgroundColor: AppColors.brand_40,
-                  foregroundColor: AppColors.white,
+                  foregroundColor: AppColors.neutral_0,
                   padding: const EdgeInsets.symmetric(vertical: 14),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(12),
@@ -223,7 +223,7 @@ class _DiaryScreenState extends State<DiaryScreen> {
               onPressed: _addObservation,
               style: ElevatedButton.styleFrom(
                 backgroundColor: AppColors.brand_40,
-                foregroundColor: AppColors.white,
+                foregroundColor: AppColors.neutral_0,
                 padding: const EdgeInsets.symmetric(vertical: 14),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(12),
@@ -290,7 +290,7 @@ class _DiaryScreenState extends State<DiaryScreen> {
         margin: const EdgeInsets.only(bottom: 12),
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
-          color: AppColors.white,
+          color: AppColors.neutral_0,
           borderRadius: BorderRadius.circular(12),
           boxShadow: [
             BoxShadow(

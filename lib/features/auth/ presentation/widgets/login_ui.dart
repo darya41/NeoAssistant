@@ -30,7 +30,7 @@ class LoginUI extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.white,
+      backgroundColor: AppColors.neutral_0,
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 24),
@@ -44,7 +44,7 @@ class LoginUI extends StatelessWidget {
                 style: TextStyle(
                   fontSize: 32,
                   fontWeight: FontWeight.bold,
-                  color: AppColors.black,
+                  color: AppColors.neutral_90,
                 ),
               ),
 
@@ -86,7 +86,7 @@ class LoginUI extends StatelessWidget {
                   children: [
                     const Text(
                       'Ещё нет аккаунта?',
-                      style: TextStyle(fontSize: 14, color: AppColors.grey),
+                      style: TextStyle(fontSize: 14, color: AppColors.neutral_50),
                     ),
                     const SizedBox(height: 8),
                     TextButton(

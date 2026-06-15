@@ -88,7 +88,7 @@ class _LoginFormState extends State<LoginForm> {
             contentPadding: EdgeInsets.zero,
             isDense: true,
             hintText: 'Электронная почта',
-            hintStyle: TextStyle(fontSize: 16, color: AppColors.grey),
+            hintStyle: TextStyle(fontSize: 16, color: AppColors.neutral_50),
           ),
           style: const TextStyle(fontSize: 16),
           onChanged: (_) {
@@ -122,7 +122,7 @@ class _LoginFormState extends State<LoginForm> {
                   contentPadding: EdgeInsets.zero,
                   isDense: true,
                   hintText: 'Пароль',
-                  hintStyle: TextStyle(fontSize: 16, color: AppColors.grey),
+                  hintStyle: TextStyle(fontSize: 16, color: AppColors.neutral_50),
                 ),
                 style: const TextStyle(fontSize: 16),
                 onChanged: (_) {

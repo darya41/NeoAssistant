@@ -1,4 +1,4 @@
-import '../../../../models/address.dart';
+import '../../domain/entities/address.dart';
 import '../services/address_service.dart';
 
 class AddressRepository {

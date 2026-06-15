@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../../../../core/constants/app_colors.dart';
-import '../../../../../models/mother.dart';
+import '../../../domain/entities/mother.dart';
 import '../../../data/repositories/mother_repository.dart';
 import '../../pages/add_mother_screen.dart';
 
@@ -9,8 +9,8 @@ class MotherSearchField extends StatefulWidget {
   final Function(Mother) onMotherSelected;
   final String? errorText;
 
-  static const _defaultBackgroundColor = AppColors.background;
-  static const _borderColor = AppColors.border;
+  static const _defaultBackgroundColor = AppColors.neutral_5;
+  static const _borderColor = AppColors.neutral_25;
   static const _activeColor = AppColors.brand_40;
 
   const MotherSearchField({
@@ -197,12 +197,12 @@ class _MotherSearchFieldState extends State<MotherSearchField> {
           Container(
             margin: const EdgeInsets.only(top: 4),
             decoration: BoxDecoration(
-              color: AppColors.white,
+              color: AppColors.neutral_0,
               border: Border.all(color: MotherSearchField._borderColor),
               borderRadius: BorderRadius.circular(8),
               boxShadow: [
                 BoxShadow(
-                  color: AppColors.black,
+                  color: AppColors.neutral_90,
                   blurRadius: 4,
                   offset: const Offset(0, 2),
                 ),

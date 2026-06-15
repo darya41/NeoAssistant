@@ -5,7 +5,7 @@ import '../../../../core/storage/token_storage.dart';
 import '../../data/repositories/exam_parameter_repository.dart';
 import '../../data/repositories/patient_repository.dart';
 import '../../domain/entities/medical_parameter.dart';
-import '../../../../models/mother.dart';
+import '../../domain/entities/mother.dart';
 import '../../data/repositories/patient_exam_repository.dart';
 
 class AddPatientViewModel extends ChangeNotifier {

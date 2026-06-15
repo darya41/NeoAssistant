@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../../../core/constants/app_colors.dart';
-import '../../../../models/address.dart';
-import '../../../../models/mother.dart';
+import '../../domain/entities/address.dart';
+import '../../domain/entities/mother.dart';
 import '../../data/repositories/address_repository.dart';
 import '../../data/repositories/mother_repository.dart';
 

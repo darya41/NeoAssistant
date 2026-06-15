@@ -1,5 +1,5 @@
 import '../../../../core/network/api_client.dart';
-import '../../../../models/mother.dart';
+import '../../domain/entities/mother.dart';
 
 class MotherService {
 

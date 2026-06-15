@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../../../../models/patient.dart';
+import '../../domain/entities/patient.dart';
 import '../../data/repositories/favorite_repository.dart';
 import '../pages/diary_screen.dart';
 import '../pages/primary_exam_view_screen.dart';

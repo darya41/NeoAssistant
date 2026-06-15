@@ -22,14 +22,14 @@ class DateField extends StatelessWidget {
   Widget build(BuildContext context) {
     final borderColor = showError && errorText != null
         ? AppColors.error
-        : AppColors.border;
+        : AppColors.neutral_25;
 
     return GestureDetector(
       onTap: onTap,
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
         decoration: BoxDecoration(
-          color: AppColors.background,
+          color: AppColors.neutral_5,
           border: Border.all(color: borderColor),
           borderRadius: BorderRadius.circular(8),
         ),
@@ -43,7 +43,7 @@ class DateField extends StatelessWidget {
                     ? hintText
                     : '${selectedDate!.day}.${selectedDate!.month}.${selectedDate!.year}',
                 style: TextStyle(
-                  color: selectedDate == null ? AppColors.grey : AppColors.black,
+                  color: selectedDate == null ? AppColors.neutral_50 : AppColors.neutral_90,
                 ),
               ),
             ),

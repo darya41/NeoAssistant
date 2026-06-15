@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../../../../models/diary_entry.dart';
+import '../../domain/entities/diary_entry.dart';
 import '../../data/repositories/patient_exam_repository.dart';
 import 'dart:developer';
 

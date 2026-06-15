@@ -1,5 +1,5 @@
 import '../../../../core/network/api_client.dart';
-import '../../../../models/address.dart';
+import '../../domain/entities/address.dart';
 
 class AddressService {
 
