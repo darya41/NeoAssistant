@@ -6,7 +6,9 @@ import '../view_model/protocol_list_viewmodel.dart';
 import 'protocol_card.dart';
 
 class ProtocolsList extends StatefulWidget {
-  const ProtocolsList({super.key});
+  final int? techLevelId;
+
+  const ProtocolsList({super.key, this.techLevelId});
 
   @override
   State<ProtocolsList> createState() => _ProtocolsListState();
@@ -18,7 +20,7 @@ class _ProtocolsListState extends State<ProtocolsList> {
   @override
   void initState() {
     super.initState();
-    _viewModel = ProtocolListViewModel();
+    _viewModel = ProtocolListViewModel(techLevelId: widget.techLevelId);
   }
 
   @override

@@ -49,18 +49,22 @@ class SettingsViewModel extends ChangeNotifier {
     notifyListeners();
 
     try {
-     try {
+      try {
         final refreshToken = await TokenStorage.getRefreshToken();
-        if (refreshToken != null) {
-          await ApiClient.post('auth/logout', {
+        if (refreshToken != null && refreshToken.isNotEmpty) {
+          await ApiClient.postAuth('auth/logout', {
             'refreshToken': refreshToken,
+          }).catchError((e) {
+            print('Logout API error (ignored): $e');
+            return null;
           });
         }
       } catch (e) {
-        print('Logout API error: $e');
+        print('Logout API error (ignored): $e');
       }
 
       await TokenStorage.clearAll();
+      await TokenStorage.clearTechLevelId();
 
       _isLoggingOut = false;
       notifyListeners();

@@ -6,9 +6,10 @@ class ProtocolController {
             const page = parseInt(req.query.page) || 1;
             const limit = parseInt(req.query.limit) || 20;
             const offset = (page - 1) * limit;
+            const techLevelId = req.query.techLevelId ? parseInt(req.query.techLevelId) : null;
 
-            const rows = await ProtocolModel.getProtocolListPaginated(limit, offset);
-            const total = await ProtocolModel.getProtocolListCount();
+            const rows = await ProtocolModel.getProtocolListPaginated(limit, offset, techLevelId);
+            const total = await ProtocolModel.getProtocolListCount(techLevelId);
 
             const hasNext = offset + limit < total;
 
@@ -23,6 +24,7 @@ class ProtocolController {
                 }
             });
         } catch (error) {
+            console.error('[getProtocolListPaginated] ERROR:', error.message);
             res.status(500).json({
                 success: false,
                 error: 'Error fetching paginated protocols: ' + error.message
@@ -125,6 +127,7 @@ class ProtocolController {
     async searchProtocols(req, res) {
         try {
             const { q } = req.query;
+            const techLevelId = req.query.techLevelId ? parseInt(req.query.techLevelId) : null;
 
             if (!q || q.trim().length < 1) {
                 return res.status(400).json({
@@ -137,8 +140,8 @@ class ProtocolController {
             const limit = parseInt(req.query.limit) || 20;
             const offset = (page - 1) * limit;
 
-            const rows = await ProtocolModel.searchProtocols(q, limit, offset);
-            const total = await ProtocolModel.searchProtocolsCount(q);
+            const rows = await ProtocolModel.searchProtocols(q, limit, offset, techLevelId);
+            const total = await ProtocolModel.searchProtocolsCount(q, techLevelId);
 
             const hasNext = offset + limit < total;
 
@@ -168,9 +171,10 @@ class ProtocolController {
             const page = parseInt(req.query.page) || 1;
             const limit = parseInt(req.query.limit) || 20;
             const offset = (page - 1) * limit;
+            const techLevelId = req.query.techLevelId ? parseInt(req.query.techLevelId) : null;
 
-            const rows = await ProtocolModel.getProtocolsByMedicationId(medicationId, limit, offset);
-            const total = await ProtocolModel.getProtocolsByMedicationIdCount(medicationId);
+            const rows = await ProtocolModel.getProtocolsByMedicationId(medicationId, limit, offset, techLevelId);
+            const total = await ProtocolModel.getProtocolsByMedicationIdCount(medicationId, techLevelId);
 
             const hasNext = offset + limit < total;
 
@@ -200,9 +204,10 @@ class ProtocolController {
             const page = parseInt(req.query.page) || 1;
             const limit = parseInt(req.query.limit) || 20;
             const offset = (page - 1) * limit;
+            const techLevelId = req.query.techLevelId ? parseInt(req.query.techLevelId) : null;
 
-            const rows = await ProtocolModel.getProtocolsByDiagnosticId(diagnosticId, limit, offset);
-            const total = await ProtocolModel.getProtocolsByDiagnosticIdCount(diagnosticId);
+            const rows = await ProtocolModel.getProtocolsByDiagnosticId(diagnosticId, limit, offset, techLevelId);
+            const total = await ProtocolModel.getProtocolsByDiagnosticIdCount(diagnosticId, techLevelId);
 
             const hasNext = offset + limit < total;
 
@@ -226,15 +231,15 @@ class ProtocolController {
     }
 
     async getProtocolsByMkbId(req, res) {
-
         try {
             const { mkbId } = req.params;
             const page = parseInt(req.query.page) || 1;
             const limit = parseInt(req.query.limit) || 20;
             const offset = (page - 1) * limit;
+            const techLevelId = req.query.techLevelId ? parseInt(req.query.techLevelId) : null;
 
-            const rows = await ProtocolModel.getProtocolsByMkbId(mkbId, limit, offset);
-            const total = await ProtocolModel.getProtocolsByMkbIdCount(mkbId);
+            const rows = await ProtocolModel.getProtocolsByMkbId(mkbId, limit, offset, techLevelId);
+            const total = await ProtocolModel.getProtocolsByMkbIdCount(mkbId, techLevelId);
 
             const hasNext = offset + limit < total;
 

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:neo_friend/core/constants/app_colors.dart';
 import '../../domain/entities/protocol_list_item.dart';
 import '../page/protocol_detail_screen.dart';
 
@@ -19,7 +20,7 @@ class ProtocolCard extends StatelessWidget {
         borderRadius: BorderRadius.circular(12),
       ),
       child: InkWell(
-        onTap: () => _navigateToDetail(context),
+        onTap: () async => _navigateToDetail(context),
         borderRadius: BorderRadius.circular(12),
         child: Padding(
           padding: const EdgeInsets.all(16),
@@ -34,7 +35,7 @@ class ProtocolCard extends StatelessWidget {
                       style: const TextStyle(
                         fontSize: 18,
                         fontWeight: FontWeight.bold,
-                        color: Colors.black,
+                        color: AppColors.neutral_90,
                       ),
                     ),
                     TextSpan(
@@ -42,7 +43,7 @@ class ProtocolCard extends StatelessWidget {
                       style: TextStyle(
                         fontSize: 18,
                         fontWeight: FontWeight.normal,
-                        color: Colors.grey[600],
+                        color: AppColors.neutral_50,
                         height: 1.5,
                       ),
                     ),
@@ -51,7 +52,7 @@ class ProtocolCard extends StatelessWidget {
                       style: TextStyle(
                         fontSize: 15,
                         fontWeight: FontWeight.normal,
-                        color: Colors.grey[800],
+                        color: AppColors.neutral_60,
                         height: 1.5,
                       ),
                     ),

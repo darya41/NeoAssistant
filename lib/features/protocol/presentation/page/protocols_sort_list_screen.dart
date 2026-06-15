@@ -14,12 +14,14 @@ class ProtocolsSortListScreen extends StatefulWidget {
   final int sourceId;
   final String sourceName;
   final ProtocolsSourceType sourceType;
+  final int? techLevelId; // Добавляем параметр
 
   const ProtocolsSortListScreen({
     super.key,
     required this.sourceId,
     required this.sourceName,
     required this.sourceType,
+    this.techLevelId, // Добавляем
   });
 
   @override
@@ -32,7 +34,8 @@ class _ProtocolsSortListScreenState extends State<ProtocolsSortListScreen> {
   @override
   void initState() {
     super.initState();
-    _viewModel = ProtocolsSortListViewmodel();
+    // Передаем techLevelId в ViewModel
+    _viewModel = ProtocolsSortListViewmodel(techLevelId: widget.techLevelId);
     _loadProtocols();
   }
 
@@ -131,7 +134,7 @@ class _ProtocolsSortListScreenState extends State<ProtocolsSortListScreen> {
         message = 'Исследование "${widget.sourceName}" не используется в протоколах';
         break;
       case ProtocolsSourceType.mkb:
-        icon = Icons.medical_information;
+        icon = Icons.code;
         message = 'Код МКБ "${widget.sourceName}" не используется в протоколах';
         break;
     }

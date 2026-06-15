@@ -17,6 +17,7 @@ class ProtocolsSortListViewmodel extends ChangeNotifier {
   bool _isLoading = false;
   bool _isLoadingMore = false;
   bool _hasNext = true;
+  final int? techLevelId;
 
   List<ProtocolListItem> get items => _items;
   bool get isLoading => _isLoading;
@@ -25,6 +26,8 @@ class ProtocolsSortListViewmodel extends ChangeNotifier {
   String? get error => _error;
   bool get hasItems => _items.isNotEmpty;
   bool get isFirstPage => _currentPage == 1;
+
+  ProtocolsSortListViewmodel({this.techLevelId});
 
   void loadProtocolsByMedication(int medicationId) {
     _sourceId = medicationId;
@@ -75,7 +78,7 @@ class ProtocolsSortListViewmodel extends ChangeNotifier {
       _updatePaginationState(result['items']);
     } catch (e) {
       _error = e.toString();
-      debugPrint('[ProtocolsBySourceViewModel] Error: $_error');
+      debugPrint('[ProtocolsSortListViewmodel] Error: $_error');
     } finally {
       _finishLoading();
     }
@@ -95,18 +98,21 @@ class ProtocolsSortListViewmodel extends ChangeNotifier {
         medicationId: _sourceId!,
         page: _currentPage,
         limit: _pageSize,
+        techLevelId: techLevelId,
       );
     } else if (_sourceType == 'diagnostic') {
       return await _repository.getProtocolsByDiagnosticPaginated(
         diagnosticId: _sourceId!,
         page: _currentPage,
         limit: _pageSize,
+        techLevelId: techLevelId,
       );
     } else {
       return await _repository.getProtocolsByMkbPaginated(
         mkbId: _sourceId!,
         page: _currentPage,
         limit: _pageSize,
+        techLevelId: techLevelId,
       );
     }
   }

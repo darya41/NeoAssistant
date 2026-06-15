@@ -20,6 +20,7 @@ class DoctorProfileViewModel extends ChangeNotifier {
   Doctor? get doctor => _doctor;
   bool get isLoading => _isLoading;
   String? get errorMessage => _errorMessage;
+  int? get techLevelId => _doctor?.techLevelId;
 
   DoctorProfileViewModel() {
     _checkTokenAndLoadData();
@@ -143,6 +144,20 @@ class DoctorProfileViewModel extends ChangeNotifier {
     } catch (e) {
       return null;
     }
+  }
+
+  Future<int?> getCurrentTechLevelId() async {
+    if (_doctor?.techLevelId != null) {
+      return _doctor!.techLevelId;
+    }
+
+    final data = await TokenStorage.getDoctorData();
+    if (data != null) {
+      final doctor = Doctor.fromJson(data);
+      return doctor.techLevelId;
+    }
+
+    return null;
   }
 
   void navigateToPatientDetails(BuildContext context, Patient patient) {

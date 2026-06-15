@@ -8,11 +8,16 @@ import '../services/protocol_service.dart';
 class ProtocolRepository {
   final ProtocolService _service = ProtocolService();
 
-  Future<Map<String, dynamic>> getProtocolListPaginated({int page = 1, int limit = 20, }) async {
+  Future<Map<String, dynamic>> getProtocolListPaginated({
+    int page = 1,
+    int limit = 20,
+    int? techLevelId,
+  }) async {
     try {
       final response = await _service.getProtocolFlatListPaginated(
         page: page,
         limit: limit,
+        techLevelId: techLevelId, // Добавляем
       );
 
       if (response['success'] != true) {
@@ -168,11 +173,17 @@ class ProtocolRepository {
 
 
   Future<Map<String, dynamic>> searchProtocolsPaginated({
-    required String query, int page = 1, int limit = 20,
+    required String query,
+    int page = 1,
+    int limit = 20,
+    int? techLevelId,
   }) async {
     try {
       final response = await _service.searchProtocols(
-        query: query, page: page, limit: limit,
+        query: query,
+        page: page,
+        limit: limit,
+        techLevelId: techLevelId, // Добавляем
       );
 
       if (response['success'] != true) {
@@ -227,11 +238,17 @@ class ProtocolRepository {
   }
 
   Future<Map<String, dynamic>> getProtocolsByMedicationPaginated({
-    required int medicationId, int page = 1, int limit = 20,
+    required int medicationId,
+    int page = 1,
+    int limit = 20,
+    int? techLevelId,
   }) async {
     try {
       final response = await _service.getProtocolsByMedication(
-        medicationId: medicationId, page: page, limit: limit,
+        medicationId: medicationId,
+        page: page,
+        limit: limit,
+        techLevelId: techLevelId, // Добавляем
       );
 
       if (response['success'] != true) {
@@ -257,11 +274,17 @@ class ProtocolRepository {
   }
 
   Future<Map<String, dynamic>> getProtocolsByDiagnosticPaginated({
-    required int diagnosticId, int page = 1, int limit = 20,
+    required int diagnosticId,
+    int page = 1,
+    int limit = 20,
+    int? techLevelId, // Добавляем параметр
   }) async {
     try {
       final response = await _service.getProtocolsByDiagnostic(
-        diagnosticId: diagnosticId, page: page, limit: limit,
+        diagnosticId: diagnosticId,
+        page: page,
+        limit: limit,
+        techLevelId: techLevelId, // Добавляем
       );
 
       if (response['success'] != true) {
@@ -287,11 +310,17 @@ class ProtocolRepository {
   }
 
   Future<Map<String, dynamic>> getProtocolsByMkbPaginated({
-    required int mkbId, int page = 1, int limit = 20,
+    required int mkbId,
+    int page = 1,
+    int limit = 20,
+    int? techLevelId, // Добавляем параметр
   }) async {
     try {
       final response = await _service.getProtocolsByMkb(
-        mkbId: mkbId, page: page, limit: limit,
+        mkbId: mkbId,
+        page: page,
+        limit: limit,
+        techLevelId: techLevelId, // Добавляем
       );
 
       if (response['success'] != true) {

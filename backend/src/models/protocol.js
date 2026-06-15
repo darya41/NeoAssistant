@@ -1,36 +1,49 @@
 const db = require('../config/database');
 
 class ProtocolModel {
-   static async getProtocolListPaginated(limit, offset) {
-       const query = `
-           SELECT
-               ph.id as hierarchy_id,
-               ph.protocol_document_id,
-               ph.title as hierarchy_title,
-               ph.level,
-               ph.parent_id,
-               ph.content,
-               pd.title as protocol_title,
-               pd.adoption_date
-           FROM protocol_hierarchy ph
-           JOIN protocol_document pd ON ph.protocol_document_id = pd.id
-           WHERE EXISTS (
-                 SELECT 1
-                 FROM protocol_hierarchy child
-                 WHERE child.parent_id = ph.id
-                   AND child.content IS NOT NULL
-                   AND child.content != ''
-             )
-           ORDER BY pd.adoption_date DESC, ph.sort_order
-           LIMIT ? OFFSET ?
-       `;
+    static async getProtocolListPaginated(limit, offset, techLevelId = null) {
 
-       const [rows] = await db.query(query, [limit, offset]);
-       return rows;
-   }
+        let query = `
+          SELECT
+              ph.id as hierarchy_id,
+              ph.protocol_document_id,
+              ph.title as hierarchy_title,
+              ph.level,
+              ph.parent_id,
+              ph.content,
+              ph.tech_level_id,
+              pd.title as protocol_title,
+              pd.adoption_date
+          FROM protocol_hierarchy ph
+          JOIN protocol_document pd ON ph.protocol_document_id = pd.id
+          WHERE EXISTS (
+                SELECT 1
+                FROM protocol_hierarchy child
+                WHERE child.parent_id = ph.id
+                  AND child.content IS NOT NULL
+                  AND child.content != ''
+            )
+      `;
 
-   static async getProtocolListCount() {
-      const query = `
+        const params = [];
+
+        if (techLevelId) {
+            query += ` AND (ph.tech_level_id = ? OR ph.tech_level_id IS NULL)`;
+            params.push(techLevelId);
+        } else {
+            console.log('No filter applied (techLevelId is null)');
+        }
+
+        query += ` ORDER BY pd.adoption_date DESC, ph.sort_order LIMIT ? OFFSET ?`;
+        params.push(limit, offset);
+
+        const [rows] = await db.query(query, params);
+
+        return rows;
+    }
+
+    static async getProtocolListCount(techLevelId = null) {
+        let query = `
            SELECT COUNT(*) as total
            FROM protocol_hierarchy ph
            WHERE ph.level = 2
@@ -43,18 +56,25 @@ class ProtocolModel {
              )
        `;
 
-       const [rows] = await db.query(query);
-       return rows[0].total;
-   }
+        const params = [];
+
+        if (techLevelId) {
+            query += ` AND (ph.tech_level_id = ? OR ph.tech_level_id IS NULL)`;
+            params.push(techLevelId);
+        }
+
+        const [rows] = await db.query(query, params);
+        return rows[0].total;
+    }
 
     static async getProtocolHierarchy(protocolDocumentId) {
-       const [rows] = await db.query(
+        const [rows] = await db.query(
             `SELECT * FROM protocol_hierarchy
              WHERE protocol_document_id = ?
              ORDER BY sort_order, id`,
             [protocolDocumentId]
         );
-       return rows;
+        return rows;
     }
 
     static async getProtocolDocumentById(protocolDocumentId) {
@@ -88,11 +108,10 @@ class ProtocolModel {
         return rows[0];
     }
 
-   static async searchProtocols(query, limit, offset) {
+    static async searchProtocols(query, limit, offset, techLevelId = null) {
+        const searchQuery = `%${query}%`;
 
-       const searchQuery = `%${query}%`;
-
-       const sqlQuery = `
+        let sqlQuery = `
            SELECT
                ph.id as hierarchy_id,
                ph.protocol_document_id,
@@ -128,26 +147,26 @@ class ProtocolModel {
                        AND child.content LIKE ?
                  )
              )
-           GROUP BY ph.id
-           ORDER BY pd.adoption_date DESC, ph.sort_order
-           LIMIT ? OFFSET ?
        `;
 
-       const [rows] = await db.query(sqlQuery, [
-           searchQuery,
-           searchQuery,
-           searchQuery,
-           searchQuery,
-           limit,
-           offset
-       ]);
-       return rows;
-   }
+        const params = [searchQuery, searchQuery, searchQuery, searchQuery];
 
-   static async searchProtocolsCount(query) {
-       const searchQuery = `%${query}%`;
+        if (techLevelId) {
+            sqlQuery += ` AND (ph.tech_level_id = ? OR ph.tech_level_id IS NULL)`;
+            params.push(techLevelId);
+        }
 
-       const sqlQuery = `
+        sqlQuery += ` GROUP BY ph.id ORDER BY pd.adoption_date DESC, ph.sort_order LIMIT ? OFFSET ?`;
+        params.push(limit, offset);
+
+        const [rows] = await db.query(sqlQuery, params);
+        return rows;
+    }
+
+    static async searchProtocolsCount(query, techLevelId = null) {
+        const searchQuery = `%${query}%`;
+
+        let sqlQuery = `
            SELECT COUNT(DISTINCT ph.id) as total
            FROM protocol_hierarchy ph
            JOIN protocol_document pd ON ph.protocol_document_id = pd.id
@@ -176,14 +195,19 @@ class ProtocolModel {
              )
        `;
 
-       const [result] = await db.query(sqlQuery, [searchQuery, searchQuery, searchQuery, searchQuery]);
+        const params = [searchQuery, searchQuery, searchQuery, searchQuery];
 
-       return result[0].total;
-   }
+        if (techLevelId) {
+            sqlQuery += ` AND (ph.tech_level_id = ? OR ph.tech_level_id IS NULL)`;
+            params.push(techLevelId);
+        }
 
-   static async getProtocolsByMedicationId(medicationId, limit, offset) {
+        const [result] = await db.query(sqlQuery, params);
+        return result[0].total;
+    }
 
-       const query = `
+    static async getProtocolsByMedicationId(medicationId, limit, offset, techLevelId = null) {
+        let query = `
            SELECT
                ph.id as hierarchy_id,
                ph.protocol_document_id,
@@ -204,29 +228,43 @@ class ProtocolModel {
            JOIN protocol_hierarchy ph ON ph.id = pm.protocol_hierarchy_id
            JOIN protocol_document pd ON pd.id = ph.protocol_document_id
            WHERE pm.medication_id = ?
-           ORDER BY pd.adoption_date DESC, ph.sort_order
-           LIMIT ? OFFSET ?
        `;
 
-       const [rows] = await db.query(query, [medicationId, limit, offset]);
+        const params = [medicationId];
 
-       return rows;
-   }
+        if (techLevelId) {
+            query += ` AND (ph.tech_level_id = ? OR ph.tech_level_id IS NULL)`;
+            params.push(techLevelId);
+        }
 
-   static async getProtocolsByMedicationIdCount(medicationId) {
-       const query = `
+        query += ` ORDER BY pd.adoption_date DESC, ph.sort_order LIMIT ? OFFSET ?`;
+        params.push(limit, offset);
+
+        const [rows] = await db.query(query, params);
+        return rows;
+    }
+
+    static async getProtocolsByMedicationIdCount(medicationId, techLevelId = null) {
+        let query = `
            SELECT COUNT(DISTINCT ph.id) as total
            FROM protocol_medication pm
            JOIN protocol_hierarchy ph ON ph.id = pm.protocol_hierarchy_id
            WHERE pm.medication_id = ?
        `;
 
-       const [result] = await db.query(query, [medicationId]);
-       return result[0].total;
-   }
+        const params = [medicationId];
 
-   static async getProtocolsByDiagnosticId(diagnosticId, limit, offset) {
-       const query = `
+        if (techLevelId) {
+            query += ` AND (ph.tech_level_id = ? OR ph.tech_level_id IS NULL)`;
+            params.push(techLevelId);
+        }
+
+        const [result] = await db.query(query, params);
+        return result[0].total;
+    }
+
+    static async getProtocolsByDiagnosticId(diagnosticId, limit, offset, techLevelId = null) {
+        let query = `
            SELECT
                ph.id as hierarchy_id,
                ph.protocol_document_id,
@@ -246,30 +284,43 @@ class ProtocolModel {
            JOIN protocol_hierarchy ph ON ph.id = pfd.protocol_hierarchy_id
            JOIN protocol_document pd ON pd.id = ph.protocol_document_id
            WHERE pfd.diagnostic_test_id = ?
-           ORDER BY pd.adoption_date DESC, ph.sort_order
-           LIMIT ? OFFSET ?
        `;
 
-       const [rows] = await db.query(query, [diagnosticId, limit, offset]);
+        const params = [diagnosticId];
 
-       return rows;
-   }
+        if (techLevelId) {
+            query += ` AND (ph.tech_level_id = ? OR ph.tech_level_id IS NULL)`;
+            params.push(techLevelId);
+        }
 
-   static async getProtocolsByDiagnosticIdCount(diagnosticId) {
-       const query = `
+        query += ` ORDER BY pd.adoption_date DESC, ph.sort_order LIMIT ? OFFSET ?`;
+        params.push(limit, offset);
+
+        const [rows] = await db.query(query, params);
+        return rows;
+    }
+
+    static async getProtocolsByDiagnosticIdCount(diagnosticId, techLevelId = null) {
+        let query = `
            SELECT COUNT(DISTINCT ph.id) as total
            FROM protocol_diagnostic pfd
            JOIN protocol_hierarchy ph ON ph.id = pfd.protocol_hierarchy_id
            WHERE pfd.diagnostic_test_id = ?
        `;
 
-       const [result] = await db.query(query, [diagnosticId]);
-       return result[0].total;
-   }
+        const params = [diagnosticId];
 
-   static async getProtocolsByMkbId(mkbId, limit, offset) {
+        if (techLevelId) {
+            query += ` AND (ph.tech_level_id = ? OR ph.tech_level_id IS NULL)`;
+            params.push(techLevelId);
+        }
 
-       const query = `
+        const [result] = await db.query(query, params);
+        return result[0].total;
+    }
+
+    static async getProtocolsByMkbId(mkbId, limit, offset, techLevelId = null) {
+        let query = `
            SELECT
                ph.id as hierarchy_id,
                ph.protocol_document_id,
@@ -285,26 +336,40 @@ class ProtocolModel {
            JOIN protocol_hierarchy ph ON ph.id = pml.protocol_hierarchy_id
            JOIN protocol_document pd ON pd.id = ph.protocol_document_id
            WHERE pml.mkb10_id = ?
-           ORDER BY pd.adoption_date DESC, ph.sort_order
-           LIMIT ? OFFSET ?
        `;
 
-       const [rows] = await db.query(query, [mkbId, limit, offset]);
+        const params = [mkbId];
 
-       return rows;
-   }
+        if (techLevelId) {
+            query += ` AND (ph.tech_level_id = ? OR ph.tech_level_id IS NULL)`;
+            params.push(techLevelId);
+        }
 
-   static async getProtocolsByMkbIdCount(mkbId) {
-       const query = `
+        query += ` ORDER BY pd.adoption_date DESC, ph.sort_order LIMIT ? OFFSET ?`;
+        params.push(limit, offset);
+
+        const [rows] = await db.query(query, params);
+        return rows;
+    }
+
+    static async getProtocolsByMkbIdCount(mkbId, techLevelId = null) {
+        let query = `
            SELECT COUNT(DISTINCT ph.id) as total
            FROM protocol_mkb_link pml
            JOIN protocol_hierarchy ph ON ph.id = pml.protocol_hierarchy_id
            WHERE pml.mkb10_id = ?
        `;
 
-       const [result] = await db.query(query, [mkbId]);
-       return result[0].total;
-   }
+        const params = [mkbId];
+
+        if (techLevelId) {
+            query += ` AND (ph.tech_level_id = ? OR ph.tech_level_id IS NULL)`;
+            params.push(techLevelId);
+        }
+
+        const [result] = await db.query(query, params);
+        return result[0].total;
+    }
 }
 
 module.exports = ProtocolModel;

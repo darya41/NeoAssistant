@@ -1,31 +1,33 @@
 import 'package:flutter/material.dart';
 import 'package:neo_friend/features/protocol/presentation/page/protocols_sort_list_screen.dart';
 import '../../../../core/constants/app_colors.dart';
+import '../../../../core/storage/token_storage.dart';
 import '../../domain/entities/mkb.dart';
 
 class MkbCategoryCard extends StatelessWidget {
   final MkbCategory category;
   final VoidCallback? onTap;
+  final int? techLevelId;
 
   const MkbCategoryCard({
     super.key,
     required this.category,
     this.onTap,
+    this.techLevelId,
   });
 
   @override
   Widget build(BuildContext context) {
-    debugPrint("🔵 Building MkbCategoryCard: ${category.code}");
-
     return Material(
       color: Colors.transparent,
       child: InkWell(
-        onTap: () {
+        onTap: () async {
           if (onTap != null) {
             onTap!();
           } else {
-
             final mkbId = category.id;
+
+            final techLevelId = await TokenStorage.getTechLevelId();
 
             Navigator.push(
               context,
@@ -34,6 +36,7 @@ class MkbCategoryCard extends StatelessWidget {
                   sourceId: mkbId,
                   sourceName: category.title,
                   sourceType: ProtocolsSourceType.mkb,
+                  techLevelId: techLevelId,
                 ),
               ),
             );
@@ -89,7 +92,7 @@ class MkbCategoryCard extends StatelessWidget {
               ),
               Icon(
                 Icons.chevron_right,
-                color:AppColors.neutral_50,
+                color: AppColors.neutral_50,
                 size: 20,
               ),
             ],

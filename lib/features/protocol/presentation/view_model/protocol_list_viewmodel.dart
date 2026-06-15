@@ -15,6 +15,7 @@ class ProtocolListViewModel extends ChangeNotifier {
   String? _error;
   String _searchQuery = '';
   Timer? _debounceTimer;
+  final int? techLevelId;
 
   static const int _pageSize = 20;
   static const _debounceDuration = Duration(milliseconds: 500);
@@ -28,10 +29,9 @@ class ProtocolListViewModel extends ChangeNotifier {
   String get currentSearchQuery => _searchQuery;
   bool get isSearching => _searchQuery.isNotEmpty;
 
-  ProtocolListViewModel() {
+  ProtocolListViewModel({this.techLevelId}) {
     loadItems();
   }
-
   void updateSearchQuery(String newQuery) {
     if (_searchQuery == newQuery) return;
 
@@ -73,11 +73,13 @@ class ProtocolListViewModel extends ChangeNotifier {
           query: _searchQuery,
           page: _currentPage,
           limit: _pageSize,
+          techLevelId: techLevelId,
         );
       } else {
         result = await _repository.getProtocolListPaginated(
           page: _currentPage,
           limit: _pageSize,
+          techLevelId: techLevelId,
         );
       }
 
@@ -98,6 +100,7 @@ class ProtocolListViewModel extends ChangeNotifier {
       notifyListeners();
     }
   }
+
   Future<void> refresh() => loadItems(refresh: true);
 
   Future<void> loadNextPage() async {

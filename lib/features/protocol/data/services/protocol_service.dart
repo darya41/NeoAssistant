@@ -8,8 +8,14 @@ class ProtocolService {
     return response;
   }
 
-  Future<Map<String, dynamic>> getProtocolFlatListPaginated({ int page = 1, int limit = 20,}) async {
-    final response = await ApiClient.getAuth( 'protocols/list?page=$page&limit=$limit');
+  Future<Map<String, dynamic>> getProtocolFlatListPaginated({
+    int page = 1, int limit = 20, int? techLevelId,
+  }) async {
+    String url = 'protocols/list?page=$page&limit=$limit';
+    if (techLevelId != null) {
+      url += '&techLevelId=$techLevelId';
+    }
+    final response = await ApiClient.getAuth(url);
     return response;
   }
 
@@ -29,30 +35,50 @@ class ProtocolService {
   }
 
   Future<Map<String, dynamic>> searchProtocols({
-    required String query, int page = 1, int limit = 20,
+    required String query,
+    int page = 1, int limit = 20, int? techLevelId,
   }) async {
-    final response = await ApiClient.getAuth('protocols/search?q=$query&page=$page&limit=$limit');
+    String url = 'protocols/search?q=$query&page=$page&limit=$limit';
+    if (techLevelId != null) {
+      url += '&techLevelId=$techLevelId';
+    }
+    final response = await ApiClient.getAuth(url);
     return _validateResponse(response);
   }
 
   Future<Map<String, dynamic>> getProtocolsByMedication({
-    required int medicationId, int page = 1, int limit = 20,
+    required int medicationId,
+    int page = 1, int limit = 20, int? techLevelId,
   }) async {
-    final response = await ApiClient.getAuth('protocols/medication/$medicationId?page=$page&limit=$limit');
+    String url = 'protocols/medication/$medicationId?page=$page&limit=$limit';
+    if (techLevelId != null) {
+      url += '&techLevelId=$techLevelId';
+    }
+    final response = await ApiClient.getAuth(url);
     return _validateResponse(response);
   }
 
   Future<Map<String, dynamic>> getProtocolsByDiagnostic({
-    required int diagnosticId, int page = 1, int limit = 20,
+    required int diagnosticId,
+    int page = 1, int limit = 20, int? techLevelId,
   }) async {
-    final response = await ApiClient.getAuth('protocols/diagnostic/$diagnosticId?page=$page&limit=$limit');
+    String url = 'protocols/diagnostic/$diagnosticId?page=$page&limit=$limit';
+    if (techLevelId != null) {
+      url += '&techLevelId=$techLevelId';
+    }
+    final response = await ApiClient.getAuth(url);
     return _validateResponse(response);
   }
 
   Future<Map<String, dynamic>> getProtocolsByMkb({
-    required int mkbId, int page = 1, int limit = 20,
+    required int mkbId,
+    int page = 1, int limit = 20, int? techLevelId,
   }) async {
-    final response = await ApiClient.getAuth('protocols/mkb/$mkbId?page=$page&limit=$limit');
+    String url = 'protocols/mkb/$mkbId?page=$page&limit=$limit';
+    if (techLevelId != null) {
+      url += '&techLevelId=$techLevelId';
+    }
+    final response = await ApiClient.getAuth(url);
     return _validateResponse(response);
   }
 }

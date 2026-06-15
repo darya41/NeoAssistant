@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:neo_friend/features/protocol/presentation/page/protocols_sort_list_screen.dart';
 import '../../../../core/constants/app_colors.dart';
+import '../../../../core/storage/token_storage.dart';
 import '../../domain/entities/diagnostic_test.dart';
 
 class DiagnosticCard extends StatelessWidget {
@@ -16,7 +17,8 @@ class DiagnosticCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onTap: onTap ?? () {
+      onTap: onTap ?? ()  async{
+        final techLevelId = await TokenStorage.getTechLevelId();
         Navigator.push(
           context,
           MaterialPageRoute(
@@ -24,6 +26,7 @@ class DiagnosticCard extends StatelessWidget {
               sourceId: diagnostic.id,
               sourceName: diagnostic.name,
               sourceType: ProtocolsSourceType.diagnostic,
+              techLevelId: techLevelId,
             ),
           ),
         );

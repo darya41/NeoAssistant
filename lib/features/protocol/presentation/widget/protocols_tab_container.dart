@@ -10,8 +10,13 @@ import 'diagnostics_list.dart';
 
 class ProtocolsTabContainer extends StatelessWidget {
   final ProtocolSearchViewModel protocolSearchViewModel;
+  final int? techLevelId;
 
-  const ProtocolsTabContainer({super.key, required this.protocolSearchViewModel,});
+  const ProtocolsTabContainer({
+    super.key,
+    required this.protocolSearchViewModel,
+    this.techLevelId,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -20,13 +25,15 @@ class ProtocolsTabContainer extends StatelessWidget {
         ChangeNotifierProvider(create: (_) => ProtocolTabViewModel()),
         ChangeNotifierProvider.value(value: protocolSearchViewModel),
       ],
-      child: const _ProtocolsTabContainerContent(),
+      child: _ProtocolsTabContainerContent(techLevelId: techLevelId),
     );
   }
 }
 
 class _ProtocolsTabContainerContent extends StatefulWidget {
-  const _ProtocolsTabContainerContent();
+  final int? techLevelId;
+
+  const _ProtocolsTabContainerContent({this.techLevelId});
 
   @override
   State<_ProtocolsTabContainerContent> createState() => _ProtocolsTabContainerContentState();
@@ -122,7 +129,7 @@ class _ProtocolsTabContainerContentState extends State<_ProtocolsTabContainerCon
             style: TextStyle(
               fontSize: 14,
               fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
-              color: isSelected ? Colors.white : AppColors.neutral_90,
+              color: isSelected ? AppColors.neutral_0 : AppColors.neutral_90,
             ),
           ),
         ),
@@ -133,7 +140,7 @@ class _ProtocolsTabContainerContentState extends State<_ProtocolsTabContainerCon
   Widget _buildContent(String activeTab) {
     switch (activeTab) {
       case 'Список':
-        return const ProtocolsList();
+        return ProtocolsList(techLevelId: widget.techLevelId);
       case 'МКБ':
         return const MkbCategoriesList();
       case 'Диагностика':
