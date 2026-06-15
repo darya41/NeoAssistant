@@ -14,6 +14,8 @@ class TemplatesScreen extends StatefulWidget {
 }
 
 class _TemplatesScreenState extends State<TemplatesScreen> {
+  bool isEditing = false;
+
   @override
   void initState() {
     super.initState();
@@ -29,7 +31,9 @@ class _TemplatesScreenState extends State<TemplatesScreen> {
   }
 
   void _toggleEditing() {
-    setState(() {});
+    setState(() {
+      isEditing = !isEditing;
+    });
   }
 
   void _handleCreateTemplate() {
@@ -115,18 +119,14 @@ class _TemplatesScreenState extends State<TemplatesScreen> {
               );
             }
 
-            final List<String> templateNames = viewModel.examTypes
-                .map((type) => type.name)
-                .toList();
-
             return Column(
               children: [
                 Expanded(
                   child: TemplatesListUI(
-                    templates: templateNames,
+                    templates: viewModel.examTypes,
                     onEditPressed: _toggleEditing,
                     onCreatePressed: _handleCreateTemplate,
-                    isEditing: false,
+                    isEditing: isEditing,
                   ),
                 ),
               ],

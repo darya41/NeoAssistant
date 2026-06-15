@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:neo_friend/features/template/domain/entities/exam_type.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../pages/template_detail_screen.dart';
 
 class TemplatesListUI extends StatelessWidget {
-  final List<String> templates;
+  final List<ExamType> templates;
   final VoidCallback onEditPressed;
   final VoidCallback onCreatePressed;
   final bool isEditing;
@@ -20,6 +21,34 @@ class TemplatesListUI extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    if (templates.isEmpty) {
+      return Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              Icons.description_outlined,
+              size: 64,
+              color: AppColors.neutral_25,
+            ),
+            const SizedBox(height: 16),
+            Text(
+              'Нет доступных шаблонов',
+              style: TextStyle(fontSize: 16, color: AppColors.neutral_50),
+            ),
+            const SizedBox(height: 16),
+            ElevatedButton(
+              onPressed: onCreatePressed,
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppColors.brand_40,
+              ),
+              child: const Text('Создать шаблон'),
+            ),
+          ],
+        ),
+      );
+    }
+
     return ListView.separated(
       padding: const EdgeInsets.all(16.0),
       itemCount: templates.length,
@@ -28,12 +57,14 @@ class TemplatesListUI extends StatelessWidget {
         thickness: 1,
         indent: 16,
         endIndent: 16,
-        color: Colors.grey[300],
+        color: AppColors.neutral_5,
       ),
       itemBuilder: (context, index) {
+        final template = templates[index];
+
         return ListTile(
           title: Text(
-            templates[index],
+            template.name,
             style: const TextStyle(fontSize: 16),
           ),
           onTap: () {
@@ -42,8 +73,8 @@ class TemplatesListUI extends StatelessWidget {
                 context,
                 MaterialPageRoute(
                   builder: (context) => TemplateDetailScreen(
-                    title: templates[index],
-                    description: 'папапапапапапа',
+                    title: template.name,
+                    examId: template.examTypeId,
                   ),
                 ),
               );

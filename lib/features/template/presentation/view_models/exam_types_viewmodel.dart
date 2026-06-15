@@ -1,4 +1,3 @@
-// lib/features/exams/presentation/view_models/exam_types_viewmodel.dart
 import 'package:flutter/material.dart';
 import '../../domain/entities/exam_type.dart';
 import '../../data/repositories/exam_type_repository.dart';
