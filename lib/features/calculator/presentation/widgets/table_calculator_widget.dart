@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../../core/constants/app_colors.dart';
 import '../../domain/entities/calculator.dart';
 
 class TableCalculatorWidget extends StatefulWidget {
@@ -101,7 +102,7 @@ class _TableCalculatorWidgetState extends State<TableCalculatorWidget> {
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: resultColor ?? Colors.grey),
+        border: Border.all(color: resultColor ?? AppColors.neutral_50),
       ),
       child: Column(
         children: [

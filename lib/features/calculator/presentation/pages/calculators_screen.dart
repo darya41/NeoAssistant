@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../../core/constants/app_colors.dart';
 import '../../../main/presentation/widgets/navigation/analytics_bottom_bar.dart';
 import '../view_models/calculators_viewmodel.dart';
 import '../widgets/calculator_card.dart';
@@ -52,7 +53,7 @@ class _CalculatorsScreenState extends State<CalculatorsScreen> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Калькуляторы'),
-        backgroundColor: const Color(0xFF44E4BF),
+        backgroundColor: AppColors.brand_40,
         elevation: 0,
         bottom: PreferredSize(
           preferredSize: const Size.fromHeight(60),
@@ -72,11 +73,11 @@ class _CalculatorsScreenState extends State<CalculatorsScreen> {
       child: Container(
         height: 45,
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: AppColors.neutral_0,
           borderRadius: BorderRadius.circular(10),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.05),
+              color: Colors.black.withValues(alpha: 0.05),
               blurRadius: 4,
               offset: const Offset(0, 2),
             ),
@@ -87,11 +88,11 @@ class _CalculatorsScreenState extends State<CalculatorsScreen> {
           focusNode: _searchFocusNode,
           decoration: InputDecoration(
             hintText: 'Поиск калькуляторов...',
-            hintStyle: const TextStyle(color: Colors.grey, fontSize: 14),
-            prefixIcon: const Icon(Icons.search, color: Colors.grey, size: 20),
+            hintStyle: const TextStyle(color: AppColors.neutral_50, fontSize: 14),
+            prefixIcon: const Icon(Icons.search, color: AppColors.neutral_50, size: 20),
             suffixIcon: _searchController.text.isNotEmpty
                 ? IconButton(
-              icon: const Icon(Icons.clear, color: Colors.grey, size: 18),
+              icon: const Icon(Icons.clear, color: AppColors.neutral_50, size: 18),
               onPressed: _clearSearch,
             )
                 : null,
@@ -114,14 +115,14 @@ class _CalculatorsScreenState extends State<CalculatorsScreen> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            const Icon(Icons.error_outline, size: 48, color: Colors.red),
+            const Icon(Icons.error_outline, size: 48, color: AppColors.error),
             const SizedBox(height: 16),
             Text(_viewModel.errorMessage!),
             const SizedBox(height: 16),
             ElevatedButton(
               onPressed: () => _viewModel.retry(),
               style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFF44E4BF),
+                backgroundColor: AppColors.brand_40,
               ),
               child: const Text('Повторить'),
             ),
@@ -135,13 +136,13 @@ class _CalculatorsScreenState extends State<CalculatorsScreen> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            const Icon(Icons.search_off, size: 48, color: Colors.grey),
+            const Icon(Icons.search_off, size: 48, color: AppColors.neutral_50),
             const SizedBox(height: 16),
             Text(
               _viewModel.searchQuery.isNotEmpty
                   ? 'Ничего не найдено по запросу "${_viewModel.searchQuery}"'
                   : 'Нет доступных калькуляторов',
-              style: const TextStyle(color: Colors.grey, fontSize: 16),
+              style: const TextStyle(color: AppColors.neutral_50, fontSize: 16),
             ),
             if (_viewModel.searchQuery.isNotEmpty)
               TextButton(

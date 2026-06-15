@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../../core/constants/app_colors.dart';
 import '../../domain/entities/calculator.dart';
 import '../widgets/calendar_calculator_widget.dart';
 import '../widgets/formula_calculator_widget.dart';
@@ -17,7 +18,7 @@ class CalculatorDetailScreen extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         title: Text(calculator.name),
-        backgroundColor: const Color(0xFF44E4BF),
+        backgroundColor: AppColors.brand_40,
         elevation: 0,
       ),
       body: _buildBody(),
