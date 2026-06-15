@@ -49,19 +49,6 @@ class TemplatesListUI extends StatelessWidget {
               );
             }
           },
-          trailing: isEditing
-              ? IconButton(
-            icon: const Icon(
-              Icons.close,
-              color: AppColors.error,
-            ),
-            onPressed: () {
-              if (onDeleteTemplate != null) {
-                onDeleteTemplate!(index);
-              }
-            },
-          )
-              : null,
         );
       },
     );

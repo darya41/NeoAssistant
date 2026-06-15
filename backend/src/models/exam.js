@@ -52,6 +52,16 @@ class ExamModel {
 
         return result[0] || null;
     }
+
+    static async getAllExamTypes() {
+        const [results] = await db.query(`
+            SELECT exam_type_id, name
+            FROM examstypes
+            ORDER BY exam_type_id
+        `);
+
+        return results;
+    }
 }
 
 module.exports = ExamModel;

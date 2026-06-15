@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../../../core/storage/token_storage.dart';
+import '../../../template/presentation/view_models/exam_types_viewmodel.dart';
 import '../view_models/protocol_search_viewmodel.dart';
 import 'reminders_stats.dart';
 import 'tab_bar_widget.dart';
@@ -30,6 +31,7 @@ class _HomeScreenUIState extends State<HomeScreenUI> {
   late final HomeViewModel _homeViewModel;
   late final PatientSearchViewModel _patientSearchViewModel;
   late final ProtocolSearchViewModel _protocolSearchViewModel;
+  late final ExamTypesViewModel _examTypesViewModel;
   bool _isInitialized = false;
   int? _currentUserTechLevelId;
 
@@ -48,6 +50,7 @@ class _HomeScreenUIState extends State<HomeScreenUI> {
     _homeViewModel = HomeViewModel();
     _protocolSearchViewModel = ProtocolSearchViewModel();
     _patientSearchViewModel = PatientSearchViewModel();
+    _examTypesViewModel = ExamTypesViewModel();
 
     _protocolSearchViewModel.onSearchCleared = () {
       _searchFieldKey.currentState?.clearTextField();
@@ -75,6 +78,7 @@ class _HomeScreenUIState extends State<HomeScreenUI> {
     _homeViewModel.dispose();
     _patientSearchViewModel.dispose();
     _protocolSearchViewModel.dispose();
+    _examTypesViewModel.dispose();
     super.dispose();
   }
 
@@ -91,6 +95,7 @@ class _HomeScreenUIState extends State<HomeScreenUI> {
         ChangeNotifierProvider.value(value: _homeViewModel),
         ChangeNotifierProvider.value(value: _patientSearchViewModel),
         ChangeNotifierProvider.value(value: _protocolSearchViewModel),
+        ChangeNotifierProvider.value(value: _examTypesViewModel),
       ],
       child: Scaffold(
         backgroundColor: Colors.white,
