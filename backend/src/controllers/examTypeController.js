@@ -96,6 +96,23 @@ class ExamTypeController {
             res.status(500).json({ success: false, error: 'Error getting exam datetime' });
         }
     };
+
+   async getAllExamTypes(req, res) {
+       try {
+           const examTypes = await ExamModel.getAllExamTypes();
+
+           res.json({
+               success: true,
+               data: examTypes
+           });
+       } catch (error) {
+           console.error('Error in getAllExamTypes:', error);
+           res.status(500).json({
+               success: false,
+               error: 'Error getting exam types'
+           });
+       }
+   }
 }
 
 module.exports = new ExamTypeController();

@@ -3,7 +3,6 @@ import '../../domain/entities/mother.dart';
 
 class MotherService {
 
-  /// Создание матери - только API вызов
   Future<Map<String, dynamic>> createMother(Mother mother) async {
     final response = await ApiClient.postAuth('mothers', mother.toJson());
 
@@ -14,7 +13,6 @@ class MotherService {
     return response;
   }
 
-  /// Получение всех матерей
   Future<Map<String, dynamic>> getAllMothers() async {
     final response = await ApiClient.getAuth('mothers');
 
@@ -25,7 +23,6 @@ class MotherService {
     return response;
   }
 
-  /// Получение матери по ID
   Future<Map<String, dynamic>> getMotherById(int id) async {
     final response = await ApiClient.getAuth('mothers/$id');
 
@@ -36,7 +33,6 @@ class MotherService {
     return response;
   }
 
-  /// Обновление матери
   Future<Map<String, dynamic>> updateMother(int id, Mother mother) async {
     final response = await ApiClient.putAuth('mothers/$id', mother.toJson());
 
@@ -47,7 +43,6 @@ class MotherService {
     return response;
   }
 
-  /// Удаление матери
   Future<void> deleteMother(int id) async {
     final response = await ApiClient.deleteAuth('mothers/$id');
 

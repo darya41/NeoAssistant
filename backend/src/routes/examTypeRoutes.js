@@ -11,5 +11,6 @@ router.get('/type', examTypeController.getExamTypeByExamId);
 router.get('/primary', examTypeController.getPrimaryExamId);
 router.get('/daily-list', examTypeController.getDailyExamList);
 router.get('/datetime', examTypeController.getExamDateTime);
+router.get('/all-types', examTypeController.getAllExamTypes);
 
 module.exports = router;
