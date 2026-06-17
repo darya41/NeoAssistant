@@ -58,7 +58,7 @@ class PatientCards extends StatelessWidget {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              const Icon(Icons.search_off, size: 64, color: Colors.grey),
+              const Icon(Icons.search_off, size: 64, color: AppColors.neutral_60),
               const SizedBox(height: 16),
               const Text(
                 'Ничего не найдено',
@@ -69,7 +69,7 @@ class PatientCards extends StatelessWidget {
                 isSearchMode
                     ? 'По запросу "${viewModel.searchQuery}" пациентов не найдено'
                     : 'По выбранным фильтрам пациентов не найдено',
-                style: const TextStyle(fontSize: 14, color: Colors.grey),
+                style: const TextStyle(fontSize: 14, color: AppColors.neutral_60),
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: 16),
@@ -92,7 +92,7 @@ class PatientCards extends StatelessWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(Icons.medical_information, size: 64, color: Colors.grey),
+            Icon(Icons.medical_information, size: 64, color: AppColors.neutral_60),
             SizedBox(height: 16),
             Text(
               'Нет пациентов',
@@ -101,78 +101,42 @@ class PatientCards extends StatelessWidget {
             SizedBox(height: 8),
             Text(
               'Добавьте первого пациента',
-              style: TextStyle(fontSize: 14, color: Colors.grey),
+              style: TextStyle(fontSize: 14, color: AppColors.neutral_60),
             ),
           ],
         ),
       );
     }
 
-    return ListView.separated(
-      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
-      itemCount: patients.length + 1,
-      separatorBuilder: (context, index) => const SizedBox(height: 16),
-      itemBuilder: (context, index) {
-        if (index == patients.length) {
-          return _buildLoadMoreButton(viewModel);
+    return NotificationListener<ScrollNotification>(
+      onNotification: (ScrollNotification scrollInfo) {
+        if (!viewModel.isLoadingMore &&
+            viewModel.hasMore &&
+            scrollInfo.metrics.pixels >= scrollInfo.metrics.maxScrollExtent - 200) {
+          viewModel.loadMorePatients();
         }
-
-        final patient = patients[index];
-        return PatientCard(patient: patient);
+        return false;
       },
-    );
-  }
+      child: ListView.separated(
+        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+        itemCount: patients.length + 1,
+        separatorBuilder: (context, index) => const SizedBox(height: 16),
+        itemBuilder: (context, index) {
+          if (index == patients.length) {
+            if (viewModel.isLoadingMore) {
+              return const Padding(
+                padding: EdgeInsets.symmetric(vertical: 24),
+                child: Center(
+                  child: CircularProgressIndicator(),
+                ),
+              );
+            }
 
-
-  Widget _buildLoadMoreButton(PatientSearchViewModel viewModel) {
-    if (!viewModel.hasMore) {
-      if (viewModel.displayedPatients.isNotEmpty) {
-        return Padding(
-          padding: const EdgeInsets.symmetric(vertical: 24),
-          child: Center(
-            child: Text(
-              'Загружено ${viewModel.displayedPatients.length} пациентов',
-              style: const TextStyle(fontSize: 14, color: Colors.grey),
-            ),
-          ),
-        );
-      }
-      return const SizedBox.shrink();
-    }
-
-    if (viewModel.isLoadingMore) {
-      return const Padding(
-        padding: EdgeInsets.symmetric(vertical: 24),
-        child: Center(
-          child: Column(
-            children: [
-              CircularProgressIndicator(),
-              SizedBox(height: 12),
-              Text('Загрузка...', style: TextStyle(fontSize: 14, color: Colors.grey)),
-            ],
-          ),
-        ),
-      );
-    }
-
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 16),
-      child: Center(
-        child: ElevatedButton(
-          onPressed: () => viewModel.loadMorePatients(),
-          style: ElevatedButton.styleFrom(
-            backgroundColor: AppColors.brand_40 ,
-            foregroundColor: Colors.white,
-            minimumSize: const Size(200, 48),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(24),
-            ),
-          ),
-          child: const Text(
-            'Загрузить ещё',
-            style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
-          ),
-        ),
+            return const SizedBox.shrink();
+          }
+          final patient = patients[index];
+          return PatientCard(patient: patient);
+        },
       ),
     );
   }

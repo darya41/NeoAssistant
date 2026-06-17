@@ -12,6 +12,7 @@ class PatientController {
             res.json({
                 success: true,
                 data: patients,
+                totalCount: total,
                 pagination: {
                     currentPage: page,
                     limit: limit,
