@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:math_expressions/math_expressions.dart';
+import '../../../../core/constants/app_colors.dart';
 import '../../domain/entities/calculator.dart';
 
 class FormulaCalculatorWidget extends StatefulWidget {
@@ -19,12 +20,7 @@ class _FormulaCalculatorWidgetState extends State<FormulaCalculatorWidget> {
   @override
   void initState() {
     super.initState();
-    _initControllers();
-  }
-
-  void _initControllers() {
-    final parameters = widget.calculator.config['parameters'] ?? [];
-    for (var param in parameters) {
+    for (var param in widget.calculator.config['parameters'] ?? []) {
       _controllers[param['name']] = TextEditingController();
     }
   }
@@ -34,12 +30,19 @@ class _FormulaCalculatorWidgetState extends State<FormulaCalculatorWidget> {
     final formulas = widget.calculator.config['formulas'] ?? [];
 
     Map<String, double> values = {};
-
     for (var param in parameters) {
-      final controller = _controllers[param['name']];
-      if (controller != null && controller.text.isNotEmpty) {
-        values[param['name']] = double.tryParse(controller.text) ?? 0;
+      final text = _controllers[param['name']]?.text;
+      if (text == null || text.isEmpty) {
+        _showError('Заполните поле "${param['label']}"');
+        return;
       }
+
+      final value = double.tryParse(text.replaceAll(',', '.'));
+      if (value == null) {
+        _showError('Введите корректное число для "${param['label']}"');
+        return;
+      }
+      values[param['name']] = value;
     }
 
     Map<String, double> results = {};
@@ -50,12 +53,8 @@ class _FormulaCalculatorWidgetState extends State<FormulaCalculatorWidget> {
         expression = expression.replaceAll(entry.key, entry.value.toString());
       }
 
-      try {
-        final result = _evaluateExpression(expression);
-        results[formula['name']] = result;
-      } catch (e) {
-        results[formula['name']] = 0;
-      }
+      final result = _evaluate(expression);
+      results[formula['name']] = result;
     }
 
     setState(() {
@@ -65,20 +64,26 @@ class _FormulaCalculatorWidgetState extends State<FormulaCalculatorWidget> {
     });
   }
 
-  double _evaluateExpression(String expression) {
+  double _evaluate(String expression) {
     try {
-      final parser = Parser();
-      final parsedExpression = parser.parse(expression);
-      final contextModel = ContextModel();
-      return parsedExpression.evaluate(EvaluationType.REAL, contextModel);
+      final result = GrammarParser()
+          .parse(expression.replaceAll(',', '.'))
+          .evaluate(EvaluationType.REAL, ContextModel());
+      return double.parse(result.toStringAsFixed(2));
     } catch (e) {
       return 0;
     }
   }
 
+  void _showError(String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(message), backgroundColor: AppColors.error),
+    );
+  }
+
   void _clearAll() {
-    for (var controller in _controllers.values) {
-      controller.clear();
+    for (var c in _controllers.values) {
+      c.clear();
     }
     setState(() {
       _results.clear();
@@ -88,8 +93,8 @@ class _FormulaCalculatorWidgetState extends State<FormulaCalculatorWidget> {
 
   @override
   void dispose() {
-    for (var controller in _controllers.values) {
-      controller.dispose();
+    for (var c in _controllers.values) {
+      c.dispose();
     }
     super.dispose();
   }
@@ -109,45 +114,48 @@ class _FormulaCalculatorWidgetState extends State<FormulaCalculatorWidget> {
               padding: const EdgeInsets.all(12),
               margin: const EdgeInsets.only(bottom: 16),
               decoration: BoxDecoration(
-                color: Colors.grey[100],
+                color: AppColors.neutral_5,
                 borderRadius: BorderRadius.circular(8),
               ),
-              child: Text(
-                widget.calculator.description,
-                style: const TextStyle(fontSize: 14, color: Colors.grey),
-              ),
+              child: Text(widget.calculator.description,
+                  style: const TextStyle(fontSize: 14, color: AppColors.neutral_90)),
             ),
 
-          const Text(
-            'Параметры',
-            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-          ),
+          const Text('Параметры',
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
           const SizedBox(height: 12),
-          ...parameters.map((param) => _buildParameterField(param)),
+          ...parameters.map((param) => _buildParameterField(param)).toList(),
 
           const SizedBox(height: 24),
-
           Row(
             children: [
               Expanded(
                 child: ElevatedButton(
                   onPressed: _calculate,
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFF44E4BF),
-                    padding: const EdgeInsets.symmetric(vertical: 14),
+                    backgroundColor: AppColors.brand_40,
+                    padding: const EdgeInsets.symmetric(vertical: 10),
                   ),
-                  child: const Text('Рассчитать', style: TextStyle(fontSize: 16)),
+                  child: const Text('Рассчитать', style: TextStyle(fontSize: 20, color: Colors.white)),
                 ),
               ),
-              const SizedBox(width: 12),
-              if (_isCalculated)
+              if (_isCalculated) ...[
+                const SizedBox(width: 12),
                 OutlinedButton(
                   onPressed: _clearAll,
                   style: OutlinedButton.styleFrom(
                     padding: const EdgeInsets.symmetric(vertical: 14),
+                    foregroundColor: AppColors.brand_65,
                   ),
-                  child: const Text('Очистить'),
+                  child: const Text(
+                    'Очистить',
+                    style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
                 ),
+              ],
             ],
           ),
 
@@ -156,58 +164,31 @@ class _FormulaCalculatorWidgetState extends State<FormulaCalculatorWidget> {
               margin: const EdgeInsets.only(top: 24),
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
-                color: Colors.green[50],
+                color: AppColors.brand_5,
                 borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: Colors.green[200]!),
+                border: Border.all(color: AppColors.brand_5),
               ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text(
-                    'Результаты',
-                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                  ),
+                  const Text('Результаты',
+                      style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
                   const SizedBox(height: 12),
-                  ...formulas.map((formula) {
-                    final result = _results[formula['name']];
-                    final interpretation = _getInterpretation(formula['name'], result);
-                    return Column(
+                  ...formulas.map((f) => Padding(
+                    padding: const EdgeInsets.only(bottom: 8),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        Padding(
-                          padding: const EdgeInsets.only(bottom: 8),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Text(
-                                formula['label'] ?? formula['name'],
-                                style: const TextStyle(fontSize: 16),
-                              ),
-                              Text(
-                                result != null
-                                    ? '${result.toStringAsFixed(2)} ${formula['unit'] ?? ''}'
-                                    : '—',
-                                style: const TextStyle(
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 18,
-                                ),
-                              ),
-                            ],
-                          ),
+                        Text(f['label'] ?? f['name'],
+                            style: const TextStyle(fontSize: 16)),
+                        Text(
+                          '${(_results[f['name']] ?? 0).toStringAsFixed(2)} ${f['unit'] ?? ''}',
+                          style: const TextStyle(
+                              fontWeight: FontWeight.bold, fontSize: 18),
                         ),
-                        if (interpretation != null)
-                          Padding(
-                            padding: const EdgeInsets.only(bottom: 8),
-                            child: Text(
-                              interpretation,
-                              style: TextStyle(
-                                color: _getColorForInterpretation(result),
-                                fontSize: 14,
-                              ),
-                            ),
-                          ),
                       ],
-                    );
-                  }).toList(),
+                    ),
+                  )).toList(),
                 ],
               ),
             ),
@@ -218,41 +199,8 @@ class _FormulaCalculatorWidgetState extends State<FormulaCalculatorWidget> {
 
   Widget _buildParameterField(Map<String, dynamic> param) {
     final name = param['name'];
-    final label = param['label'];
+    final label = param['label'] ?? name;
     final unit = param['unit'];
-    final type = param['type'] ?? 'number';
-    final min = param['min'];
-    final max = param['max'];
-
-    if (type == 'radio' && param['options'] != null) {
-      return Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            label,
-            style: const TextStyle(fontWeight: FontWeight.w500, fontSize: 16),
-          ),
-          const SizedBox(height: 8),
-          Wrap(
-            spacing: 8,
-            children: (param['options'] as List).map((option) {
-              return ChoiceChip(
-                label: Text(option['label']),
-                selected: _controllers[name]?.text == option['value'],
-                onSelected: (selected) {
-                  if (selected) {
-                    setState(() {
-                      _controllers[name]?.text = option['value'];
-                    });
-                  }
-                },
-              );
-            }).toList(),
-          ),
-          const SizedBox(height: 16),
-        ],
-      );
-    }
 
     return Padding(
       padding: const EdgeInsets.only(bottom: 16),
@@ -264,52 +212,7 @@ class _FormulaCalculatorWidgetState extends State<FormulaCalculatorWidget> {
           border: const OutlineInputBorder(),
         ),
         keyboardType: const TextInputType.numberWithOptions(decimal: true),
-        onChanged: (value) {
-          if (min != null && value.isNotEmpty) {
-            final numValue = double.tryParse(value);
-            if (numValue != null && numValue < min) {
-              _controllers[name]?.text = min.toString();
-            }
-          }
-        },
       ),
     );
-  }
-
-  String? _getInterpretation(String resultName, double? value) {
-    if (value == null) return null;
-
-    final interpretations = widget.calculator.possibleResults;
-    if (interpretations.isEmpty) return null;
-
-    for (var interp in interpretations) {
-      final min = interp['min'];
-      final max = interp['max'];
-      if (value >= min && value <= max) {
-        return interp['text'];
-      }
-    }
-    return null;
-  }
-
-  Color _getColorForInterpretation(double? value) {
-    if (value == null) return Colors.grey;
-
-    final interpretations = widget.calculator.possibleResults;
-    for (var interp in interpretations) {
-      final min = interp['min'];
-      final max = interp['max'];
-      if (value >= min && value <= max) {
-        final color = interp['color'];
-        switch (color) {
-          case 'green': return Colors.green;
-          case 'yellow': return Colors.orange;
-          case 'orange': return Colors.orange;
-          case 'red': return Colors.red;
-          default: return Colors.grey;
-        }
-      }
-    }
-    return Colors.grey;
   }
 }

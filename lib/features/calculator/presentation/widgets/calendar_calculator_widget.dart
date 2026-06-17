@@ -1,5 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import '../../../../core/constants/app_colors.dart';
 import '../../domain/entities/calculator.dart';
 
 class CalendarCalculatorWidget extends StatefulWidget {
@@ -65,7 +66,7 @@ class _CalendarCalculatorWidgetState extends State<CalendarCalculatorWidget> {
                     },
                     child: const Text(
                       'Выбрать',
-                      style: TextStyle(color: Color(0xFF44E4BF)),
+                      style: TextStyle(color: AppColors.brand_40),
                     ),
                   ),
                 ],
@@ -78,21 +79,7 @@ class _CalendarCalculatorWidgetState extends State<CalendarCalculatorWidget> {
     );
   }
 
-  Future<void> _selectDateWithPicker(BuildContext context) async {
-    final DateTime? picked = await showDatePicker(
-      context: context,
-      initialDate: _birthDate ?? DateTime.now(),
-      firstDate: DateTime(2020),
-      lastDate: DateTime.now(),
-      locale: const Locale('ru', 'RU'),
-    );
 
-    if (picked != null) {
-      setState(() {
-        _birthDate = picked;
-      });
-    }
-  }
 
   void _calculate() {
     if (_birthDate == null || _feedingType == null) return;
@@ -157,12 +144,12 @@ class _CalendarCalculatorWidgetState extends State<CalendarCalculatorWidget> {
               padding: const EdgeInsets.all(12),
               margin: const EdgeInsets.only(bottom: 16),
               decoration: BoxDecoration(
-                color: Colors.grey[100],
+                color: AppColors.neutral_5,
                 borderRadius: BorderRadius.circular(8),
               ),
               child: Text(
                 widget.calculator.description,
-                style: const TextStyle(fontSize: 14, color: Colors.grey),
+                style: const TextStyle(fontSize: 14, color: AppColors.neutral_60),
               ),
             ),
 
@@ -211,12 +198,12 @@ class _CalendarCalculatorWidgetState extends State<CalendarCalculatorWidget> {
                     child: Container(
                       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
                       decoration: BoxDecoration(
-                        border: Border.all(color: Colors.grey[300]!),
+                        border: Border.all(color: AppColors.neutral_25),
                         borderRadius: BorderRadius.circular(8),
                       ),
                       child: Row(
                         children: [
-                          Icon(Icons.calendar_today, color: Colors.grey[600], size: 20),
+                          Icon(Icons.calendar_today, color: AppColors.neutral_50, size: 20),
                           const SizedBox(width: 12),
                           Expanded(
                             child: Text(
@@ -224,12 +211,12 @@ class _CalendarCalculatorWidgetState extends State<CalendarCalculatorWidget> {
                                   ? _formatDate(_birthDate!)
                                   : 'Выберите дату рождения',
                               style: TextStyle(
-                                color: _birthDate != null ? Colors.black : Colors.grey,
+                                color: _birthDate != null ? AppColors.neutral_90 : AppColors.neutral_50,
                                 fontSize: 16,
                               ),
                             ),
                           ),
-                          Icon(Icons.arrow_drop_down, color: Colors.grey[600]),
+                          Icon(Icons.arrow_drop_down, color: AppColors.neutral_50),
                         ],
                       ),
                     ),
@@ -277,7 +264,7 @@ class _CalendarCalculatorWidgetState extends State<CalendarCalculatorWidget> {
                               ? _calculate
                               : null,
                           style: ElevatedButton.styleFrom(
-                            backgroundColor: const Color(0xFF44E4BF),
+                            backgroundColor:AppColors.brand_40,
                             padding: const EdgeInsets.symmetric(vertical: 14),
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(8),
@@ -332,9 +319,9 @@ class _CalendarCalculatorWidgetState extends State<CalendarCalculatorWidget> {
       child: Container(
         padding: const EdgeInsets.symmetric(vertical: 12),
         decoration: BoxDecoration(
-          color: isSelected ? const Color(0xFF44E4BF).withOpacity(0.1) : Colors.grey[100],
+          color: isSelected ? AppColors.brand_40.withValues(alpha: 0.1): AppColors.neutral_5,
           border: Border.all(
-            color: isSelected ? const Color(0xFF44E4BF) : Colors.grey[300]!,
+            color: isSelected ? AppColors.brand_40 : AppColors.neutral_25,
             width: isSelected ? 2 : 1,
           ),
           borderRadius: BorderRadius.circular(8),
@@ -343,7 +330,7 @@ class _CalendarCalculatorWidgetState extends State<CalendarCalculatorWidget> {
           children: [
             Icon(
               icon,
-              color: isSelected ? const Color(0xFF44E4BF) : Colors.grey,
+              color: isSelected ? AppColors.brand_40 : AppColors.neutral_50,
               size: 28,
             ),
             const SizedBox(height: 8),
@@ -352,7 +339,7 @@ class _CalendarCalculatorWidgetState extends State<CalendarCalculatorWidget> {
               style: TextStyle(
                 fontSize: 12,
                 fontWeight: isSelected ? FontWeight.w500 : FontWeight.normal,
-                color: isSelected ? const Color(0xFF44E4BF) : Colors.grey,
+                color: isSelected ? AppColors.brand_40 : AppColors.neutral_50,
               ),
               textAlign: TextAlign.center,
             ),
@@ -411,7 +398,7 @@ class _CalendarCalculatorWidgetState extends State<CalendarCalculatorWidget> {
             Container(
               padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 12),
               decoration: BoxDecoration(
-                color: const Color(0xFF44E4BF),
+                color: AppColors.brand_40,
                 borderRadius: BorderRadius.circular(8),
               ),
               child: Row(
@@ -422,20 +409,20 @@ class _CalendarCalculatorWidgetState extends State<CalendarCalculatorWidget> {
                     style: const TextStyle(
                       fontWeight: FontWeight.bold,
                       fontSize: 18,
-                      color: Colors.white,
+                      color: AppColors.neutral_0,
                     ),
                   ),
                   Container(
                     padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                     decoration: BoxDecoration(
-                      color: Colors.white.withOpacity(0.3),
+                      color: AppColors.neutral_0.withValues(alpha: 0.1),
                       borderRadius: BorderRadius.circular(12),
                     ),
                     child: Text(
                       'с ${item['start_date']}',
                       style: const TextStyle(
                         fontSize: 12,
-                        color: Colors.white,
+                        color: AppColors.neutral_0,
                       ),
                     ),
                   ),
@@ -458,10 +445,10 @@ class _CalendarCalculatorWidgetState extends State<CalendarCalculatorWidget> {
       margin: const EdgeInsets.only(bottom: 12),
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: isNew ? Colors.blue[50] : Colors.grey[50],
+        color: isNew ? Colors.blue[50] : AppColors.neutral_5,
         borderRadius: BorderRadius.circular(8),
         border: Border.all(
-          color: isNew ? Colors.blue[200]! : Colors.grey[200]!,
+          color: isNew ? Colors.blue[200]! : AppColors.neutral_5,
           width: isNew ? 1.5 : 1,
         ),
       ),
@@ -475,7 +462,7 @@ class _CalendarCalculatorWidgetState extends State<CalendarCalculatorWidget> {
                 height: 8,
                 margin: const EdgeInsets.only(right: 8),
                 decoration: BoxDecoration(
-                  color: const Color(0xFF44E4BF),
+                  color: AppColors.brand_40,
                   shape: BoxShape.circle,
                 ),
               ),
@@ -485,7 +472,7 @@ class _CalendarCalculatorWidgetState extends State<CalendarCalculatorWidget> {
                   style: TextStyle(
                     fontSize: 15,
                     fontWeight: isNew ? FontWeight.bold : FontWeight.w500,
-                    color: isNew ? Colors.blue[800] : Colors.black87,
+                    color: isNew ? Colors.blue[800] : AppColors.neutral_90,
                   ),
                 ),
               ),
@@ -501,7 +488,7 @@ class _CalendarCalculatorWidgetState extends State<CalendarCalculatorWidget> {
                     style: TextStyle(
                       fontSize: 10,
                       fontWeight: FontWeight.bold,
-                      color: Colors.white,
+                      color:AppColors.neutral_0,
                     ),
                   ),
                 ),
@@ -515,7 +502,7 @@ class _CalendarCalculatorWidgetState extends State<CalendarCalculatorWidget> {
               product['amount'],
               style: TextStyle(
                 fontSize: 13,
-                color: Colors.grey[600],
+                color: AppColors.neutral_50,
                 height: 1.4,
               ),
             ),
