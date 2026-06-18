@@ -21,7 +21,7 @@ class PatientSearchViewModel extends ChangeNotifier {
   bool _searchHasMore = true;
   bool _isSearchingMore = false;
 
-  static const int _pageSize = 10;
+  static const int _pageSize = 15;
 
   String? _selectedGender;
   String? _selectedBloodGroup;
@@ -190,7 +190,12 @@ class PatientSearchViewModel extends ChangeNotifier {
       }
 
       _hasMore = result['hasNext'] ?? false;
-      _currentPage = result['currentPage'] ?? _currentPage;
+
+      if (_hasMore) {
+        _currentPage = result['currentPage'] ?? _currentPage;
+      } else {
+        _currentPage = result['currentPage'] ?? _currentPage;
+      }
 
     } catch (e) {
       _error = e.toString();
@@ -242,9 +247,10 @@ class PatientSearchViewModel extends ChangeNotifier {
     notifyListeners();
 
     try {
+      final page = reset ? _searchPage : _searchPage + 1;
       final result = await _repository.searchPatients(
         query: _searchQuery,
-        page: reset ? _searchPage : _searchPage + 1,
+        page: page,
         limit: _pageSize,
         gender: _selectedGender,
         bloodGroup: _selectedBloodGroup,
@@ -257,12 +263,11 @@ class PatientSearchViewModel extends ChangeNotifier {
 
       if (reset) {
         _searchResults = newPatients;
-        _searchPage = result['currentPage'] ?? 1;
       } else {
         _searchResults.addAll(newPatients);
-        _searchPage = result['currentPage'] ?? _searchPage + 1;
       }
 
+      _searchPage = result['currentPage'] ?? page;
       _searchHasMore = result['hasNext'] ?? false;
 
     } catch (e) {
