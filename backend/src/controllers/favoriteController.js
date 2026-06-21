@@ -1,4 +1,4 @@
-const FavoriteModel = require('../models/Favorite');
+const FavoriteModel = require('../models/favorite');
 
 class FavoriteController {
     async checkFavorite(req, res) {
