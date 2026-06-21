@@ -17,7 +17,8 @@ pool.getConnection()
         connection.release();
     })
     .catch(err => {
-        process.exit(1);
+        console.error('Ошибка подключения к MySQL:', err.message);
+        console.log('Сервер продолжит работу, но проверьте подключение к БД');
     });
 
 module.exports = pool;
