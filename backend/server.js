@@ -2,7 +2,7 @@ require('dotenv').config();
 
 const express = require('express');
 const cors = require('cors');
-/*const db = require('./src/config/database');
+const db = require('./src/config/database');
 
 const { authenticateToken } = require('./src/middleware/auth');
 
@@ -23,13 +23,13 @@ const mkbRoutes = require('./src/routes/mkbRoutes');
 const diagnosticRoutes = require('./src/routes/diagnosticRoutes');
 const medicationRoutes = require('./src/routes/medicationRoutes');
 const techLevelRoutes = require('./src/routes/techLevelRoutes');
-*/
+
 const app = express();
 
 app.use(cors());
 app.use(express.json());
 
-/*app.get('/api/health', async (req, res) => {
+app.get('/api/health', async (req, res) => {
     try {
         await db.query('SELECT 1');
         res.json({
@@ -68,24 +68,4 @@ app.listen(PORT, () => {
     console.log(`\nСервер запущен на порту ${PORT}`);
     console.log(`База данных: ${process.env.DB_NAME}`);
     console.log(`http://localhost:${PORT}/api/health - проверить подключение\n`);
-});
-*/
-
-
-app.get('/api/health', (req, res) => {
-    res.json({
-        status: 'OK',
-        message: 'Server is alive!',
-        timestamp: new Date().toISOString()
-    });
-});
-
-app.get('/', (req, res) => {
-    res.send('Server is running!');
-});
-
-const PORT = process.env.PORT || 3000;
-app.listen(PORT, '0.0.0.0', () => {
-    console.log(`\n✅ Сервер запущен на порту ${PORT}`);
-    console.log(`🔗 http://localhost:${PORT}/api/health\n`);
 });
