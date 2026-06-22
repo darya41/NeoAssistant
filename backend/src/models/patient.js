@@ -193,7 +193,7 @@ class PatientModel {
             const placeholders = medicalParamIds.map(() => '?').join(',');
             const [rows] = await db.query(
                 `SELECT medical_parameter_id, med_param_exam_id
-                 FROM MedParamInExams
+                 FROM medparaminexams
                  WHERE exam_id = ? AND medical_parameter_id IN (${placeholders})`,
                 [examId, ...medicalParamIds]
             );

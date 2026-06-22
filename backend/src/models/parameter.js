@@ -3,7 +3,7 @@ const db = require('../config/database');
 class ParameterModel {
     static async getParametersByExamId(examId) {
         const [paramIdsResult] = await db.query(
-            'SELECT medical_parameter_id, med_param_exam_id FROM MedParamInExams WHERE exam_id = ?',
+            'SELECT medical_parameter_id, med_param_exam_id FROM medparaminexams WHERE exam_id = ?',
             [examId]
         );
 
@@ -20,7 +20,7 @@ class ParameterModel {
                 mp.value_type,
                 mp.unit,
                 mp.description
-            FROM MedicalParameters mp
+            FROM medicalparameters mp
             WHERE mp.medical_parameter_id IN (?)
         `, [medicalParamIds]);
 
@@ -42,7 +42,7 @@ class ParameterModel {
     static async getAllParameters() {
         const [parameters] = await db.query(`
             SELECT mp.medical_parameter_id, mp.name, mp.value_type, mp.unit, mp.description
-            FROM MedicalParameters mp
+            FROM medicalparameters mp
             ORDER BY mp.name
         `);
 
@@ -63,7 +63,7 @@ class ParameterModel {
     static async getParametersWithValuesByExamId(patientExamId) {
         const [paramInExams] = await db.query(`
             SELECT mpie.medical_parameter_id, mpie.med_param_exam_id
-            FROM MedParamInExams mpie
+            FROM medparaminexams mpie
             INNER JOIN patientsexams pe ON mpie.exam_id = pe.exam_id
             WHERE pe.patients_exams_id = ?
         `, [patientExamId]);
@@ -78,7 +78,7 @@ class ParameterModel {
         const placeholders = medicalParamIds.map(() => '?').join(',');
         const [parameters] = await db.query(`
             SELECT medical_parameter_id, name, unit
-            FROM MedicalParameters
+            FROM medicalparameters
             WHERE medical_parameter_id IN (${placeholders})
             ORDER BY medical_parameter_id
         `, medicalParamIds);
@@ -86,7 +86,7 @@ class ParameterModel {
         const valuePlaceholders = medParamExamIds.map(() => '?').join(',');
         const [patientValues] = await db.query(`
             SELECT med_param_exam_id, value
-            FROM MedParamInPatientExams
+            FROM medparaminpatientexams
             WHERE patients_exams_id = ? AND med_param_exam_id IN (${valuePlaceholders})
         `, [patientExamId, ...medParamExamIds]);
 
@@ -143,7 +143,7 @@ class ParameterModel {
 
             const [medParamLinks] = await db.query(`
                 SELECT medical_parameter_id, med_param_exam_id
-                FROM MedParamInExams
+                FROM medparaminexams
                 WHERE exam_id = ?
             `, [examId]);
 
@@ -156,7 +156,7 @@ class ParameterModel {
 
             const [values] = await db.query(`
                 SELECT med_param_exam_id, value
-                FROM MedParamInPatientExams
+                FROM medparaminpatientexams
                 WHERE patients_exams_id = ? AND med_param_exam_id IN (${placeholders})
             `, [patientExamId, ...medParamExamIds]);
 
@@ -193,7 +193,7 @@ class ParameterModel {
 
             const [paramLink] = await db.query(`
                 SELECT med_param_exam_id
-                FROM MedParamInExams
+                FROM medparaminexams
                 WHERE exam_id = ? AND medical_parameter_id = ?
             `, [examId, medicalParameterId]);
 
@@ -204,19 +204,19 @@ class ParameterModel {
             const medParamExamId = paramLink[0].med_param_exam_id;
 
             const [existing] = await db.query(`
-                SELECT id FROM MedParamInPatientExams
+                SELECT id FROM medparaminpatientexams
                 WHERE patients_exams_id = ? AND med_param_exam_id = ?
             `, [patientsExamsId, medParamExamId]);
 
             if (existing.length > 0) {
                 await db.query(`
-                    UPDATE MedParamInPatientExams
+                    UPDATE medparaminpatientexams
                     SET value = ?
                     WHERE patients_exams_id = ? AND med_param_exam_id = ?
                 `, [value || null, patientsExamsId, medParamExamId]);
             } else {
                 await db.query(`
-                    INSERT INTO MedParamInPatientExams (patients_exams_id, med_param_exam_id, value)
+                    INSERT INTO medparaminpatientexams (patients_exams_id, med_param_exam_id, value)
                     VALUES (?, ?, ?)
                 `, [patientsExamsId, medParamExamId, value || null]);
             }
